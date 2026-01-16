@@ -4,6 +4,7 @@ import { apiFetch } from "./api";
 export async function login(email: string, password: string) {
   console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
   console.log("Logging in with:", { email, password });
+    console.log(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`)
   return fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
     method: "POST",
     credentials: "include", // important for cookies

@@ -1,175 +1,623 @@
 // "use client";
-
 // import { useState } from "react";
 
-// const products = [
-//   {
-//     id: 1,
-//     name: "Handmade Vase",
-//     image: "/placeholder.png",
-//     description: "Beautiful handcrafted vase",
-//   },
-//   {
-//     id: 2,
-//     name: "Wall Art",
-//     image: "/placeholder.png",
-//     description: "Eco-friendly wall art",
-//   },
-// ];
+// export default function BookFlip() {
+//   const totalPages = 100; // must be even for nice spreads
+//   const [currentSpread, setCurrentSpread] = useState(0);
+//   const [isTurning, setIsTurning] = useState(false);
+//   const [turnDirection, setTurnDirection] = useState<"next" | "prev" | null>(
+//     null
+//   );
 
-// export default function ProductsCatalogue() {
-//   const [index, setIndex] = useState(0);
-//   const product = products[index];
+//   const maxSpread = Math.floor((totalPages - 1) / 2);
+
+//   const goNext = () => {
+//     if (currentSpread >= maxSpread || isTurning) return;
+
+//     setIsTurning(true);
+//     setTurnDirection("next");
+
+//     setTimeout(() => {
+//       setCurrentSpread((prev) => prev + 1);
+//       setIsTurning(false);
+//       setTurnDirection(null);
+//     }, 900);
+//   };
+
+//   const goPrev = () => {
+//     if (currentSpread <= 0 || isTurning) return;
+
+//     setIsTurning(true);
+//     setTurnDirection("prev");
+
+//     setTimeout(() => {
+//       setCurrentSpread((prev) => prev - 1);
+//       setIsTurning(false);
+//       setTurnDirection(null);
+//     }, 900);
+//   };
+
+//   const leftPageNum = currentSpread * 2 + 1;
+//   const rightPageNum = currentSpread * 2 + 2;
+
+//   const showLeftPage = leftPageNum <= totalPages;
+//   const showRightPage = rightPageNum <= totalPages;
 
 //   return (
-//     <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
-//       <img
-//         src={product.image}
-//         className="w-full h-60 object-cover rounded"
-//       />
-//       <h2 className="text-xl font-semibold mt-4">{product.name}</h2>
-//       <p className="text-zinc-600 mt-2">{product.description}</p>
-
-//       <div className="flex justify-between mt-6">
+//     <>
+//       <div className="book-container">
 //         <button
-//           disabled={index === 0}
-//           onClick={() => setIndex(index - 1)}
-//           className="px-4 py-2 bg-black text-white rounded disabled:opacity-40"
+//           className="nav-btn prev"
+//           onClick={goPrev}
+//           disabled={currentSpread === 0 || isTurning}
 //         >
-//           Prev
+//           ◀
 //         </button>
-//         <button
-//           disabled={index === products.length - 1}
-//           onClick={() => setIndex(index + 1)}
-//           className="px-4 py-2 bg-black text-white rounded disabled:opacity-40"
+
+//         <div
+//           className={`book ${isTurning ? "turning" : ""} ${
+//             turnDirection || ""
+//           }`}
 //         >
-//           Next
+//           {/* Left page */}
+//           <div className="page left-page">
+//             {showLeftPage ? (
+//               <div className="page-content">
+//                 <h2>Product {leftPageNum}</h2>
+//                 <div className="product-placeholder" />
+//                 <p>
+//                   Amazing features • Super cool • Only ₹
+//                   {999 + leftPageNum * 100}
+//                 </p>
+//               </div>
+//             ) : (
+//               <div className="empty-page" />
+//             )}
+//           </div>
+
+//           {/* Right page */}
+//           <div
+//             className={`page right-page ${
+//               isTurning
+//                 ? turnDirection === "next"
+//                   ? "flip-forward"
+//                   : "flip-backward"
+//                 : ""
+//             }`}
+//           >
+//             {showRightPage ? (
+//               <div className="page-content">
+//                 <h2>Product {rightPageNum}</h2>
+//                 <div className="product-placeholder" />
+//                 <p>
+//                   Amazing features • Super cool • Only ₹
+//                   {999 + rightPageNum * 100}
+//                 </p>
+//               </div>
+//             ) : (
+//               <div className="empty-page" />
+//             )}
+//           </div>
+
+//           {/* Flipping page */}
+//           {isTurning && (
+//             <div className={`page flipping-page ${turnDirection}`}>
+//               <div className="page-content front">
+//                 <h2>
+//                   Product{" "}
+//                   {turnDirection === "next" ? rightPageNum : leftPageNum}
+//                 </h2>
+//                 <div className="product-placeholder" />
+//                 <p>Turning...</p>
+//               </div>
+//               <div className="page-content back">
+//                 <h2>
+//                   Product{" "}
+//                   {turnDirection === "next"
+//                     ? rightPageNum + 1
+//                     : leftPageNum - 1}
+//                 </h2>
+//                 <div className="product-placeholder" />
+//                 <p>Next one coming...</p>
+//               </div>
+//             </div>
+//           )}
+//         </div>
+
+//         <button
+//           className="nav-btn next"
+//           onClick={goNext}
+//           disabled={currentSpread >= maxSpread || isTurning}
+//         >
+//           ▶
 //         </button>
 //       </div>
-//     </div>
+
+//       {/* ================= CSS ================= */}
+//       <style jsx>{`
+//         .book-container {
+//           display: flex;
+//           align-items: center;
+//           justify-content: center;
+//           gap: 24px;
+//           min-height: 100vh;
+//           background: #f4f4f5;
+//           perspective: 2000px;
+//         }
+
+//         .nav-btn {
+//           font-size: 28px;
+//           padding: 10px 16px;
+//           border: none;
+//           background: #111;
+//           color: #fff;
+//           cursor: pointer;
+//           border-radius: 6px;
+//         }
+
+//         .nav-btn:disabled {
+//           opacity: 0.4;
+//           cursor: not-allowed;
+//         }
+
+//         .book {
+//           position: relative;
+//           width: 700px;
+//           height: 420px;
+//           display: flex;
+//           transform-style: preserve-3d;
+//         }
+
+//         .page {
+//           width: 50%;
+//           height: 100%;
+//           background: #fff;
+//           border: 1px solid #ddd;
+//           position: relative;
+//           overflow: hidden;
+//           backface-visibility: hidden;
+//         }
+
+//         .left-page {
+//           border-right: none;
+//         }
+
+//         .right-page {
+//           border-left: none;
+//           transform-origin: left center;
+//         }
+
+//         .page-content {
+//           padding: 24px;
+//         }
+
+//         .product-placeholder {
+//           height: 180px;
+//           background: linear-gradient(135deg, #ddd, #bbb);
+//           margin-bottom: 12px;
+//           border-radius: 6px;
+//         }
+
+//         .empty-page {
+//           width: 100%;
+//           height: 100%;
+//           background: #eee;
+//         }
+
+//         .book.turning {
+//           pointer-events: none;
+//         }
+
+//         .right-page.flip-forward {
+//           animation: flipForward 0.9s ease-in-out forwards;
+//         }
+
+//         .right-page.flip-backward {
+//           animation: flipBackward 0.9s ease-in-out forwards;
+//         }
+
+//         .flipping-page {
+//           position: absolute;
+//           width: 50%;
+//           height: 100%;
+//           right: 0;
+//           top: 0;
+//           transform-style: preserve-3d;
+//           transform-origin: left center;
+//           z-index: 10;
+//           background: white;
+//         }
+
+//         .flipping-page.next {
+//           animation: flipForward 0.9s ease-in-out forwards;
+//         }
+
+//         .flipping-page.prev {
+//           animation: flipBackward 0.9s ease-in-out forwards;
+//         }
+
+//         .flipping-page .front,
+//         .flipping-page .back {
+//           position: absolute;
+//           inset: 0;
+//           backface-visibility: hidden;
+//         }
+
+//         .flipping-page .back {
+//           transform: rotateY(180deg);
+//         }
+
+//         @keyframes flipForward {
+//           0% {
+//             transform: rotateY(0deg);
+//           }
+//           100% {
+//             transform: rotateY(-180deg);
+//           }
+//         }
+
+//         @keyframes flipBackward {
+//           0% {
+//             transform: rotateY(-180deg);
+//           }
+//           100% {
+//             transform: rotateY(0deg);
+//           }
+//         }
+//       `}</style>
+//     </>
 //   );
 // }
 
 
-import { useState } from "react";
+
+
+"use client";
+
+import { useEffect, useState } from "react";
+
+/* ================= TYPES ================= */
+
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  cms_image_ids: string[];
+};
+
+/* ================= HELPERS ================= */
+
+const getCloudinaryUrl = (
+  publicId: string,
+  options = "w_600,h_400,c_fill,q_auto,f_auto"
+) => {
+  console.log("Cloudinary Name:", process.env.NEXT_PUBLIC_CLOUDINARY_NAME);
+  return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/image/upload/${options}/${publicId}.webp`;
+};
+
+/* ================= COMPONENT ================= */
 
 export default function BookFlip() {
-  const totalPages = 10;
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [direction, setDirection] = useState("next");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [currentSpread, setCurrentSpread] = useState(0);
+  const [isTurning, setIsTurning] = useState(false);
+  const [turnDirection, setTurnDirection] = useState<"next" | "prev" | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
 
-  const nextPage = () => {
-    if (currentPage < totalPages - 1 && !isFlipping) {
-      setDirection("next");
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage((p) => p + 1);
-        setIsFlipping(false);
-      }, 800);
-    }
+  /* ========== FETCH PRODUCTS ========== */
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/products/`
+        );
+        const data = await res.json();
+        console.log("Fetched products:", data);
+        setProducts(data);
+      } catch (err) {
+        console.log("Failed to load products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  /* ========== PAGINATION LOGIC ========== */
+
+  const totalPages = products.length;
+  const maxSpread = Math.floor((totalPages - 1) / 2);
+
+  const leftPageNum = currentSpread * 2 + 1;
+  const rightPageNum = currentSpread * 2 + 2;
+
+  const leftProduct = products[leftPageNum - 1];
+  const rightProduct = products[rightPageNum - 1];
+
+  /* ========== NAVIGATION ========== */
+
+  const goNext = () => {
+    if (currentSpread >= maxSpread || isTurning) return;
+
+    setIsTurning(true);
+    setTurnDirection("next");
+
+    setTimeout(() => {
+      setCurrentSpread((prev) => prev + 1);
+      setIsTurning(false);
+      setTurnDirection(null);
+    }, 900);
   };
 
-  const prevPage = () => {
-    if (currentPage > 0 && !isFlipping) {
-      setDirection("prev");
-      setIsFlipping(true);
-      setTimeout(() => {
-        setCurrentPage((p) => p - 1);
-        setIsFlipping(false);
-      }, 800);
-    }
+  const goPrev = () => {
+    if (currentSpread <= 0 || isTurning) return;
+
+    setIsTurning(true);
+    setTurnDirection("prev");
+
+    setTimeout(() => {
+      setCurrentSpread((prev) => prev - 1);
+      setIsTurning(false);
+      setTurnDirection(null);
+    }, 900);
   };
+
+  /* ========== LOADING STATE ========== */
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-600">
+        Loading catalogue…
+      </div>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <div className="flex items-center justify-center min-h-screen  text-gray-600">
+        No products available
+      </div>
+    );
+  }
+
+  /* ================= RENDER ================= */
 
   return (
     <>
-      <div className="book-wrapper">
-        <button onClick={prevPage} disabled={currentPage === 0}>
-          ◀ Prev
+      <div className="book-container">
+        <button
+          className="nav-btn prev"
+          onClick={goPrev}
+          disabled={currentSpread === 0 || isTurning}
+        >
+          ◀
         </button>
 
-        <div className="scene">
+        <div
+          className={`book ${isTurning ? "turning" : ""} ${
+            turnDirection || ""
+          }`}
+        >
+          {/* LEFT PAGE */}
+          <div className="page left-page">
+            {leftProduct ? (
+              <div className="page-content text-gray-800">
+                <h2>{leftProduct.name}</h2>
+{/* 
+                <img
+                  src={getCloudinaryUrl(leftProduct.cms_image_ids[0])}
+                  alt={leftProduct.name}
+                  className="product-image"
+                /> */}
+              <img
+                src={
+                  leftProduct.cms_image_ids?.length
+                    ? getCloudinaryUrl(leftProduct.cms_image_ids[0])
+                    : "/placeholder.png"
+                }
+                alt={leftProduct.name}
+                className="product-image text-grey-500"
+              />
+
+                <p className="price text-gray-800">₹{leftProduct.price}</p>
+              </div>
+            ) : (
+              <div className="empty-page" />
+            )}
+          </div>
+
+          {/* RIGHT PAGE */}
           <div
-            className={`page ${
-              isFlipping ? (direction === "next" ? "flip-next" : "flip-prev") : ""
+            className={`page right-page ${
+              isTurning
+                ? turnDirection === "next"
+                  ? "flip-forward"
+                  : "flip-backward"
+                : ""
             }`}
           >
-            <div className="page-front">
-              Page {currentPage + 1}
-            </div>
-            <div className="page-back">
-              Page {direction === "next" ? currentPage + 2 : currentPage}
-            </div>
+            {rightProduct ? (
+              <div className="page-content text-gray-800">
+                <h2>{rightProduct.name}</h2>
+
+                <img
+                  src={getCloudinaryUrl(rightProduct.cms_image_ids[0])}
+                  alt={rightProduct.name}
+                  className="product-image"
+                />
+
+                <p className="price text-gray-800">₹{rightProduct.price}</p>
+              </div>
+            ) : (
+              <div className="empty-page text-gray-800" />
+            )}
           </div>
+
+          {/* FLIPPING PAGE */}
+          {isTurning && (
+            <div className={`page flipping-page ${turnDirection}`}>
+              <div className="page-content front">
+                <h2>
+                  {turnDirection === "next"
+                    ? rightProduct?.name
+                    : leftProduct?.name}
+                </h2>
+              </div>
+              <div className="page-content back">
+                <h2>Next</h2>
+              </div>
+            </div>
+          )}
         </div>
 
-        <button onClick={nextPage} disabled={currentPage === totalPages - 1}>
-          Next ▶
+        <button
+          className="nav-btn next"
+          onClick={goNext}
+          disabled={currentSpread >= maxSpread || isTurning}
+        >
+          ▶
         </button>
       </div>
 
-      {/* CSS */}
+      {/* ================= CSS ================= */}
       <style jsx>{`
-        .book-wrapper {
+        .book-container {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 20px;
-          margin-top: 50px;
+          gap: 24px;
+          min-height: 100vh;
+          background: #f4f4f5;
+          perspective: 2000px;
         }
 
-        .scene {
-          width: 400px;
-          height: 550px;
-          perspective: 1500px;
+        .nav-btn {
+          font-size: 28px;
+          padding: 10px 16px;
+          border: none;
+          background: #111;
+          color: #fff;
+          cursor: pointer;
+          border-radius: 6px;
+        }
+
+        .nav-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .book {
+          position: relative;
+          width: 700px;
+          height: 420px;
+          display: flex;
+          transform-style: preserve-3d;
         }
 
         .page {
-          width: 100%;
+          width: 50%;
           height: 100%;
-          position: relative;
-          transform-style: preserve-3d;
-          transition: transform 0.8s ease-in-out;
+          background: #fff;
+          border: 1px solid #ddd;
+          overflow: hidden;
+          backface-visibility: hidden;
         }
 
-        .page-front,
-        .page-back {
-          position: absolute;
+        .left-page {
+          border-right: none;
+        }
+
+        .right-page {
+          border-left: none;
+          transform-origin: left center;
+        }
+
+        .page-content {
+          padding: 24px;
+        }
+
+        .product-image {
           width: 100%;
-          height: 100%;
-          background: white;
-          border: 1px solid #ccc;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-          backface-visibility: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 6px;
+          margin: 12px 0;
+        }
+
+        .price {
           font-weight: bold;
         }
 
-        .page-back {
+        .empty-page {
+          width: 100%;
+          height: 100%;
+          background: #eee;
+        }
+
+        .book.turning {
+          pointer-events: none;
+        }
+
+        .right-page.flip-forward {
+          animation: flipForward 0.9s ease-in-out forwards;
+        }
+
+        .right-page.flip-backward {
+          animation: flipBackward 0.9s ease-in-out forwards;
+        }
+
+        .flipping-page {
+          position: absolute;
+          width: 50%;
+          height: 100%;
+          right: 0;
+          top: 0;
+          transform-style: preserve-3d;
+          transform-origin: left center;
+          z-index: 10;
+          background: white;
+        }
+
+        .flipping-page.next {
+          animation: flipForward 0.9s ease-in-out forwards;
+        }
+
+        .flipping-page.prev {
+          animation: flipBackward 0.9s ease-in-out forwards;
+        }
+
+        .flipping-page .front,
+        .flipping-page .back {
+          position: absolute;
+          inset: 0;
+          backface-visibility: hidden;
+        }
+
+        .flipping-page .back {
           transform: rotateY(180deg);
-          background: #f5f5f5;
         }
 
-        .flip-next {
-          transform: rotateY(-180deg);
+        @keyframes flipForward {
+          0% {
+            transform: rotateY(0deg);
+          }
+          100% {
+            transform: rotateY(-180deg);
+          }
         }
 
-        .flip-prev {
-          transform: rotateY(180deg);
-        }
-
-        button {
-          padding: 10px 16px;
-          font-size: 1rem;
-          cursor: pointer;
-        }
-
-        button:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
+        @keyframes flipBackward {
+          0% {
+            transform: rotateY(-180deg);
+          }
+          100% {
+            transform: rotateY(0deg);
+          }
         }
       `}</style>
     </>
