@@ -32,9 +32,12 @@ export default function LoginForm() {
       if (data.role === "ADMIN") {
         console.log('role:-', data.role);
         router.push("/admin");
-      } else {
+      } else if(data.role === "USER"){
         router.push("/dashboard");
+      }else{
+        setError("Invalid credentials.");
       }
+      
     } catch (err) {
       setError("Invalid credentials.");
     }
