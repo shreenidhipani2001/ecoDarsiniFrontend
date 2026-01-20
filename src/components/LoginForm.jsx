@@ -10,50 +10,49 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
     setError("");
+    console.log("Submitting login form");
 
     try {
       const data = await login(email, password);
       console.log("Login response:", data);
 
-      if (!data) {
+      if (!data || data.message === "Please check the credentials") {
         setError("Invalid credentials.");
         return;
       }
-
-      if (data.message === "Please check the credentials") {
-        setError("Invalid credentials.");
-        return;
-      }
+      const user = data;
+      console.log("Logged in user:", user);
 
       if (data.role === "ADMIN") {
-        console.log('role:-', data.role);
         router.push("/admin");
-      } else if(data.role === "USER"){
+      } else if (data.role === "USER") {
         router.push("/dashboard");
-      }else{
+      } else {
         setError("Invalid credentials.");
       }
       
     } catch (err) {
       setError("Invalid credentials.");
+    } finally {
+      setLoading(false);
     }
   }
-
+ 
   return (
     <form
       onSubmit={handleSubmit}
       className="w-full max-w-sm flex flex-col gap-6 p-10 bg-white rounded-xl shadow-lg"
     >
-      {/* Heading */}
       <h2 className="text-2xl font-semibold text-red-600 text-center">
-        Login
+        Please Login 
       </h2>
 
-      {/* Email */}
       <input
         type="email"
         placeholder="Email"
@@ -63,7 +62,6 @@ export default function LoginForm() {
         required
       />
 
-      {/* Password */}
       <input
         type="password"
         placeholder="Password"
@@ -73,20 +71,42 @@ export default function LoginForm() {
         required
       />
 
-      {/* Error Message – ABOVE BUTTON */}
       {error && (
         <p className="text-red-500 text-sm text-center -mt-2">
           {error}
         </p>
       )}
 
-      {/* Submit */}
       <button
         type="submit"
-        className="bg-black text-white py-3 rounded-[60px] font-semibold hover:opacity-90 transition"
+        className="bg-black text-white py-3 rounded-[60px] font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"
+        disabled={loading} // prevent multiple clicks
       >
-        Login
+        {loading && (
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+            ></path>
+          </svg>
+        )}
+        {loading ? "Logging in..." : "Login"}
       </button>
     </form>
   );
 }
+

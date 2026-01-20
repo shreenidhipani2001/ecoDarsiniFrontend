@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 
 import "./globals.css";
 
@@ -18,6 +19,16 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} antialiased`}
       >
         {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 2500,
+            style: {
+              background: "#111",
+              color: "#fff",
+            },
+          }}
+        />
       </body>
     </html>
   );
