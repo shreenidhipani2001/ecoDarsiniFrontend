@@ -1,4 +1,5 @@
 export type AdminSection =
+  | "dashboard"
   | "products"
   | "orders"
   | "payments"
