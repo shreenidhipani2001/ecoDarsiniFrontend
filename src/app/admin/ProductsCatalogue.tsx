@@ -1,30 +1,42 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import ProductModal from '../user/ProductModal';
+import ProductDetailModal from '../../components/ProductDetailModal';
+import { useAuthStore } from '../../store/useAuthStore';
 
 /* ================= TYPES ================= */
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
 type Product = {
   id: string;
   name: string;
   price: number;
   cms_image_ids: string[];
-  slug?: string;
+  images?: ProductImage[];  // Images from Payload CMS
+  slug: string;
   description?: string;
+  stock: number;
+  category_id: string;
+  artist_name?: string;
+  is_active: boolean;
+  created_at?: string;
 };
 
 /* ================= HELPERS ================= */
-const getCloudinaryUrl = (
-  publicId: string,
-  options = "w_600,h_600,c_fill,q_auto,f_auto"
-) => {
-  if (!publicId) return '/placeholder.png';
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-  if (!cloudName) {
-    console.warn('Cloudinary cloud name missing');
+// Get image URL from Payload CMS images array
+const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string => {
+  if (!product.images || product.images.length === 0) {
     return '/placeholder.png';
   }
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
+  const image = product.images[0];
+  return image[size] || image.url || '/placeholder.png';
 };
 
 /* ================= COMPONENT ================= */
@@ -36,6 +48,9 @@ export default function BookFlip() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [hoverSide, setHoverSide] = useState<'left' | 'right' | null>(null);
+
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
 
   /* ========== FETCH PRODUCTS ========== */
   useEffect(() => {
@@ -181,11 +196,7 @@ export default function BookFlip() {
                     <div className="product-card">
                       <div className="product-image-wrapper">
                         <img
-                          src={
-                            leftProduct.cms_image_ids?.length
-                              ? getCloudinaryUrl(leftProduct.cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                              : '/placeholder.png'
-                          }
+                          src={getProductImageUrl(leftProduct, 'card')}
                           alt={leftProduct.name}
                           className="product-image"
                         />
@@ -198,9 +209,44 @@ export default function BookFlip() {
                   </div>
                 ) : (
                   <div className="page-content empty">
-                    <div className="empty-message">
-                      {currentPage === 0 ? 'Start browsing →' : '← Previous page'}
-                    </div>
+                    {currentPage === 0 ? (
+                      /* Welcome / Start Page */
+                      <div className="welcome-container">
+                        <div className="floating-leaves">
+                          <span className="leaf leaf-1">🌿</span>
+                          <span className="leaf leaf-2">🍃</span>
+                          <span className="leaf leaf-3">🌱</span>
+                          <span className="leaf leaf-4">☘️</span>
+                        </div>
+                        <div className="welcome-icon">
+                          <svg viewBox="0 0 100 100" className="eco-circle">
+                            <circle cx="50" cy="50" r="45" className="circle-bg" />
+                            <circle cx="50" cy="50" r="45" className="circle-progress" />
+                          </svg>
+                          <span className="book-icon">📖</span>
+                        </div>
+                        <h3 className="welcome-title text-blacj">Welcome to Our Catalogue</h3>
+                        <p className="welcome-subtitle">Discover eco-friendly products</p>
+                        <div className="arrow-hint">
+                          <span>Start browsing</span>
+                          <div className="bouncing-arrow">→</div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Previous Page Hint */
+                      <div className="nav-hint-container">
+                        <div className="pulse-circle"></div>
+                        <div className="nav-arrow-animated">
+                          <span className="sliding-arrow">←</span>
+                        </div>
+                        <p className="nav-text">Previous page</p>
+                        <div className="page-dots">
+                          <span className="dot"></span>
+                          <span className="dot"></span>
+                          <span className="dot active"></span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -223,11 +269,7 @@ export default function BookFlip() {
                     <div className="product-card">
                       <div className="product-image-wrapper">
                         <img
-                          src={
-                            rightProduct.cms_image_ids?.length
-                              ? getCloudinaryUrl(rightProduct.cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                              : '/placeholder.png'
-                          }
+                          src={getProductImageUrl(rightProduct, 'card')}
                           alt={rightProduct.name}
                           className="product-image"
                         />
@@ -240,7 +282,28 @@ export default function BookFlip() {
                   </div>
                 ) : (
                   <div className="page-content empty">
-                    <div className="empty-message">End of catalogue</div>
+                    {/* End of Catalogue */}
+                    <div className="end-container">
+                      <div className="sparkles">
+                        <span className="sparkle sparkle-1">✨</span>
+                        <span className="sparkle sparkle-2">⭐</span>
+                        <span className="sparkle sparkle-3">✨</span>
+                      </div>
+                      <div className="end-icon">
+                        <div className="rotating-ring"></div>
+                        <span className="check-icon">🌍</span>
+                      </div>
+                      <h3 className="end-title">You've seen it all!</h3>
+                      <p className="end-subtitle">Thank you for exploring</p>
+                      <div className="eco-badge">
+                        <span className="badge-icon">🌿</span>
+                        <span className="badge-text">Eco Friendly</span>
+                      </div>
+                      <div className="restart-hint">
+                        <span className="sliding-arrow-left">←</span>
+                        <span>Go back to explore</span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -254,9 +317,7 @@ export default function BookFlip() {
                         <div className="product-image-wrapper">
                           <img
                             src={
-                              rightProduct.cms_image_ids?.length
-                                ? getCloudinaryUrl(rightProduct.cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                                : '/placeholder.png'
+                              getProductImageUrl(rightProduct, 'card')
                             }
                             alt={rightProduct.name}
                             className="product-image"
@@ -275,9 +336,7 @@ export default function BookFlip() {
                           <div className="product-image-wrapper">
                             <img
                               src={
-                                products[currentPage + 1].cms_image_ids?.length
-                                  ? getCloudinaryUrl(products[currentPage + 1].cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                                  : '/placeholder.png'
+                                getProductImageUrl(products[currentPage + 1], 'card')
                               }
                               alt={products[currentPage + 1].name}
                               className="product-image"
@@ -301,9 +360,7 @@ export default function BookFlip() {
                         <div className="product-image-wrapper">
                           <img
                             src={
-                              leftProduct.cms_image_ids?.length
-                                ? getCloudinaryUrl(leftProduct.cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                                : '/placeholder.png'
+                              getProductImageUrl(leftProduct, 'card')
                             }
                             alt={leftProduct.name}
                             className="product-image"
@@ -322,9 +379,7 @@ export default function BookFlip() {
                           <div className="product-image-wrapper">
                             <img
                               src={
-                                products[currentPage - 2].cms_image_ids?.length
-                                  ? getCloudinaryUrl(products[currentPage - 2].cms_image_ids[0], 'w_500,h_500,c_fill,q_auto,f_auto')
-                                  : '/placeholder.png'
+                                getProductImageUrl(products[currentPage - 2], 'card')
                               }
                               alt={products[currentPage - 2].name}
                               className="product-image"
@@ -348,16 +403,19 @@ export default function BookFlip() {
         </div>
       </div>
 
-      {/* Product Modal */}
+      {/* Product Detail Modal */}
       {selectedProduct && (
-        <ProductModal
-          product={{
-            ...selectedProduct,
-            image: selectedProduct.cms_image_ids?.length
-              ? getCloudinaryUrl(selectedProduct.cms_image_ids[0], 'w_800,h_800,c_fill,q_auto,f_auto')
-              : '/placeholder.png',
-          }}
+        <ProductDetailModal
+          product={selectedProduct}
+          imageUrl={getProductImageUrl(selectedProduct, 'full')}
+          isAdmin={isAdmin}
           onClose={() => setSelectedProduct(null)}
+          onProductUpdate={(updatedProduct) => {
+            setProducts((prev) =>
+              prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+            );
+            setSelectedProduct(updatedProduct);
+          }}
         />
       )}
 
@@ -584,13 +642,331 @@ export default function BookFlip() {
         }
 
         .page-content.empty {
-          background: #f9f9f9;
+          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%);
+          overflow: hidden;
         }
 
-        .empty-message {
+        /* ========== WELCOME CONTAINER ========== */
+        .welcome-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          text-align: center;
+        }
+
+        .floating-leaves {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+
+        .leaf {
+          position: absolute;
+          font-size: 1.5rem;
+          animation: floatLeaf 4s ease-in-out infinite;
+        }
+
+        .leaf-1 { top: 10%; left: 15%; animation-delay: 0s; }
+        .leaf-2 { top: 20%; right: 20%; animation-delay: 1s; }
+        .leaf-3 { bottom: 25%; left: 20%; animation-delay: 2s; }
+        .leaf-4 { bottom: 15%; right: 15%; animation-delay: 0.5s; }
+
+        @keyframes floatLeaf {
+          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+          50% { transform: translateY(-15px) rotate(10deg); opacity: 1; }
+        }
+
+        .welcome-icon {
+          position: relative;
+          width: 100px;
+          height: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+
+        .eco-circle {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+          fill: none;
+          stroke: #bbf7d0;
+          stroke-width: 4;
+        }
+
+        .circle-progress {
+          fill: none;
+          stroke: #10b981;
+          stroke-width: 4;
+          stroke-linecap: round;
+          stroke-dasharray: 283;
+          stroke-dashoffset: 283;
+          animation: drawCircle 2s ease-out forwards, pulseGlow 2s ease-in-out infinite 2s;
+        }
+
+        @keyframes drawCircle {
+          to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes pulseGlow {
+          0%, 100% { filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5)); }
+          50% { filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8)); }
+        }
+
+        .book-icon {
+          font-size: 2.5rem;
+          animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        .welcome-title {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #065f46;
+          margin-bottom: 8px;
+          animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .welcome-subtitle {
+          font-size: 1rem;
+          color: #059669;
+          margin-bottom: 24px;
+          animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .arrow-hint {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #10b981;
+          font-weight: 600;
+          font-size: 1.1rem;
+          animation: fadeInUp 0.8s ease-out 0.7s both;
+        }
+
+        .bouncing-arrow {
+          animation: bounceRight 1s ease-in-out infinite;
+          font-size: 1.5rem;
+        }
+
+        @keyframes bounceRight {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(10px); }
+        }
+
+        /* ========== NAV HINT CONTAINER ========== */
+        .nav-hint-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+
+        .pulse-circle {
+          position: absolute;
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(0.8); opacity: 0.5; }
+          50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .nav-arrow-animated {
+          width: 70px;
+          height: 70px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 16px;
+          box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+          animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .sliding-arrow {
+          font-size: 2rem;
+          color: white;
+          font-weight: bold;
+          animation: slideLeft 1.5s ease-in-out infinite;
+        }
+
+        @keyframes slideLeft {
+          0%, 100% { transform: translateX(5px); opacity: 0.7; }
+          50% { transform: translateX(-5px); opacity: 1; }
+        }
+
+        .nav-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #065f46;
+          margin-bottom: 16px;
+        }
+
+        .page-dots {
+          display: flex;
+          gap: 8px;
+        }
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #bbf7d0;
+          transition: all 0.3s ease;
+        }
+
+        .dot.active {
+          width: 24px;
+          border-radius: 4px;
+          background: #10b981;
+        }
+
+        /* ========== END CONTAINER ========== */
+        .end-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          text-align: center;
+        }
+
+        .sparkles {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+
+        .sparkle {
+          position: absolute;
           font-size: 1.2rem;
-          color: #999;
-          font-style: italic;
+          animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .sparkle-1 { top: 15%; left: 25%; animation-delay: 0s; }
+        .sparkle-2 { top: 10%; right: 25%; animation-delay: 0.7s; }
+        .sparkle-3 { bottom: 20%; left: 30%; animation-delay: 1.4s; }
+
+        @keyframes twinkle {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        .end-icon {
+          position: relative;
+          width: 90px;
+          height: 90px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 16px;
+        }
+
+        .rotating-ring {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border: 3px solid transparent;
+          border-top-color: #10b981;
+          border-right-color: #10b981;
+          border-radius: 50%;
+          animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .check-icon {
+          font-size: 2.5rem;
+          animation: popIn 0.6s ease-out;
+        }
+
+        @keyframes popIn {
+          0% { transform: scale(0); opacity: 0; }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .end-title {
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: #065f46;
+          margin-bottom: 6px;
+        }
+
+        .end-subtitle {
+          font-size: 0.95rem;
+          color: #059669;
+          margin-bottom: 16px;
+        }
+
+        .eco-badge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+          animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+          0%, 100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+          50% { box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
+        }
+
+        .badge-icon {
+          font-size: 1rem;
+        }
+
+        .restart-hint {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #6b7280;
+          font-size: 0.9rem;
+        }
+
+        .sliding-arrow-left {
+          animation: slideLeft 1.5s ease-in-out infinite;
+          font-weight: bold;
+          color: #10b981;
         }
 
         .product-card {

@@ -10,11 +10,13 @@ export async function getWishlist() {
       },
     });
 
+
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
+    console.log('Wishlist data fetched:', data);
     return data;
   } catch (error) {
     console.error('Failed to fetch wishlist:', error);

@@ -8,7 +8,6 @@ export async function getUserProfile(userId: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId }),
     });
 
     if (!res.ok) {

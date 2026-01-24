@@ -17,7 +17,7 @@ export default function ProfileModal({
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const { setUser } = useAuthStore();
-c
+
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -42,14 +42,18 @@ console.log('Initial formData:', formData);
         updates.password = formData.password;
       }
 
-      const updatedUser = await updateUserProfile(user.id, updates);
+      const response = await updateUserProfile(user.id, updates);
+      // Handle both nested and flat response structures
+      const updatedUser = response.user || response;
       toast.success('Profile updated successfully!');
 
-      // Update the auth store with new user data
+      // Update the auth store with complete user data
       setUser({
-        id: updatedUser.id,
-        email: updatedUser.email,
-        role: updatedUser.role,
+        id: updatedUser.id || user.id,
+        email: updatedUser.email || formData.email,
+        role: updatedUser.role || user.role,
+        name: updatedUser.name || formData.name,
+        phone: updatedUser.phone || formData.phone,
       });
 
       setIsEditing(false);
@@ -74,7 +78,8 @@ console.log('Initial formData:', formData);
 
   return (
     <BaseModal title="My Profile" onClose={onClose}>
-      <div className="flex flex-col md:flex-row gap-6 bg-gradient-to-br from-green-100 via-green-200 to-green-300 p-8 rounded-2xl shadow-xl">
+      <div className="flex flex-col md:flex-row gap-6 bg-gradient-to-br from-green-100 via-green-200 to-green-900 p-8 rounded-2xl shadow-xl">
+      {/* <div className="flex flex-col md:flex-row gap-6 bg-gradient-to-br from-green-100 via-green-200 to-green-300 p-8 rounded-2xl shadow-xl"> */}
 
         {/* Left Half - Big Avatar */}
         <div className="flex justify-center items-center md:w-1/3">
@@ -89,25 +94,26 @@ console.log('Initial formData:', formData);
             <>
               {/* View Mode */}
               <div>
-                <span className="text-green-900 font-bold text-lg">Name:</span>
-                <p className="text-gray-800 font-semibold text-xl mt-1">{user?.name}</p>
+                <span className="text-green-900 font-bold text-lg">Name:</span> 
+                <p className="text-black font-semibold text-xl mt-1">{user?.name}</p>
+                {/* <p className="text-gray-800 font-semibold text-xl mt-1">{user?.name}</p> */}
               </div>
 
               <div>
                 <span className="text-green-900 font-bold text-lg">Role:</span>
-                <p className="text-gray-800 font-semibold text-xl mt-1 capitalize">{user.role}</p>
+                <p className="text-black font-semibold text-xl mt-1 capitalize">{user.role}</p>
               </div>
 
               <div>
                 <span className="text-green-900 font-bold text-lg">Email:</span>
-                <p className="text-gray-800 font-semibold text-xl mt-1">{formData.email}</p>
+                <p className="text-black font-semibold text-xl mt-1">{formData.email}</p>
                 {/* <p className="text-gray-800 font-semibold text-xl mt-1">{user.email}</p> */}
               </div>
 
               {user.phone && (
                 <div>
                   <span className="text-green-900 font-bold text-lg">Phone:</span>
-                  <p className="text-gray-800 font-semibold text-xl mt-1">{user.phone}</p>
+                  <p className="text-black font-semibold text-xl mt-1">{user.phone}</p>
                 </div>
               )}
 
@@ -128,7 +134,7 @@ console.log('Initial formData:', formData);
                   type="text"
                   value={formData?.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 text-black py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
@@ -138,7 +144,7 @@ console.log('Initial formData:', formData);
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
                 />
               </div>
 
@@ -148,7 +154,7 @@ console.log('Initial formData:', formData);
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full text-black px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
@@ -161,7 +167,7 @@ console.log('Initial formData:', formData);
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Enter new password"
-                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full text-black px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
@@ -177,7 +183,7 @@ console.log('Initial formData:', formData);
                 <button
                   onClick={handleCancel}
                   disabled={saving}
-                  className="px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3 bg-red-400 text-white rounded-lg hover:bg-gray-500 transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <X size={18} />
                   Cancel

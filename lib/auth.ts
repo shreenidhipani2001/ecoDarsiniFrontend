@@ -59,7 +59,6 @@ export async function login(email: string, password: string) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId: loginData.userId }),
         }
       );
 
@@ -98,29 +97,7 @@ export async function login(email: string, password: string) {
 }
 
 /* ================= CURRENT USER ================= */
-// export async function getCurrentUser() {
-//   console.log('userAurh getCurrentUser:- ', useAuthStore.getState().user);
-//   const userInStore = useAuthStore.getState().user;
-//   console.log("User in Store:", userInStore);
-   
-//   const id = userInStore?.userId;
-//   console.log("User ID from Store:", id);
-//   const res = await fetch(
-//     `${process.env.NEXT_PUBLIC_API_URL}/api/users/me`,
-//     {
-//       method: "POST",
-//       credentials: "include",
-//       body: JSON.stringify({ id }),
-      
-//     }
-//   );
-
-//   if (!res.ok) return null;
-
-//   const data = await res.json();
-//   console.log("Current User Data:", data);
-//   return data.user ?? null;
-// }
+ 
 export async function getCurrentUser() {
   const userInStore = useAuthStore.getState().user;
 
@@ -136,7 +113,7 @@ export async function getCurrentUser() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: userInStore.userId,
+        userId: userInStore?.id,
       }),
     }
   );

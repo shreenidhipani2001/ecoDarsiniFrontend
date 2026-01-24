@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import BaseModal from './BaseModal';
 import Image from 'next/image';
+import { useAuthStore } from '../store/useAuthStore';
+
 import { getWishlist, removeFromWishlist } from '../../lib/wishlistApi';
 import toast from 'react-hot-toast';
 import { Heart, Trash2, ShoppingCart } from 'lucide-react';
@@ -27,7 +29,7 @@ export default function WishlistModal({
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState(false);
-
+  
   // Helper to get Cloudinary URL
   const getCloudinaryUrl = (publicId: string, options = "w_600,h_600,c_fill,q_auto,f_auto") => {
     if (!publicId) return '/placeholder.png';
