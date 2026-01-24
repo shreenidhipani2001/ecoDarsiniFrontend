@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
   const { user } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+console.log('DashboardPage user:', user?.name);
   const dummyUser = {
     id: (user as any)?.user?.id || user?.id,
     name: (user as any)?.user?.name || (user as any)?.name,

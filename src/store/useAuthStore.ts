@@ -38,6 +38,8 @@ export type User = {
   id: string;
   email: string;
   role: "ADMIN" | "USER";
+  name?: string;
+  phone?: string;
 };
 
 interface AuthState {

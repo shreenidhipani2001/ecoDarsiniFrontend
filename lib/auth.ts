@@ -45,16 +45,56 @@ export async function login(email: string, password: string) {
     throw new Error("Login failed");
   }
 
-  const data = await res.json();
-  console.log("Login Response Data:", data);
+  const loginData = await res.json();
+  console.log("Login Response Data:", loginData);
 
-  if (data) {
-    console.log("Setting user in auth store:", data);
-    useAuthStore.getState().setUser(data);
-    console.log("User after setting in store:", useAuthStore.getState().user);
+  // Fetch full user profile after successful login
+  if (loginData.userId) {
+    try {
+      const userRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/${loginData.userId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId: loginData.userId }),
+        }
+      );
+
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        console.log("Full User Profile Data:", userData);
+
+        // Store complete user data with proper structure
+        const completeUser = {
+          id: userData.user?.id || loginData.userId,
+          name: userData.user?.name,
+          email: userData.user?.email || loginData.email,
+          role: userData.user?.role || loginData.role,
+          phone: userData.user?.phone,
+        };
+
+        console.log("Setting complete user in auth store:", completeUser);
+        useAuthStore.getState().setUser(completeUser);
+        console.log("User after setting in store:", useAuthStore.getState().user);
+        console.log("Login process completed successfully.",loginData);
+        return loginData;
+      }
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+    }
   }
 
-  return data;
+  // Fallback: store minimal login data if profile fetch fails
+  useAuthStore.getState().setUser({
+    id: loginData.userId,
+    email: loginData.email,
+    role: loginData.role,
+  });
+
+  return loginData;
 }
 
 /* ================= CURRENT USER ================= */

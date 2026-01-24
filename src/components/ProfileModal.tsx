@@ -17,7 +17,7 @@ export default function ProfileModal({
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const { setUser } = useAuthStore();
-
+c
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -26,7 +26,8 @@ export default function ProfileModal({
   });
 
   if (!user) return null;
-
+console.log('Rendering ProfileModal for user:', user);
+console.log('Initial formData:', formData);
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -89,7 +90,7 @@ export default function ProfileModal({
               {/* View Mode */}
               <div>
                 <span className="text-green-900 font-bold text-lg">Name:</span>
-                <p className="text-gray-800 font-semibold text-xl mt-1">{user.name}</p>
+                <p className="text-gray-800 font-semibold text-xl mt-1">{user?.name}</p>
               </div>
 
               <div>
@@ -99,7 +100,8 @@ export default function ProfileModal({
 
               <div>
                 <span className="text-green-900 font-bold text-lg">Email:</span>
-                <p className="text-gray-800 font-semibold text-xl mt-1">{user.email}</p>
+                <p className="text-gray-800 font-semibold text-xl mt-1">{formData.email}</p>
+                {/* <p className="text-gray-800 font-semibold text-xl mt-1">{user.email}</p> */}
               </div>
 
               {user.phone && (
@@ -124,7 +126,7 @@ export default function ProfileModal({
                 <label className="text-green-900 font-bold text-sm block mb-1">Name</label>
                 <input
                   type="text"
-                  value={formData.name}
+                  value={formData?.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
