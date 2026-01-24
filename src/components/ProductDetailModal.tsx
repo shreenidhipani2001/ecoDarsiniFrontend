@@ -237,7 +237,7 @@ export default function ProductDetailModal({
                     </p>
                   )}
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">
                     Stock
                   </label>
@@ -259,7 +259,7 @@ export default function ProductDetailModal({
                       {formData.stock > 0 ? `${formData.stock} units` : 'Out of Stock'}
                     </p>
                   )}
-                </div>
+                </div> */}
               </div>
 
               {/* Artist Name */}
@@ -319,7 +319,7 @@ export default function ProductDetailModal({
 
               {/* Read-only Info */}
               <div className="pt-4 border-t border-gray-200 space-y-2">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                {/* <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Product ID:</span>
                     <p className="text-gray-700 font-mono text-xs break-all">{product.id}</p>
@@ -334,7 +334,7 @@ export default function ProductDetailModal({
                 <div>
                   <span className="text-gray-500 text-sm">Created At:</span>
                   <p className="text-gray-700 text-sm">{formatDate(product.created_at)}</p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

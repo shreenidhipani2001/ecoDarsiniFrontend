@@ -1,8 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function getWishlist() {
+export async function getWishlist(userId: string) {
   try {
-    const res = await fetch(`${API_URL}/api/wishes`, {
+    const res = await fetch(`${API_URL}/api/wishes/unique/${userId}`, {
+    // const res = await fetch(`${API_URL}/api/wishes`, {
       method: 'GET',
       credentials: 'include',
       headers: {

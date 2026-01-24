@@ -1,78 +1,53 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import BaseModal from './BaseModal';
-import Image from 'next/image';
-import { getCart, removeFromCart, updateCartQuantity } from '../../lib/cartApi';
+import { removeFromCart } from '../../lib/cartApi';
 import toast from 'react-hot-toast';
 import { Trash2, ShoppingBag } from 'lucide-react';
 
-type CartItem = {
-  id: number;
+export type CartItem = {
+  id: string;
   quantity: number;
   product_id: string;
   name: string;
-  price: number;
-  total_price: number;
-  cms_image_ids: string[];
+  price: string;
+  total_price: string;
+  cms_image_ids?: string[];
+  slug: string;
+  created_at: string;
   image?: string;
 };
 
-export default function CartModal({
-  onClose,
-}: {
+interface CartModalProps {
+  items: CartItem[];
+  loading: boolean;
   onClose: () => void;
-}) {
+  onItemRemoved: (itemId: string) => void;
+}
+
+export default function CartModal({
+  items,
+  loading,
+  onClose,
+  onItemRemoved,
+}: CartModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState(false);
-
-  // Helper to get Cloudinary URL
-  const getCloudinaryUrl = (publicId: string, options = "w_600,h_600,c_fill,q_auto,f_auto") => {
-    if (!publicId) return '/placeholder.png';
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-    if (!cloudName) return '/placeholder.png';
-    return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
-  };
-
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      setLoading(true);
-      try {
-        const data = await getCart();
-        const mappedItems = data?.map((item: any) => ({
-          ...item,
-          image: item.cms_image_ids?.[0]
-            ? getCloudinaryUrl(item.cms_image_ids[0])
-            : '/placeholder.png',
-        })) || [];
-        setItems(mappedItems);
-      } catch (err) {
-        console.error('Failed to fetch cart items:', err);
-        toast.error('Failed to load cart items');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
-  }, []);
 
   const handleRemoveItem = async () => {
     if (!items[currentIndex]) return;
 
     setRemoving(true);
     try {
-      await removeFromCart(items[currentIndex].id);
+      await removeFromCart(items[currentIndex].id as any);
       toast.success('Item removed from cart');
 
-      // Remove item from local state
-      const newItems = items.filter((_, index) => index !== currentIndex);
-      setItems(newItems);
+      // Notify parent to update cart state
+      onItemRemoved(items[currentIndex].id);
 
       // Adjust current index if needed
-      if (currentIndex >= newItems.length && currentIndex > 0) {
+      if (currentIndex >= items.length - 1 && currentIndex > 0) {
         setCurrentIndex(currentIndex - 1);
       }
     } catch (err) {
@@ -84,8 +59,9 @@ export default function CartModal({
   };
 
   const handleBuyNow = () => {
-    toast.success('Proceeding to checkout...');
-    // Add checkout logic here later
+    toast('Buy option yet to be added', {
+      icon: '🛒',
+    });
   };
 
   if (loading) {
@@ -110,7 +86,7 @@ export default function CartModal({
   }
 
   const item = items[currentIndex];
-  const totalAmount = items.reduce((sum, item) => sum + item.total_price, 0);
+  const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
 
   return (
     <BaseModal title="My Cart" onClose={onClose}>
@@ -118,11 +94,13 @@ export default function CartModal({
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           {/* Left - Product Image */}
           <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
-            <Image
-              src={item.image ?? '/placeholder.png'}
-              alt={item.name}
-              fill
-              className="object-cover rounded-xl"
+            <img
+              src={item?.image || '/placeholder.png'}
+              alt={item?.name}
+              className="w-full h-full object-cover rounded-xl"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.png';
+              }}
             />
           </div>
 
@@ -130,8 +108,9 @@ export default function CartModal({
           <div className="flex-1 flex flex-col justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+              <p className="text-gray-500 text-sm mt-1">Unit Price: ₹{parseFloat(item.price).toLocaleString()}</p>
               <p className="text-gray-600 mt-2">Quantity: {item.quantity}</p>
-              <p className="text-green-600 font-bold text-xl mt-2">₹{item.total_price.toLocaleString()}</p>
+              <p className="text-green-600 font-bold text-xl mt-2">₹{parseFloat(item.total_price).toLocaleString()}</p>
             </div>
 
             {/* Action Buttons */}

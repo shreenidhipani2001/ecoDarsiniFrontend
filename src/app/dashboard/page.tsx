@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../user/SideBar';
 import BookFlip from '../admin/ProductsCatalogue';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -8,18 +8,94 @@ import WishlistModal from '../../components/WishlistModal';
 import CartModal from '../../components/CartModal';
 import ProfileModal from '../../components/ProfileModal';
 import RoleGuard from '../../components/RoleGuard';
+import { getCart } from '../../../lib/cartApi';
+import toast from 'react-hot-toast';
+
+// Image type from Payload CMS (same as BookFlip)
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
+export type CartItem = {
+  id: string;
+  quantity: number;
+  product_id: string;
+  name: string;
+  price: string;
+  total_price: string;
+  cms_image_ids?: string[];
+  images?: ProductImage[];  // Images from Payload CMS
+  slug: string;
+  created_at: string;
+  image?: string;
+};
+
+// Get image URL from cart item (same pattern as BookFlip's getProductImageUrl)
+function getCartItemImageUrl(item: CartItem, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string {
+  // First try to get from images array (Payload CMS)
+  
+  if (item.images && item.images.length > 0) {
+    const image = item.images[0];
+    return image[size] || image.url || '/placeholder.png';
+  }
+  return '/placeholder.png';
+}
 
 export default function DashboardPage() {
   const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
   const { user } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
- 
+
+  // Cart state
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartLoading, setCartLoading] = useState(false);
+
+  const userId = (user as any)?.user?.id || user?.id;
+
   const dummyUser = {
-    id: (user as any)?.user?.id || user?.id,
+    id: userId,
     name: (user as any)?.user?.name || (user as any)?.name,
     email: user?.email,
     role: user?.role,
     phone: (user as any)?.user?.phone || (user as any)?.phone,
+  };
+
+  // Fetch cart items
+  const fetchCartItems = useCallback(async () => {
+    if (!userId) return;
+
+    setCartLoading(true);
+    try {
+      const data = await getCart(userId);
+      console.log('Fetched cart items:', data);
+      const mappedItems = data?.map((item: any) => ({
+        ...item,
+        image: getCartItemImageUrl(item, 'card'),
+      })) || [];
+      setCartItems(mappedItems);
+    } catch (err) {
+      console.log('Failed to fetch cart items:', err);
+      toast.error('Failed to load cart items');
+    } finally {
+      setCartLoading(false);
+    }
+  }, [userId]);
+
+  // Fetch cart when modal opens
+  useEffect(() => {
+    if (activeModal === 'cart' && userId) {
+      fetchCartItems();
+    }
+  }, [activeModal, userId, fetchCartItems]);
+
+  // Handle cart item removal (update local state)
+  const handleCartItemRemoved = (itemId: string) => {
+    setCartItems(prev => prev.filter(item => item.id !== itemId));
   };
 
   return (
@@ -52,7 +128,12 @@ export default function DashboardPage() {
         )}
 
         {activeModal === 'cart' && (
-          <CartModal onClose={() => setActiveModal(null)} />
+          <CartModal
+            items={cartItems}
+            loading={cartLoading}
+            onClose={() => setActiveModal(null)}
+            onItemRemoved={handleCartItemRemoved}
+          />
         )}
 
         {activeModal === 'wishlist' && (

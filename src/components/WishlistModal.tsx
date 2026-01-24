@@ -29,6 +29,7 @@ export default function WishlistModal({
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState(false);
+  const { user } = useAuthStore();
   
   // Helper to get Cloudinary URL
   const getCloudinaryUrl = (publicId: string, options = "w_600,h_600,c_fill,q_auto,f_auto") => {
@@ -42,7 +43,7 @@ export default function WishlistModal({
     const fetchWishlistItems = async () => {
       setLoading(true);
       try {
-        const data = await getWishlist();
+        const data = await getWishlist(user?.id);
         const mappedItems = data?.map((item: any) => ({
           ...item,
           image: item.cms_image_ids?.[0]

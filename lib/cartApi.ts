@@ -1,8 +1,31 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function getCart() {
+// export async function getCart() {
+//   try {
+//     const res = await fetch(`${API_URL}/api/cart`, {
+//       method: 'GET',
+//       credentials: 'include',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+// console.log('Fetching cart from:', `${API_URL}/api/cart`);
+//     if (!res.ok) {
+//       throw new Error(`HTTP ${res.status}`);
+//     }
+
+//     const data = await res.json();
+//     return data;
+//   } catch (error) {
+//     console.error('Failed to fetch cart:', error);
+//     throw error;
+//   }
+// }
+
+export async function getCart(userId: string) {
   try {
-    const res = await fetch(`${API_URL}/api/cart`, {
+    console.log('Fetching cart for user:', userId);
+    const res = await fetch(`${API_URL}/api/cart/user/${userId}`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -11,17 +34,18 @@ export async function getCart() {
     });
 
     if (!res.ok) {
+      console.error('Response not ok:', res.status, res.statusText);
       throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
+    console.log('Cart data fetched:', data);
     return data;
   } catch (error) {
     console.error('Failed to fetch cart:', error);
     throw error;
   }
 }
-
 export async function addToCart(userId: string, productId: string, quantity: number = 1) {
   try {
     const res = await fetch(`${API_URL}/api/cart/add`, {
