@@ -8,10 +8,9 @@ export default function OrdersGrid() {
           key={i}
           className="bg-white p-4 rounded-xl shadow"
         >
-          <img
-            src="/placeholder.png"
-            className="h-32 w-full object-cover rounded"
-          />
+          <div className="h-32 w-full bg-gray-200 rounded flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No Image</span>
+          </div>
           <h3 className="mt-2 font-semibold">
             Order #{i + 1}
           </h3>

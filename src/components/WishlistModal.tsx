@@ -58,9 +58,9 @@ interface WishlistModalProps {
 function getImageForWishlistItem(wishlistItem: WishlistItem, products: Product[]): string {
   const product = products.find((p) => p.id === wishlistItem.product_id);
   if (product && product.images && product.images.length > 0) {
-    return product.images[0].url || product.images[0].card || '/placeholder.png';
+    return product.images[0].url || product.images[0].card || '';
   }
-  return '/placeholder.png';
+  return '';
 }
 
 export default function WishlistModal({

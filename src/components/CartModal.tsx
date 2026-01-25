@@ -57,9 +57,9 @@ interface CartModalProps {
 function getImageForCartItem(cartItem: CartItem, products: Product[]): string {
   const product = products.find((p) => p.id === cartItem.product_id);
   if (product && product.images && product.images.length > 0) {
-    return product.images[0].url || product.images[0].card || '/placeholder.png';
+    return product.images[0].url || product.images[0].card || '';
   }
-  return '/placeholder.png';
+  return '';
 }
 
 export default function CartModal({
@@ -138,7 +138,7 @@ export default function CartModal({
               alt={item?.name}
               className="w-full h-full object-cover rounded-xl"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.png';
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           </div>

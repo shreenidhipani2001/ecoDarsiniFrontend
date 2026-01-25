@@ -24,12 +24,12 @@ const getCloudinaryUrl = (
   publicId: string,
   options = "w_600,h_600,c_fill,q_auto,f_auto"
 ) => {
-  if (!publicId) return '/placeholder.png';
+  if (!publicId) return '';
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
   if (!cloudName) {
     console.warn("Cloudinary cloud name not set");
-    return '/placeholder.png';
+    return '';
   }
 
   return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
@@ -76,7 +76,7 @@ export default function DashboardGrid() {
             slug: p.slug,
             cms_image_ids: p.cms_image_ids || [],
             discount: p.discount ?? 0,
-            image: imageId ? Image : '/placeholder.png',
+            image: imageId ? Image : undefined,
           };
         });
 

@@ -26,12 +26,18 @@ export default function ProductCard({ product, onClick }: Props) {
       className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group"
     >
       <div className="relative aspect-square">
-        <Image
-          src={product.image || '/placeholder.png'}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+            <span className="text-gray-400 text-sm">No Image</span>
+          </div>
+        )}
       </div>
 
       <div className="p-4">

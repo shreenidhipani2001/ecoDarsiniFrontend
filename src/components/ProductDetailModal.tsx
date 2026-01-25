@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Save, Edit3, Eye } from 'lucide-react';
+import { X, Save, Edit3, Eye, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Logo from '../../public/svg/Logo';
 import { Heart, ShoppingCart } from 'lucide-react';
@@ -9,6 +9,15 @@ import { useAuthStore } from '../store/useAuthStore';
 // const { isAuthenticated, user } = useAuthStore();
 
 
+
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
 
 type Product = {
   id: string;
@@ -19,6 +28,7 @@ type Product = {
   stock: number;
   category_id: string;
   cms_image_ids: string[];
+  images?: ProductImage[];
   artist_name?: string;
   is_active: boolean;
   created_at?: string;
@@ -50,7 +60,12 @@ export default function ProductDetailModal({
     artist_name: product.artist_name || '',
     is_active: product.is_active,
   });
-  const {  user } = useAuthStore();
+  const { user } = useAuthStore();
+
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -66,6 +81,7 @@ export default function ProductDetailModal({
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
   const handleAddToCart = async () => {
     setLoading(true);
         // if (!isAuthenticated || !user) {
@@ -93,7 +109,7 @@ export default function ProductDetailModal({
             }
           );
           const data = await res.json();
-      console.log("Add to Cart API response ::::", data);
+      console.log("Added to Cart API response ::::", data);
           if (!res.ok) {
             const err = await res.json();
             throw new Error(err.error || "Failed to add to cart");
@@ -107,6 +123,57 @@ export default function ProductDetailModal({
           setLoading(false);
         }
       };
+
+
+  const handleSubmitReview = async () => {
+    if (!user?.id) {
+      toast.error("Please login to add a review");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/review/add`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            product_id: product.id,
+            rating: reviewRating,
+            comment: reviewComment || null,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      console.log("Review API response:", data);
+
+      if (res.status === 409) {
+        toast.error("You have already reviewed this product");
+        setShowReviewModal(false);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to add review");
+      }
+
+      toast.success("Review added successfully!");
+      setShowReviewModal(false);
+      setReviewRating(5);
+      setReviewComment('');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
       
  
     const handleAddToWishlist = async () => {
@@ -233,15 +300,20 @@ export default function ProductDetailModal({
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden relative flex flex-col">
         {/* Header */}
         <div
-  className="
-  flex items-center justify-between p-4 border-b
-bg-gradient-to-r
-from-emerald-850 via-emerald-700 to-emerald-300
-bg-[length:300%_300%]
-animate-green-shift
+            //   className="
+            //   flex items-center justify-between p-4 border-b
+            // bg-gradient-to-r
+            // from-emerald-850 via-emerald-700 to-emerald-300
+            // bg-[length:300%_300%]
+            // animate-green-shift
 
-  "
->
+            //   "
+        className="
+        flex items-center justify-between p-4 border-b
+        bg-green-700
+
+        "
+        >
         {/* <div className="flex items-center justify-between p-4 border-b bg-green-700"> */}
           <div className="flex items-center gap-3">
             {/* {isAdmin ? (
@@ -457,7 +529,7 @@ animate-green-shift
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-4 border-t bg-green-700">
           {isAdmin ? (
             <div className="flex justify-end gap-3">
               {isEditing ? (
@@ -465,14 +537,16 @@ animate-green-shift
                   <button
                     onClick={handleCancel}
                     disabled={loading}
-                    className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+                    className="px-6 py-2 rounded-lg border bg-slate-100 text-slate-900 hover:bg-slate-300 transition disabled:opacity-50"
+                    // className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+                    className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2 disabled:opacity-50"
+                    // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -490,7 +564,9 @@ animate-green-shift
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
+                  className="px-6 py-2 rounded-lg bg-white text-green-800 hover:bg-slate-300 transition flex items-center gap-2"
+                  // className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2"
+                  // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
                 >
                   <Edit3 size={18} />
                   Edit Product
@@ -502,10 +578,18 @@ animate-green-shift
             //   <Logo className="w-12 h-auto text-green-400" />
             // </div>
             <div className="flex ml-27 justify-end gap-3 w-150 ">
+                   <button
+                      onClick={() => setShowReviewModal(true)}
+                      disabled={loading}
+                      className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                    <Camera color="white" size={22} />
+                   Add a Review
+                  </button>
                   <button
                     onClick={handleAddToCart}
                     disabled={loading}
-                    className="flex-1 bg-black text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <ShoppingCart size={20} />
                     Add to Cart
@@ -514,16 +598,130 @@ animate-green-shift
                   <button
                     onClick={handleAddToWishlist}
                     disabled={loading}
-                    className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
+                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    // className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
                     title="Add to Wishlist"
                   >
-                    <Heart size={22} className="text-red-500" />
+                    <Heart size={22} className="text-white" />
+                    Add to Wishlist
                   </button>
             </div>
           )
           }
         </div>
       </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden">
+            {/* Review Modal Header */}
+            <div className="flex items-center justify-between p-4 bg-green-800">
+              <h3 className="text-lg font-semibold text-white">
+                Review for {product.name}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowReviewModal(false);
+                  setReviewRating(5);
+                  setReviewComment('');
+                }}
+                className="p-1 rounded-full hover:bg-green-700 transition"
+              >
+                <X size={20} className="text-white" />
+              </button>
+            </div>
+
+            {/* Review Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Rating */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Rating
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <svg
+                        className={`w-10 h-10 ${
+                          star <= reviewRating
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                        />
+                      </svg>
+                    </button>
+                  ))}
+                  <span className="ml-2 text-lg font-medium text-gray-700">
+                    {reviewRating}/5
+                  </span>
+                </div>
+              </div>
+
+              {/* Comment */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Comment (Optional)
+                </label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your experience with this product..."
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-800 resize-none"
+                  maxLength={5000}
+                />
+                <p className="text-xs text-gray-500 mt-1 text-right">
+                  {reviewComment.length}/5000
+                </p>
+              </div>
+            </div>
+
+            {/* Review Modal Footer */}
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowReviewModal(false);
+                  setReviewRating(5);
+                  setReviewComment('');
+                }}
+                disabled={loading}
+                className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={loading}
+                className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Review'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
