@@ -303,7 +303,7 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, p
   className="page product-page right-page flex justify-center items-center"
   ref={ref}
 >
-  <div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
+  {/* <div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
     <div className="details-container flex flex-col gap-5 text-center">
     <div className="left-header">
         <h2 className="mt-10 text-center text-black font-bold text-3xl md:text-4xl">
@@ -311,43 +311,14 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, p
           </h2>
           <div className="title-line"></div>
         </div>
-      {/* Artist */}
-   
-
-      {/* Description */}
-      {/* <div className="detail-card rounded-xl bg-white/15 px-4 py-4">
-        <p className="text-sm leading-relaxed opacity-95 text-xl text-black">
-          {product.description || 'A beautifully handcrafted eco-friendly product.'}
-        </p>
-      </div> */}
-          {/* Category & Status */}
+     
+          
           <div className="info-row flex gap-3 mt-30">
-        {/* <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 py-2 text-black">
-          
-          <span>{product?.category_name || 'Eco Product'}</span>
-        </div> */}
+         
         
-        {/* <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 py-2 text-sm">
-          
-          <span>{product?.category_name || 'Eco Product'}</span>
-        </div> */}
-
-        {/* <div
-          className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm 
-            ${
-            product.is_active
-              ? 'bg-green-500/40'
-              : 'bg-red-500/40'
-          }`}
-        >
-          <span className="h-2 w-2 rounded-full bg-white" />
-          <span>
-            {product.is_active ? 'Available' : 'Out of Stock'}
-          </span>
-        </div> */}
       </div>
 
-      {/* Price */}
+      
       <div className="price-card rounded-2xl bg-green-700 px-3 py-2  mt-25">
         <span className="block text-xs uppercase tracking-wide opacity-80">
           Price
@@ -360,7 +331,7 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, p
 
   
 
-      {/* Stock */}
+     
       {product.stock > 0 && (
         <div className="text-sm opacity-90 text-black">
           <span className="font-semibold">{product.stock}</span>{' '}
@@ -368,7 +339,7 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, p
         </div>
       )}
 
-      {/* Button */}
+      
       {onViewMore && (
         <button
           onClick={() => onViewMore(product)}
@@ -379,11 +350,46 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, p
       )}
     </div>
 
-    {/* Page number */}
-    {/* <span className="absolute bottom-4 right-5 text-xs opacity-50 text-black">
-      {pageNumber}
-    </span> */}
+    
+    
+  </div> */}
+
+<div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
+  <div className="details-container flex flex-col justify-center items-center gap-6 text-center h-full">
+    
+    {/* Product Name */}
+    <h2 className="text-black font-bold text-3xl md:text-4xl">
+      {product.name}
+    </h2>
+    <div className="title-line" />
+
+<div className="flex flex-col items-center gap-10 mt-40">
+  
+  {/* Price */}
+  <div className="price-card rounded-xl bg-green-700 px-10 py-2">
+    <span className="block text-[10px] uppercase tracking-widest opacity-80">
+      Price
+    </span>
+    <div className="mt-1 flex justify-center items-end gap-1 font-bold">
+      <span className="text-lg">₹</span>
+      <span className="text-2xl">{formatPrice(product.price)}</span>
+    </div>
   </div>
+
+  {/* Button */}
+  {onViewMore && (
+    <button
+      onClick={() => onViewMore(product)}
+      className="w-full rounded-xl bg-white py-3 font-bold text-green-800 transition hover:bg-green-100 hover:-translate-y-0.5"
+    >
+      View Full Details
+    </button>
+  )}
+</div>
+
+  </div>
+</div>
+
 </div>
 
   );
@@ -514,27 +520,7 @@ export default function BookFlip() {
   return (
     <>
       <div className="catalogue-wrapper">
-        {/* Header */}
-        {/* <div className="catalogue-header">
-          <div className="header-left">
-            
-            <span className="header-title">Product Catalogue</span>
-          </div>
-          <div className="header-center">
-            {currentPage === 0 ? (
-              <span className="page-info">Cover</span>
-            ) : currentPage >= totalPages - 1 ? (
-              <span className="page-info">End</span>
-            ) : (
-              <span className="page-info">
-                Product {currentProductIndex + 1} of {products.length}
-              </span>
-            )}
-          </div>
-          <div className="header-right ">
-            <span className="total-products " >{products.length} Products</span>
-          </div>
-        </div> */}
+     
         <div className="catalogue-header"></div>
 
         {/* Book Container */}

@@ -95,8 +95,12 @@ import {
   ShoppingCart,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import Logo from '../../../public/svg/Logo';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -109,6 +113,29 @@ export default function Sidebar({
   onToggle,
   onOpenModal,
 }: SidebarProps) {
+  const router = useRouter();
+  const { clearUser } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error('Logout failed');
+      }
+
+      clearUser();
+      toast.success('Logged out successfully');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
+  };
+
   const navItems = [
     {
       name: 'Profile',
@@ -182,6 +209,21 @@ export default function Sidebar({
             </button>
           ))}
         </nav>
+      </div>
+
+      {/* Logout Button at Bottom */}
+      <div className="mt-auto p-4 border-t border-gray-700">
+        <button
+          onClick={handleLogout}
+          className={`
+            w-full flex items-center rounded-lg transition-colors
+            hover:bg-red-900/30 text-red-400 hover:text-red-300 focus:outline-none
+            ${isOpen ? 'gap-4 px-4 py-3' : 'justify-center p-3'}
+          `}
+        >
+          <LogOut className="w-6 h-6 shrink-0" />
+          {isOpen && <span className="font-medium">Logout</span>}
+        </button>
       </div>
     </aside>
   );

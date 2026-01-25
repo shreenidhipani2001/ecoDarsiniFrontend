@@ -5,6 +5,32 @@ import BaseModal from './BaseModal';
 import { removeFromCart } from '../../lib/cartApi';
 import toast from 'react-hot-toast';
 import { Trash2, ShoppingBag } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
+
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  price: number | string;
+  cms_image_ids: string[];
+  images?: ProductImage[];
+  slug: string;
+  description?: string;
+  stock: number;
+  category_id: string;
+  category_name?: string;
+  artist_name?: string;
+  is_active: boolean;
+  created_at?: string;
+};
 
 export type CartItem = {
   id: string;
@@ -21,26 +47,38 @@ export type CartItem = {
 
 interface CartModalProps {
   items: CartItem[];
+  products: Product[];
   loading: boolean;
   onClose: () => void;
   onItemRemoved: (itemId: string) => void;
 }
 
+// Helper to get product image URL by matching product_id
+function getImageForCartItem(cartItem: CartItem, products: Product[]): string {
+  const product = products.find((p) => p.id === cartItem.product_id);
+  if (product && product.images && product.images.length > 0) {
+    return product.images[0].url || product.images[0].card || '/placeholder.png';
+  }
+  return '/placeholder.png';
+}
+
 export default function CartModal({
   items,
+  products,
   loading,
   onClose,
   onItemRemoved,
 }: CartModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
-  console.log('CartModal items:', items);
+  const { user } = useAuthStore();
   const handleRemoveItem = async () => {
     if (!items[currentIndex]) return;
     
     setRemoving(true);
     try {
-      await removeFromCart(items[currentIndex].id as any);
+      console.log('Removing cart item id:', items[currentIndex].id, 'for user id:', user?.id);  
+      await removeFromCart(items[currentIndex].id, user?.id);
       toast.success('Item removed from cart');
 
       // Notify parent to update cart state
@@ -86,7 +124,7 @@ export default function CartModal({
   }
 
   const item = items[currentIndex];
-  console.log('Current cart item:', item);
+  const itemImage = getImageForCartItem(item, products);
   const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
 
   return (
@@ -96,7 +134,7 @@ export default function CartModal({
           {/* Left - Product Image */}
           <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
             <img
-              src={item?.image || '/placeholder.png'}
+              src={itemImage}
               alt={item?.name}
               className="w-full h-full object-cover rounded-xl"
               onError={(e) => {

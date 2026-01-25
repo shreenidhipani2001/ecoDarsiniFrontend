@@ -96,9 +96,10 @@ export async function updateCartQuantity(cartItemId: number, quantity: number) {
   }
 }
 
-export async function removeFromCart(cartItemId: number) {
+export async function removeFromCart(cartItemId: string, userId?: string) {
   try {
-    const res = await fetch(`${API_URL}/api/cart/${cartItemId}`, {
+    console.log('Removing cart item:', cartItemId, 'for user:', userId);
+    const res = await fetch(`${API_URL}/api/cart/${cartItemId}?userId=${userId}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: {
@@ -111,6 +112,7 @@ export async function removeFromCart(cartItemId: number) {
     }
 
     const data = await res.json();
+    console.log('Removed from cart:', data);
     return data;
   } catch (error) {
     console.error('Failed to remove from cart:', error);

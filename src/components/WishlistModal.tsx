@@ -10,7 +10,31 @@ import { useAuthStore } from '../store/useAuthStore';
 
 
 
-// Assuming this type is now shared (e.g. from lib/types.ts or from page.tsx)
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  price: number | string;
+  cms_image_ids: string[];
+  images?: ProductImage[];
+  slug: string;
+  description?: string;
+  stock: number;
+  category_id: string;
+  category_name?: string;
+  artist_name?: string;
+  is_active: boolean;
+  created_at?: string;
+};
+
 export type WishlistItem = {
   id: number;
   user_id: string;
@@ -19,18 +43,29 @@ export type WishlistItem = {
   price: number;
   cms_image_ids: string[];
   slug?: string;
-  image?: string;     // pre-filled URL from parent
+  image?: string;
 };
 
 interface WishlistModalProps {
   items: WishlistItem[];
+  products: Product[];
   loading: boolean;
   onClose: () => void;
   onItemRemoved?: (itemId: number) => void;
 }
 
+// Helper to get product image URL by matching product_id
+function getImageForWishlistItem(wishlistItem: WishlistItem, products: Product[]): string {
+  const product = products.find((p) => p.id === wishlistItem.product_id);
+  if (product && product.images && product.images.length > 0) {
+    return product.images[0].url || product.images[0].card || '/placeholder.png';
+  }
+  return '/placeholder.png';
+}
+
 export default function WishlistModal({
   items,
+  products,
   loading,
   onClose,
   onItemRemoved,
@@ -38,8 +73,6 @@ export default function WishlistModal({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
   const { user } = useAuthStore();
-  
-  console.log('WishlistModal items:', items);
 
   const handleRemoveItem = async () => {
     const item = items[currentIndex];
@@ -174,6 +207,7 @@ export default function WishlistModal({
   }
 
   const item = items[currentIndex];
+  const itemImage = getImageForWishlistItem(item, products);
 
   return (
     <BaseModal title="My Wishlist" onClose={onClose}>
@@ -183,7 +217,7 @@ export default function WishlistModal({
           {/* Image container */}
           <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
             <Image
-              src={item.image ?? '/placeholder.png'}
+              src={itemImage}
               alt={item.name}
               fill
               className="object-cover rounded-xl"

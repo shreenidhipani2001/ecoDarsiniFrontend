@@ -172,6 +172,22 @@ type ProductImage = {
   alt: string;
 };
 
+export type Product = {
+  id: string;
+  name: string;
+  price: number | string;
+  cms_image_ids: string[];
+  images?: ProductImage[];
+  slug: string;
+  description?: string;
+  stock: number;
+  category_id: string;
+  category_name?: string;
+  artist_name?: string;
+  is_active: boolean;
+  created_at?: string;
+};
+
 export type CartItem = {
   id: string;
   quantity: number;
@@ -198,35 +214,25 @@ export type WishlistItem = {
 };
 
 // ────────────────────────────────────────────────
-// Cloudinary helper (you can also move this to lib/cloudinary.ts)
+// Helper to get product image URL
 // ────────────────────────────────────────────────
 
-function getCloudinaryUrl(
-  publicId: string,
-  options = 'w_600,h_600,c_fill,q_auto,f_auto'
-): string {
-  if (!publicId) return '/placeholder.png';
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-  if (!cloudName) return '/placeholder.png';
-  return `/placeholder.png`;
-  // return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
-}
-
-function getCartItemImageUrl(item: CartItem, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string {
-  if (item.images && item.images.length > 0) {
-    const image = item.images[0];
-    return image[size] || image.url || '/placeholder.png';
+function getProductImageUrl(product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'url'): string {
+  if (!product.images || product.images.length === 0) {
+    return '/placeholder.png';
   }
-  if (item.cms_image_ids && item.cms_image_ids.length > 0) {
-    return getCloudinaryUrl(item.cms_image_ids[0]);
-  }
-  return '/placeholder.png';
+  const image = product.images[0];
+  return image[size] || image.url || '/placeholder.png';
 }
 
 export default function DashboardPage() {
   const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
   const { user } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Products state (fetched once, shared with modals)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   // Cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -247,6 +253,35 @@ export default function DashboardPage() {
   };
 
   // ────────────────────────────────────────────────
+  // Products fetching (once on mount)
+  // ────────────────────────────────────────────────
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) throw new Error('API URL not set');
+
+        const res = await fetch(`${apiUrl}/api/products/`, {
+          cache: 'no-store',
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const productList = Array.isArray(data) ? data : data?.products || data?.data || [];
+        setProducts(productList);
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // ────────────────────────────────────────────────
   // Cart fetching
   // ────────────────────────────────────────────────
 
@@ -255,11 +290,8 @@ export default function DashboardPage() {
     setCartLoading(true);
     try {
       const data = await getCart(userId);
-      const mappedItems = (data || []).map((item: any) => ({
-        ...item,
-        image: getCartItemImageUrl(item, 'card'),
-      }));
-      setCartItems(mappedItems);
+      // Just store raw cart items - CartModal will match with products for images
+      setCartItems(data || []);
     } catch (err) {
       console.error('Failed to fetch cart items:', err);
       toast.error('Failed to load cart');
@@ -277,13 +309,8 @@ export default function DashboardPage() {
     setWishlistLoading(true);
     try {
       const data = await getWishlist(userId);
-      const mapped = (data || []).map((item: any) => ({
-        ...item,
-        image: item.cms_image_ids?.[0]
-          ? getCloudinaryUrl(item.cms_image_ids[0])
-          : '/placeholder.png',
-      }));
-      setWishlistItems(mapped);
+      // Just store raw wishlist items - WishlistModal will match with products for images
+      setWishlistItems(data || []);
     } catch (err) {
       console.error('Failed to fetch wishlist:', err);
       toast.error('Failed to load wishlist');
@@ -340,6 +367,7 @@ export default function DashboardPage() {
 
           <main className="flex-1 overflow-hidden">
             <BookFlip />
+            {/* <BookFlip products={products} loading={productsLoading} onProductsChange={setProducts} /> */}
           </main>
         </div>
 
@@ -351,6 +379,7 @@ export default function DashboardPage() {
         {activeModal === 'cart' && (
           <CartModal
             items={cartItems}
+            products={products}
             loading={cartLoading}
             onClose={() => setActiveModal(null)}
             onItemRemoved={handleCartItemRemoved}
@@ -360,6 +389,7 @@ export default function DashboardPage() {
         {activeModal === 'wishlist' && (
           <WishlistModal
             items={wishlistItems}
+            products={products}
             loading={wishlistLoading}
             onClose={() => setActiveModal(null)}
             onItemRemoved={handleWishlistItemRemoved}
