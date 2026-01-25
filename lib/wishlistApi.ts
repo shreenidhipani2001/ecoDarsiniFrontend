@@ -52,9 +52,9 @@ export async function addToWishlist(userId: string, productId: string) {
   }
 }
 
-export async function removeFromWishlist(wishlistItemId: number) {
+export async function removeFromWishlist(wishlistItemId: number,userId: number) {
   try {
-    const res = await fetch(`${API_URL}/api/wishes/${wishlistItemId}`, {
+    const res = await fetch(`${API_URL}/api/wishes/${wishlistItemId}?userId=${userId}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: {

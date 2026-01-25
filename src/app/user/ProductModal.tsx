@@ -56,7 +56,7 @@ export default function ProductModal({ product, onClose }: Props) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                user_id: user.user.id,  
+                user_id: user.id,  
                 product_id: product.id,
                 quantity: 1,
               }),
@@ -99,7 +99,7 @@ export default function ProductModal({ product, onClose }: Props) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                user_id: user.user.id,  
+                user_id: user.id,  
                 product_id: product.id,
               }),
             }
