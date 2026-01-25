@@ -9,9 +9,13 @@ import {
   Star,
   MapPin,
   ChevronLeft,
+  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import type { AdminSection } from "./types";
 import Logo from "../../../public/svg/Logo";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const menu: {
   id: AdminSection;
@@ -33,6 +37,28 @@ interface SidebarProps {
 
 export default function Sidebar({ active, setActive }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  const { clearUser } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error('Logout failed');
+      }
+
+      clearUser();
+      toast.success('Logged out successfully');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <aside
@@ -41,8 +67,10 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
     >
       {/* Header with Toggle */}
       <div className="flex justify-between items-center p-4 border-b border-green-900/30">
-        {!collapsed && (
-          <h2 className="text-green-400 font-bold text-lg">Admin Panel</h2>
+        {collapsed ? (
+          <Logo className="w-8 h-auto text-green-400" />
+        ) : (
+          <h2 className="text-green-400 font-bold text-lg">Ecodarsini</h2>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -84,6 +112,18 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
           ))}
         </ul>
       </nav>
+
+      {/* Logout Button */}
+      <div className="px-2 mb-2">
+        <button
+          onClick={handleLogout}
+          className={`flex items-center gap-4 w-full px-4 py-3 rounded-lg cursor-pointer
+            transition-all duration-200 text-red-400 hover:bg-red-900/20 hover:text-red-300`}
+        >
+          <LogOut size={20} />
+          {!collapsed && <span className="font-medium">Logout</span>}
+        </button>
+      </div>
 
       {/* Logo at bottom */}
       <div

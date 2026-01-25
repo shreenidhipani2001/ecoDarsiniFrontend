@@ -162,8 +162,9 @@ export default function ProductDetailModal({
   const handleSave = async () => {
     setLoading(true);
     try {
+      const productId = product?.id;
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${product.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`,
         {
           method: 'PUT',
           credentials: 'include',
@@ -171,13 +172,13 @@ export default function ProductDetailModal({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            name: formData.name,
-            slug: formData.slug,
-            description: formData.description,
-            price: formData.price,
-            stock: formData.stock,
-            artist_name: formData.artist_name,
-            is_active: formData.is_active,
+            name: formData?.name,
+            slug: formData?.slug,
+            description: formData?.description,
+            price: formData?.price,
+            stock: formData?.stock,
+            artist_name: formData?.artist_name,
+            is_active: formData?.is_active,
           }),
         }
       );
@@ -188,6 +189,7 @@ export default function ProductDetailModal({
       }
 
       const updatedProduct = await res.json();
+      console.log('Updated product:', updatedProduct);
       toast.success('Product updated successfully');
       setIsEditing(false);
 
@@ -232,10 +234,12 @@ export default function ProductDetailModal({
         {/* Header */}
         <div
   className="
-    flex items-center justify-between p-4 border-b
-    bg-gradient-to-r from-green-900 via-green-700 to-green-500
-    bg-[length:200%_200%]
-    animate-gradient
+  flex items-center justify-between p-4 border-b
+bg-gradient-to-r
+from-emerald-850 via-emerald-700 to-emerald-300
+bg-[length:300%_300%]
+animate-green-shift
+
   "
 >
         {/* <div className="flex items-center justify-between p-4 border-b bg-green-700"> */}
@@ -245,7 +249,7 @@ export default function ProductDetailModal({
             ) : (
               <Eye size={20} className="text-blue-600" />
             )} */}
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-white-800">
               {isAdmin ? 'Product Details' : 'Product Details'}
             </h2>
           </div>
@@ -263,11 +267,17 @@ export default function ProductDetailModal({
             {/* Image Section */}
             <div className="lg:w-1/3">
               <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-md">
-                <img
-                  src={imageUrl || '/placeholder.png'}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <span className="text-gray-400 text-sm">No Image</span>
+                  </div>
+                )}
               </div>
               {/* Status Badge */}
               <div className="mt-4 flex justify-center">
@@ -296,7 +306,7 @@ export default function ProductDetailModal({
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black"
                   />
                 ) : (
                   <p className="text-lg font-semibold text-gray-900">{formData.name}</p>
@@ -314,7 +324,7 @@ export default function ProductDetailModal({
                     name="slug"
                     value={formData.slug}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500  text-black"
                   />
                 ) : (
                   <p className="text-gray-700">{product.slug}</p>
@@ -335,7 +345,7 @@ export default function ProductDetailModal({
                       onChange={handleInputChange}
                       min="0"
                       step="0.01"
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500  text-black"
                     />
                   ) : (
                     <p className="text-2xl font-bold text-green-600">
@@ -379,7 +389,7 @@ export default function ProductDetailModal({
                     name="artist_name"
                     value={formData.artist_name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500  text-black"
                   />
                 ) : (
                   <p className="text-gray-700">{formData.artist_name || 'Not specified'}</p>
@@ -397,7 +407,7 @@ export default function ProductDetailModal({
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500  text-black"
                   />
                 ) : (
                   <p className="text-gray-700">
