@@ -34,10 +34,10 @@ export default function CartModal({
 }: CartModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
-
+  console.log('CartModal items:', items);
   const handleRemoveItem = async () => {
     if (!items[currentIndex]) return;
-
+    
     setRemoving(true);
     try {
       await removeFromCart(items[currentIndex].id as any);
@@ -86,6 +86,7 @@ export default function CartModal({
   }
 
   const item = items[currentIndex];
+  console.log('Current cart item:', item);
   const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
 
   return (

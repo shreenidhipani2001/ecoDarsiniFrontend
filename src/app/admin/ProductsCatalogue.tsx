@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import HTMLFlipBook from 'react-pageflip';
 import ProductDetailModal from '../../components/ProductDetailModal';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -17,21 +18,31 @@ type ProductImage = {
 type Product = {
   id: string;
   name: string;
-  price: number;
+  price: number | string;
   cms_image_ids: string[];
-  images?: ProductImage[];  // Images from Payload CMS
+  images?: ProductImage[];
   slug: string;
   description?: string;
   stock: number;
   category_id: string;
+  category_name?: string;
   artist_name?: string;
   is_active: boolean;
   created_at?: string;
 };
 
+type FlipBookRef = {
+  pageFlip: () => {
+    flipNext: (corner?: 'top' | 'bottom') => void;
+    flipPrev: (corner?: 'top' | 'bottom') => void;
+    getPageCount: () => number;
+    getCurrentPageIndex: () => number;
+    turnToPage: (pageNum: number) => void;
+  };
+};
+
 /* ================= HELPERS ================= */
-// Get image URL from Payload CMS images array
-const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string => {
+const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'url'): string => {
   if (!product.images || product.images.length === 0) {
     return '/placeholder.png';
   }
@@ -39,18 +50,359 @@ const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full
   return image[size] || image.url || '/placeholder.png';
 };
 
-/* ================= COMPONENT ================= */
+const formatPrice = (price: number | string): string => {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  return numPrice.toLocaleString('en-IN');
+};
+
+/* ================= PAGE COMPONENTS ================= */
+
+// Front Cover Page
+const FrontCover = React.forwardRef<HTMLDivElement>((_, ref) => {
+  return (
+    <div className="page page-cover front-cover" ref={ref} data-density="hard">
+      <div className="cover-inner">
+        <div className="cover-decoration">
+          <div className="leaf-pattern leaf-tl"></div>
+          <div className="leaf-pattern leaf-tr"></div>
+          <div className="leaf-pattern leaf-bl"></div>
+          <div className="leaf-pattern leaf-br"></div>
+        </div>
+
+        <div className="cover-content">
+          <div className="cover-emblem">
+            <div className="emblem-ring"></div>
+            <div className="emblem-ring emblem-ring-2"></div>
+            {/* <span className="emblem-icon">🌿</span> */}
+          </div>
+
+          {/* <h1 className="cover-title">Eco Darsini</h1> */}
+          <div className="cover-divider">
+            {/* <span className="divider-leaf">❧</span> */}
+          </div>
+          {/* <h2 className="cover-subtitle">Product Catalogue</h2> */}
+          {/* <h2 className="cover-subtitle">Product Catalogue</h2> */}
+
+          {/* <p className="cover-tagline">Handcrafted with Love & Nature</p>
+
+          <div className="cover-footer">
+            <span className="footer-text">Turn the page to explore</span>
+            <span className="footer-arrow">→</span>
+          </div> */}
+            <div className="cover-footer">
+            <span className="footer-text text-4xl font-bold">Welcome</span>
+            <span className="footer-arrow"></span>
+          </div>
+        </div>
+
+        <div className="cover-spine"></div>
+      </div>
+    </div>
+  );
+});
+FrontCover.displayName = 'FrontCover';
+
+// Back Cover Page
+const BackCover = React.forwardRef<HTMLDivElement>((_, ref) => {
+  return (
+    <div className="page page-cover back-cover" ref={ref} data-density="hard">
+      <div className="cover-inner">
+        <div className="cover-decoration">
+          <div className="leaf-pattern leaf-tl"></div>
+          <div className="leaf-pattern leaf-tr"></div>
+          <div className="leaf-pattern leaf-bl"></div>
+          <div className="leaf-pattern leaf-br"></div>
+        </div>
+
+        <div className="cover-content">
+          <div className="cover-emblem small">
+            {/* <span className="emblem-icon">🌍</span> */}
+          </div>
+
+          {/* <h2 className="end-title">Thank You</h2> */}
+          
+          {/* <p className="end-subtitle">For Supporting Sustainable Artisans</p> */}
+{/* 
+          <div className="end-stats">
+            <div className="stat-item">
+              <span className="stat-icon">•</span>
+              
+              <span className="stat-text">Handmade Products</span>
+            </div>
+            <div className="stat-item">
+              
+              <span className="stat-icon">•</span>
+
+              <span className="stat-text">Eco-Friendly Materials</span>
+            </div>
+            <div className="stat-item">
+              
+              <span className="stat-icon">•</span>
+
+              <span className="stat-text">Supporting Local Artists</span>
+            </div>
+          </div> */}
+
+          <div className="cover-footer m-auto text-4xl font-bold">
+             
+            <span className="footer-text">Thank You</span>
+          </div>
+        </div>
+
+        <div className="cover-spine right"></div>
+      </div>
+    </div>
+  );
+});
+
+BackCover.displayName = 'BackCover';
+
+// Left Page - Product Image & Name
+interface LeftPageProps {
+  product: Product;
+  pageNumber: number;
+}
+
+const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(({ product, pageNumber }, ref) => {
+  return (
+    <div className="page product-page left-page" ref={ref}>
+      <div className="page-inner">
+        {/* Product Name - Top Center */}
+        <div className="left-header">
+        {/* <h2 className="mt-10 text-center text-black font-bold text-3xl md:text-4xl">
+            {product.name}
+          </h2>
+          <div className="title-line"></div> */}
+        </div>
+
+        {/* Product Image - Center */}
+        {/* <div className="left-image-area mt-10">
+          <div className="image-box flex justify-center">
+            <img
+              src={getProductImageUrl(product, 'url')}
+              alt={product.name}
+              className="product-img w-80 h-80 md:w-96 md:h-96 object-cover rounded-xl shadow-md"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.png';
+              }}
+            />
+          </div>
+        </div> */}
+ <div>
+
+ <div className="left-image-area mt-10 p-2  w-fit  border border-green-500 rounded-2xl shadow-lg   mt-20 ml-19">
+  <div className="flex justify-center bg-white rounded-xl">
+    <img
+      src={getProductImageUrl(product, 'url')}
+      alt={product.name}
+      className="product-img w-80 h-80  object-cover rounded-xl"
+      onError={(e) => {
+        (e.target as HTMLImageElement).src = '/placeholder.png';
+      }}
+    />
+  </div>
+  
+  
+</div>
+<div className="detail-info flex flex-col items-center justify-center text-center">
+  <span className="block text-xs uppercase tracking-wide opacity-80 text-black mt-10">
+    Crafted by
+  </span>
+  <span className="block font-semibold text-4xl text-black">
+    {product?.artist_name || 'Artisan'}
+  </span>
+</div>
+
+ </div>
+
+
+
+
+
+
+
+
+       
+      </div>
+    </div>
+  );
+});
+LeftPage.displayName = 'LeftPage';
+
+// Right Page - Product Details
+interface RightPageProps {
+  product: Product;
+  pageNumber: number;
+  onViewMore?: (product: Product) => void;
+}
+
+const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, pageNumber, onViewMore }, ref) => {
+  return (
+    // <div className="page product-page right-page" ref={ref}>
+    //   <div className="page-inner">
+    //     <div className="details-container">
+          
+    //       <div className="detail-card artist-card">
+    //         <span className="detail-emoji">🎨</span>
+    //         <div className="detail-info">
+    //           <span className="detail-label">Crafted by</span>
+    //           <span className="detail-value">{product.artist_name || 'Artisan'}</span>
+    //         </div>
+    //       </div>
+
+        
+    //       <div className="detail-card desc-card">
+    //         <p className="desc-text">
+    //           {product.description || 'A beautifully handcrafted eco-friendly product.'}
+    //         </p>
+    //       </div>
+
+           
+    //       <div className="price-card">
+    //         <span className="price-label">Price</span>
+    //         <div className="price-amount">
+    //           <span className="rupee">₹</span>
+    //           <span className="amount">{formatPrice(product.price)}</span>
+    //         </div>
+    //       </div>
+
+           
+    //       <div className="info-row">
+    //         <div className="category-tag">
+    //           <span>📦</span>
+    //           <span>{product.category_name || 'Eco Product'}</span>
+    //         </div>
+    //         <div className={`status-tag ${product.is_active ? 'available' : 'unavailable'}`}>
+    //           <span className="status-dot"></span>
+    //           <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
+    //         </div>
+    //       </div>
+
+          
+    //       {product.stock > 0 && (
+    //         <div className="stock-info">
+    //           <span className="stock-num">{product.stock}</span>
+    //           <span className="stock-label">items in stock</span>
+    //         </div>
+    //       )}
+
+          
+    //       {onViewMore && (
+    //         <button className="view-btn" onClick={() => onViewMore(product)}>
+    //           View Full Details
+    //         </button>
+    //       )}
+    //     </div>
+
+        
+    //     <span className="pg-num right">{pageNumber}</span>
+    //   </div>
+    // </div>
+
+    <div
+  className="page product-page right-page flex justify-center items-center"
+  ref={ref}
+>
+  <div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
+    <div className="details-container flex flex-col gap-5 text-center">
+    <div className="left-header">
+        <h2 className="mt-10 text-center text-black font-bold text-3xl md:text-4xl">
+            {product.name}
+          </h2>
+          <div className="title-line"></div>
+        </div>
+      {/* Artist */}
+   
+
+      {/* Description */}
+      {/* <div className="detail-card rounded-xl bg-white/15 px-4 py-4">
+        <p className="text-sm leading-relaxed opacity-95 text-xl text-black">
+          {product.description || 'A beautifully handcrafted eco-friendly product.'}
+        </p>
+      </div> */}
+          {/* Category & Status */}
+          <div className="info-row flex gap-3 mt-30">
+        {/* <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 py-2 text-black">
+          
+          <span>{product?.category_name || 'Eco Product'}</span>
+        </div> */}
+        
+        {/* <div className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 py-2 text-sm">
+          
+          <span>{product?.category_name || 'Eco Product'}</span>
+        </div> */}
+
+        {/* <div
+          className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm 
+            ${
+            product.is_active
+              ? 'bg-green-500/40'
+              : 'bg-red-500/40'
+          }`}
+        >
+          <span className="h-2 w-2 rounded-full bg-white" />
+          <span>
+            {product.is_active ? 'Available' : 'Out of Stock'}
+          </span>
+        </div> */}
+      </div>
+
+      {/* Price */}
+      <div className="price-card rounded-2xl bg-green-700 px-3 py-2  mt-25">
+        <span className="block text-xs uppercase tracking-wide opacity-80">
+          Price
+        </span>
+        <div className="mt-1 flex justify-center items-end gap-1 font-extrabold">
+          <span className="text-xl">₹</span>
+          <span className="text-4xl">{formatPrice(product.price)}</span>
+        </div>
+      </div>
+
+  
+
+      {/* Stock */}
+      {product.stock > 0 && (
+        <div className="text-sm opacity-90 text-black">
+          <span className="font-semibold">{product.stock}</span>{' '}
+          items in stock
+        </div>
+      )}
+
+      {/* Button */}
+      {onViewMore && (
+        <button
+          onClick={() => onViewMore(product)}
+          className="mt-2 rounded-xl bg-white py-3 font-bold text-green-800 transition hover:bg-green-100 hover:-translate-y-0.5"
+        >
+          View Full Details
+        </button>
+      )}
+    </div>
+
+    {/* Page number */}
+    {/* <span className="absolute bottom-4 right-5 text-xs opacity-50 text-black">
+      {pageNumber}
+    </span> */}
+  </div>
+</div>
+
+  );
+});
+RightPage.displayName = 'RightPage';
+
+/* ================= MAIN COMPONENT ================= */
 export default function BookFlip() {
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isTurning, setIsTurning] = useState(false);
-  const [turnDirection, setTurnDirection] = useState<'next' | 'prev' | null>(null);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [hoverSide, setHoverSide] = useState<'left' | 'right' | null>(null);
 
+  const flipBookRef = useRef<FlipBookRef>(null);
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'ADMIN';
+
+  const currentProductIndex = Math.max(0, Math.floor((currentPage - 1) / 2));
 
   /* ========== FETCH PRODUCTS ========== */
   useEffect(() => {
@@ -78,33 +430,29 @@ export default function BookFlip() {
     fetchProducts();
   }, []);
 
-  /* ========== PAGINATION LOGIC ========== */
-  const totalPages = products.length;
-  const leftProduct = currentPage > 0 ? products[currentPage - 1] : null;
-  const rightProduct = currentPage < totalPages ? products[currentPage] : null;
+  /* ========== NAVIGATION HANDLERS ========== */
+  const goNext = useCallback(() => {
+    if (flipBookRef.current) {
+      flipBookRef.current.pageFlip().flipNext();
+    }
+  }, []);
 
-  /* ========== NAVIGATION ========== */
-  const goNext = () => {
-    if (currentPage >= totalPages || isTurning) return;
-    setIsTurning(true);
-    setTurnDirection('next');
-    setTimeout(() => {
-      setCurrentPage((prev) => prev + 1);
-      setIsTurning(false);
-      setTurnDirection(null);
-    }, 800);
-  };
+  const goPrev = useCallback(() => {
+    if (flipBookRef.current) {
+      flipBookRef.current.pageFlip().flipPrev();
+    }
+  }, []);
 
-  const goPrev = () => {
-    if (currentPage <= 0 || isTurning) return;
-    setIsTurning(true);
-    setTurnDirection('prev');
-    setTimeout(() => {
-      setCurrentPage((prev) => prev - 1);
-      setIsTurning(false);
-      setTurnDirection(null);
-    }, 800);
-  };
+  /* ========== EVENT HANDLERS ========== */
+  const onFlip = useCallback((e: { data: number }) => {
+    setCurrentPage(e.data);
+  }, []);
+
+  const handleInit = useCallback(() => {
+    if (flipBookRef.current) {
+      setTotalPages(flipBookRef.current.pageFlip().getPageCount());
+    }
+  }, []);
 
   /* ========== KEYBOARD NAVIGATION ========== */
   useEffect(() => {
@@ -114,1013 +462,908 @@ export default function BookFlip() {
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentPage, isTurning]);
+  }, [goNext, goPrev]);
 
   /* ========== LOADING / EMPTY STATES ========== */
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500 mb-4 mx-auto"></div>
-          <p className="text-gray-600 text-lg">Loading catalogue...</p>
+      <div className="catalogue-loading">
+        <div className="loading-book">
+          <div className="loading-cover"></div>
+          <div className="loading-pages">
+            <div className="loading-page"></div>
+            <div className="loading-page"></div>
+            <div className="loading-page"></div>
+          </div>
         </div>
+        <p className="loading-text">Opening catalogue...</p>
+        <style jsx>{loadingStyles}</style>
       </div>
     );
   }
 
   if (!products.length) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-        <div className="text-center">
-          <p className="text-gray-600 text-xl">No products available</p>
-        </div>
+      <div className="catalogue-empty">
+        <div className="empty-icon">📚</div>
+        <p className="empty-text">No products in catalogue</p>
+        <style jsx>{loadingStyles}</style>
       </div>
     );
   }
+
+  // Generate pages
+  const pages: React.ReactNode[] = [];
+  pages.push(<FrontCover key="front-cover" />);
+  products.forEach((product, index) => {
+    pages.push(
+      <LeftPage key={`left-${product.id}`} product={product} pageNumber={index * 2 + 1} />
+    );
+    pages.push(
+      <RightPage
+        key={`right-${product.id}`}
+        product={product}
+        pageNumber={index * 2 + 2}
+        onViewMore={setSelectedProduct}
+      />
+    );
+  });
+  pages.push(<BackCover key="back-cover" />);
 
   /* ================= RENDER ================= */
   return (
     <>
       <div className="catalogue-wrapper">
-        {/* Page counter */}
-        <div className="page-counter-top">
-          Page {currentPage} of {totalPages}
-        </div>
+        {/* Header */}
+        {/* <div className="catalogue-header">
+          <div className="header-left">
+            
+            <span className="header-title">Product Catalogue</span>
+          </div>
+          <div className="header-center">
+            {currentPage === 0 ? (
+              <span className="page-info">Cover</span>
+            ) : currentPage >= totalPages - 1 ? (
+              <span className="page-info">End</span>
+            ) : (
+              <span className="page-info">
+                Product {currentProductIndex + 1} of {products.length}
+              </span>
+            )}
+          </div>
+          <div className="header-right ">
+            <span className="total-products " >{products.length} Products</span>
+          </div>
+        </div> */}
+        <div className="catalogue-header"></div>
 
-        {/* Main book container */}
-        <div className="book-scene">
-          {/* Navigation Buttons */}
+        {/* Book Container */}
+        <div className="book-container">
+          {/* Prev Button */}
           <button
-            className={`nav-arrow nav-arrow-left ${currentPage === 0 ? 'disabled' : ''}`}
+            className={`nav-btn nav-prev ${currentPage === 0 ? 'disabled' : ''}`}
             onClick={goPrev}
-            disabled={currentPage === 0 || isTurning}
-            aria-label="Previous page"
+            disabled={currentPage === 0}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M15 18l-6-6 6-6" />
             </svg>
+            {/* <span className="nav-label">Prev</span> */}
           </button>
 
+          {/* The Book */}
+          <div className="book-wrapper">
+            <div className="book-base"></div>
+            {/* @ts-expect-error - react-pageflip types are incomplete */}
+            <HTMLFlipBook
+              width={480}
+              height={620}
+              size="fixed"
+              minWidth={480}
+              maxWidth={480}
+              minHeight={620}
+              maxHeight={620}
+              maxShadowOpacity={0.5}
+              showCover={true}
+              mobileScrollSupport={true}
+              onFlip={onFlip}
+              onInit={handleInit}
+              className="catalogue-book"
+              ref={flipBookRef}
+              drawShadow={true}
+              flippingTime={800}
+              usePortrait={false}
+              startZIndex={0}
+              autoSize={false}
+              clickEventForward={true}
+              useMouseEvents={true}
+              swipeDistance={30}
+              showPageCorners={true}
+              disableFlipByClick={false}
+            >
+              {pages}
+            </HTMLFlipBook>
+          </div>
+
+          {/* Next Button */}
           <button
-            className={`nav-arrow nav-arrow-right ${currentPage >= totalPages ? 'disabled' : ''}`}
+            className={`nav-btn nav-next ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}
             onClick={goNext}
-            disabled={currentPage >= totalPages || isTurning}
-            aria-label="Next page"
+            disabled={currentPage >= totalPages - 1}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/* <span className="nav-label">Next</span> */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
-
-          {/* Book Container */}
-          <div className={`book-container ${isTurning ? 'turning' : ''}`}>
-            <div className="book">
-              {/* Book Spine Shadow */}
-              <div className="book-spine"></div>
-
-              {/* LEFT PAGE */}
-              <div
-                className={`page page-left ${hoverSide === 'left' && !isTurning ? 'hover' : ''}`}
-                onClick={() => {
-                  if (leftProduct && !isTurning) {
-                    setSelectedProduct(leftProduct);
-                  } else if (!isTurning) {
-                    goPrev();
-                  }
-                }}
-                onMouseEnter={() => setHoverSide('left')}
-                onMouseLeave={() => setHoverSide(null)}
-              >
-                {leftProduct ? (
-                  <div className="page-content">
-                    <div className="product-card">
-                      <div className="product-image-wrapper">
-                        <img
-                          src={getProductImageUrl(leftProduct, 'card')}
-                          alt={leftProduct.name}
-                          className="product-image"
-                        />
-                      </div>
-                      <h3 className="product-name">{leftProduct.name}</h3>
-                      <p className="product-price">₹{leftProduct.price.toLocaleString()}</p>
-                      <div className="click-hint">Click for details</div>
-                    </div>
-                    <div className="page-number">{currentPage - 1}</div>
-                  </div>
-                ) : (
-                  <div className="page-content empty">
-                    {currentPage === 0 ? (
-                      /* Welcome / Start Page */
-                      <div className="welcome-container">
-                        <div className="floating-leaves">
-                          <span className="leaf leaf-1">🌿</span>
-                          <span className="leaf leaf-2">🍃</span>
-                          <span className="leaf leaf-3">🌱</span>
-                          <span className="leaf leaf-4">☘️</span>
-                        </div>
-                        <div className="welcome-icon">
-                          <svg viewBox="0 0 100 100" className="eco-circle">
-                            <circle cx="50" cy="50" r="45" className="circle-bg" />
-                            <circle cx="50" cy="50" r="45" className="circle-progress" />
-                          </svg>
-                          <span className="book-icon">📖</span>
-                        </div>
-                        <h3 className="welcome-title text-blacj">Welcome to Our Catalogue</h3>
-                        <p className="welcome-subtitle">Discover eco-friendly products</p>
-                        <div className="arrow-hint">
-                          <span>Start browsing</span>
-                          <div className="bouncing-arrow">→</div>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Previous Page Hint */
-                      <div className="nav-hint-container">
-                        <div className="pulse-circle"></div>
-                        <div className="nav-arrow-animated">
-                          <span className="sliding-arrow">←</span>
-                        </div>
-                        <p className="nav-text">Previous page</p>
-                        <div className="page-dots">
-                          <span className="dot"></span>
-                          <span className="dot"></span>
-                          <span className="dot active"></span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* RIGHT PAGE */}
-              <div
-                className={`page page-right ${hoverSide === 'right' && !isTurning ? 'hover' : ''}`}
-                onClick={() => {
-                  if (rightProduct && !isTurning) {
-                    setSelectedProduct(rightProduct);
-                  } else if (!isTurning) {
-                    goNext();
-                  }
-                }}
-                onMouseEnter={() => setHoverSide('right')}
-                onMouseLeave={() => setHoverSide(null)}
-              >
-                {rightProduct ? (
-                  <div className="page-content">
-                    <div className="product-card">
-                      <div className="product-image-wrapper">
-                        <img
-                          src={getProductImageUrl(rightProduct, 'card')}
-                          alt={rightProduct.name}
-                          className="product-image"
-                        />
-                      </div>
-                      <h3 className="product-name">{rightProduct.name}</h3>
-                      <p className="product-price">₹{rightProduct.price.toLocaleString()}</p>
-                      <div className="click-hint">Click for details</div>
-                    </div>
-                    <div className="page-number">{currentPage}</div>
-                  </div>
-                ) : (
-                  <div className="page-content empty">
-                    {/* End of Catalogue */}
-                    <div className="end-container">
-                      <div className="sparkles">
-                        <span className="sparkle sparkle-1">✨</span>
-                        <span className="sparkle sparkle-2">⭐</span>
-                        <span className="sparkle sparkle-3">✨</span>
-                      </div>
-                      <div className="end-icon">
-                        <div className="rotating-ring"></div>
-                        <span className="check-icon">🌍</span>
-                      </div>
-                      <h3 className="end-title">You've seen it all!</h3>
-                      <p className="end-subtitle">Thank you for exploring</p>
-                      <div className="eco-badge">
-                        <span className="badge-icon">🌿</span>
-                        <span className="badge-text">Eco Friendly</span>
-                      </div>
-                      <div className="restart-hint">
-                        <span className="sliding-arrow-left">←</span>
-                        <span>Go back to explore</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* TURNING PAGE - appears during animation */}
-              {isTurning && turnDirection === 'next' && rightProduct && (
-                <div className="turning-page turning-next">
-                  <div className="turning-page-front">
-                    <div className="page-content">
-                      <div className="product-card">
-                        <div className="product-image-wrapper">
-                          <img
-                            src={
-                              getProductImageUrl(rightProduct, 'card')
-                            }
-                            alt={rightProduct.name}
-                            className="product-image"
-                          />
-                        </div>
-                        <h3 className="product-name">{rightProduct.name}</h3>
-                        <p className="product-price">₹{rightProduct.price.toLocaleString()}</p>
-                      </div>
-                      <div className="page-number">{currentPage}</div>
-                    </div>
-                  </div>
-                  <div className="turning-page-back">
-                    <div className="page-content">
-                      {products[currentPage + 1] && (
-                        <div className="product-card">
-                          <div className="product-image-wrapper">
-                            <img
-                              src={
-                                getProductImageUrl(products[currentPage + 1], 'card')
-                              }
-                              alt={products[currentPage + 1].name}
-                              className="product-image"
-                            />
-                          </div>
-                          <h3 className="product-name">{products[currentPage + 1].name}</h3>
-                          <p className="product-price">₹{products[currentPage + 1].price.toLocaleString()}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TURNING PAGE BACKWARD - appears during prev animation */}
-              {isTurning && turnDirection === 'prev' && leftProduct && (
-                <div className="turning-page turning-prev">
-                  <div className="turning-page-front">
-                    <div className="page-content">
-                      <div className="product-card">
-                        <div className="product-image-wrapper">
-                          <img
-                            src={
-                              getProductImageUrl(leftProduct, 'card')
-                            }
-                            alt={leftProduct.name}
-                            className="product-image"
-                          />
-                        </div>
-                        <h3 className="product-name">{leftProduct.name}</h3>
-                        <p className="product-price">₹{leftProduct.price.toLocaleString()}</p>
-                      </div>
-                      <div className="page-number">{currentPage - 1}</div>
-                    </div>
-                  </div>
-                  <div className="turning-page-back">
-                    <div className="page-content">
-                      {products[currentPage - 2] && (
-                        <div className="product-card">
-                          <div className="product-image-wrapper">
-                            <img
-                              src={
-                                getProductImageUrl(products[currentPage - 2], 'card')
-                              }
-                              alt={products[currentPage - 2].name}
-                              className="product-image"
-                            />
-                          </div>
-                          <h3 className="product-name">{products[currentPage - 2].name}</h3>
-                          <p className="product-price">₹{products[currentPage - 2].price.toLocaleString()}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Navigation hints */}
-        <div className="navigation-hints">
-          <p>Use arrow keys ← → or click on pages to navigate</p>
+        {/* Footer */}
+        <div className="catalogue-footer">
+          <span className="hint-text">💡 Drag page corners or use arrow keys to flip</span>
         </div>
       </div>
 
       {/* Product Detail Modal */}
       {selectedProduct && (
         <ProductDetailModal
-          product={selectedProduct}
-          imageUrl={getProductImageUrl(selectedProduct, 'full')}
+          product={{
+            ...selectedProduct,
+            price: typeof selectedProduct.price === 'string'
+              ? parseFloat(selectedProduct.price)
+              : selectedProduct.price
+          }}
+          imageUrl={getProductImageUrl(selectedProduct, 'url')}
           isAdmin={isAdmin}
           onClose={() => setSelectedProduct(null)}
           onProductUpdate={(updatedProduct) => {
             setProducts((prev) =>
-              prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+              prev.map((p) => (p.id === updatedProduct.id ? { ...updatedProduct, price: updatedProduct.price } : p))
             );
-            setSelectedProduct(updatedProduct);
+            setSelectedProduct({ ...updatedProduct, price: updatedProduct.price });
           }}
         />
       )}
 
       {/* ================= STYLES ================= */}
-      <style jsx>{`
-        .catalogue-wrapper {
-          min-height: calc(100vh - 100px);
-          background: transparent;
-          display: flex;
-          flex-direction: column;
-          padding: 0;
+      <style jsx global>{`
+        /* ========== BOOK CONTAINER FIX ========== */
+        .catalogue-book {
+          overflow: hidden !important;
         }
 
-        .page-counter-top {
-          text-align: center;
-          margin-bottom: 20px;
-          font-size: 1.1rem;
-          color: #10b981;
-          font-weight: 600;
+        .stf__wrapper {
+          overflow: hidden !important;
         }
 
-        .book-scene {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          perspective: 2500px;
-          position: relative;
-          padding: 40px 20px;
+        .stf__parent {
+          overflow: hidden !important;
         }
 
-        .nav-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 100;
-          background: rgba(16, 185, 129, 0.9);
-          color: white;
-          border: none;
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-
-        .nav-arrow:hover:not(.disabled) {
-          background: #10b981;
-          transform: translateY(-50%) scale(1.1);
-          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-        }
-
-        .nav-arrow.disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-
-        .nav-arrow-left {
-          left: 20px;
-        }
-
-        .nav-arrow-right {
-          right: 20px;
-        }
-
-        .book-container {
-          position: relative;
-          transform-style: preserve-3d;
-          transition: transform 0.6s ease;
-        }
-
-        .book-container.turning {
-          pointer-events: none;
-        }
-
-        .book {
-          position: relative;
-          width: 900px;
-          height: 600px;
-          display: flex;
-          transform-style: preserve-3d;
-          box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.3),
-            0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .book-spine {
-          position: absolute;
-          left: 50%;
-          top: 0;
-          width: 4px;
-          height: 100%;
-          background: linear-gradient(to right,
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.1),
-            rgba(0, 0, 0, 0.3)
-          );
-          transform: translateX(-50%);
-          z-index: 10;
-        }
-
+        /* ========== PAGE BASE ========== */
         .page {
-          position: relative;
-          width: 50%;
-          height: 100%;
-          background: #fefefe;
-          box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-          cursor: pointer;
-          overflow: hidden;
+          background-color: #fffef5 !important;
+          overflow: hidden !important;
+          box-sizing: border-box;
         }
 
-        .page-left {
-          border-right: 1px solid #ddd;
-          box-shadow: inset -20px 0 30px rgba(0, 0, 0, 0.08);
-        }
-
-        .page-right {
-          border-left: 1px solid #ddd;
-          box-shadow: inset 20px 0 30px rgba(0, 0, 0, 0.08);
-        }
-
-        .page.hover {
-          background: #fff;
-        }
-
-        /* TURNING PAGE ELEMENT */
-        .turning-page {
-          position: absolute;
-          width: 50%;
-          height: 100%;
-          top: 0;
-          transform-style: preserve-3d;
-          z-index: 20;
-        }
-
-        .turning-page-front,
-        .turning-page-back {
-          position: absolute;
+        .page-inner {
           width: 100%;
           height: 100%;
-          backface-visibility: hidden;
-          background: #fefefe;
-          border: 1px solid #ddd;
+          background: #fffef5;
+          position: relative;
+          display: flex;
+          flex-direction: column;
         }
 
-        .turning-page-back {
-          transform: rotateY(180deg);
+        /* ========== COVER PAGES ========== */
+        .page-cover {
+          background: linear-gradient(145deg, #065f46 0%, #047857 40%, #059669 70%, #10b981 100%) !important;
         }
 
-        /* TURN NEXT - from right edge, turn to left */
-        .turning-page.turning-next {
+        .page-cover.back-cover {
+          background: linear-gradient(145deg, #10b981 0%, #059669 30%, #047857 60%, #065f46 100%) !important;
+        }
+
+        .cover-inner {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: inherit;
+        }
+
+        .cover-spine {
+          position: absolute;
           right: 0;
-          transform-origin: left center;
-          animation: turnPageNext 0.8s cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
+          top: 0;
+          bottom: 0;
+          width: 12px;
+          background: linear-gradient(to right,
+            rgba(0,0,0,0.4),
+            rgba(0,0,0,0.1) 40%,
+            rgba(255,255,255,0.05) 60%,
+            rgba(0,0,0,0.3)
+          );
         }
 
-        @keyframes turnPageNext {
-          0% {
-            transform: rotateY(0deg) translateZ(0);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-          }
-          25% {
-            transform: rotateY(-20deg) translateZ(30px);
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-          }
-          50% {
-            transform: rotateY(-90deg) translateZ(60px);
-            box-shadow: -15px 0 50px rgba(0, 0, 0, 0.5);
-          }
-          75% {
-            transform: rotateY(-160deg) translateZ(30px);
-            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
-          }
-          100% {
-            transform: rotateY(-180deg) translateZ(0);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-          }
-        }
-
-        /* TURN PREV - from left edge, turn to right */
-        .turning-page.turning-prev {
+        .cover-spine.right {
+          right: auto;
           left: 0;
-          transform-origin: right center;
-          animation: turnPagePrev 0.8s cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
+          background: linear-gradient(to left,
+            rgba(0,0,0,0.4),
+            rgba(0,0,0,0.1) 40%,
+            rgba(255,255,255,0.05) 60%,
+            rgba(0,0,0,0.3)
+          );
         }
 
-        @keyframes turnPagePrev {
-          0% {
-            transform: rotateY(0deg) translateZ(0);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-          }
-          25% {
-            transform: rotateY(20deg) translateZ(30px);
-            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
-          }
-          50% {
-            transform: rotateY(90deg) translateZ(60px);
-            box-shadow: 15px 0 50px rgba(0, 0, 0, 0.5);
-          }
-          75% {
-            transform: rotateY(160deg) translateZ(30px);
-            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.3);
-          }
-          100% {
-            transform: rotateY(180deg) translateZ(0);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-          }
-        }
-
-        .page-content {
-          width: 100%;
-          height: 100%;
-          padding: 40px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-        }
-
-        .page-content.empty {
-          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%);
-          overflow: hidden;
-        }
-
-        /* ========== WELCOME CONTAINER ========== */
-        .welcome-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          text-align: center;
-        }
-
-        .floating-leaves {
+        .cover-decoration {
           position: absolute;
-          width: 100%;
-          height: 100%;
+          inset: 0;
           pointer-events: none;
         }
 
-        .leaf {
+        .leaf-pattern {
           position: absolute;
-          font-size: 1.5rem;
-          animation: floatLeaf 4s ease-in-out infinite;
+          width: 70px;
+          height: 70px;
+          opacity: 0.12;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M50 5 C30 25, 10 50, 50 95 C90 50, 70 25, 50 5'/%3E%3C/svg%3E") no-repeat center;
+          background-size: contain;
         }
 
-        .leaf-1 { top: 10%; left: 15%; animation-delay: 0s; }
-        .leaf-2 { top: 20%; right: 20%; animation-delay: 1s; }
-        .leaf-3 { bottom: 25%; left: 20%; animation-delay: 2s; }
-        .leaf-4 { bottom: 15%; right: 15%; animation-delay: 0.5s; }
+        .leaf-tl { top: 25px; left: 25px; transform: rotate(-45deg); }
+        .leaf-tr { top: 25px; right: 35px; transform: rotate(45deg); }
+        .leaf-bl { bottom: 25px; left: 25px; transform: rotate(-135deg); }
+        .leaf-br { bottom: 25px; right: 35px; transform: rotate(135deg); }
 
-        @keyframes floatLeaf {
-          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
-          50% { transform: translateY(-15px) rotate(10deg); opacity: 1; }
+        .cover-content {
+          text-align: center;
+          color: white;
+          padding: 30px;
+          z-index: 1;
         }
 
-        .welcome-icon {
+        .cover-emblem {
           position: relative;
           width: 100px;
           height: 100px;
+          margin: 0 auto 25px;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 20px;
         }
 
-        .eco-circle {
+        .cover-emblem.small {
+          width: 70px;
+          height: 70px;
+          margin-bottom: 15px;
+        }
+
+        .emblem-ring {
           position: absolute;
-          width: 100%;
-          height: 100%;
-          transform: rotate(-90deg);
+          inset: 0;
+          border: 2px solid rgba(255,255,255,0.35);
+          border-radius: 50%;
         }
 
-        .circle-bg {
-          fill: none;
-          stroke: #bbf7d0;
-          stroke-width: 4;
+        .emblem-ring-2 {
+          inset: 8px;
+          border-style: dashed;
         }
 
-        .circle-progress {
-          fill: none;
-          stroke: #10b981;
-          stroke-width: 4;
-          stroke-linecap: round;
-          stroke-dasharray: 283;
-          stroke-dashoffset: 283;
-          animation: drawCircle 2s ease-out forwards, pulseGlow 2s ease-in-out infinite 2s;
+        .emblem-icon {
+          font-size: 3rem;
         }
 
-        @keyframes drawCircle {
-          to { stroke-dashoffset: 0; }
+        .cover-emblem.small .emblem-icon {
+          font-size: 2rem;
         }
 
-        @keyframes pulseGlow {
-          0%, 100% { filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5)); }
-          50% { filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8)); }
-        }
-
-        .book-icon {
-          font-size: 2.5rem;
-          animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-
-        .welcome-title {
-          font-size: 1.4rem;
+        .cover-title {
+          font-size: 2.4rem;
           font-weight: 700;
-          color: #065f46;
-          margin-bottom: 8px;
-          animation: fadeInUp 0.8s ease-out 0.3s both;
+          margin-bottom: 12px;
+          text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+          letter-spacing: 1px;
         }
 
-        .welcome-subtitle {
-          font-size: 1rem;
-          color: #059669;
-          margin-bottom: 24px;
-          animation: fadeInUp 0.8s ease-out 0.5s both;
+        .cover-divider {
+          margin: 12px 0;
         }
 
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+        .divider-leaf {
+          font-size: 1.8rem;
+          opacity: 0.7;
         }
 
-        .arrow-hint {
+        .cover-subtitle {
+          font-size: 1.2rem;
+          font-weight: 400;
+          opacity: 0.95;
+          margin-bottom: 20px;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        .cover-tagline {
+          font-size: 0.95rem;
+          font-style: italic;
+          opacity: 0.8;
+          margin-bottom: 35px;
+        }
+
+        .cover-footer {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 10px;
-          color: #10b981;
-          font-weight: 600;
-          font-size: 1.1rem;
-          animation: fadeInUp 0.8s ease-out 0.7s both;
+          font-size: 0.9rem;
+          opacity: 0.85;
         }
 
-        .bouncing-arrow {
-          animation: bounceRight 1s ease-in-out infinite;
-          font-size: 1.5rem;
+        .footer-arrow {
+          font-size: 1.2rem;
+          animation: bounceRight 1.5s ease-in-out infinite;
+        }
+
+        .footer-arrow.flip {
+          animation: bounceLeft 1.5s ease-in-out infinite;
         }
 
         @keyframes bounceRight {
           0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(10px); }
+          50% { transform: translateX(6px); }
         }
 
-        /* ========== NAV HINT CONTAINER ========== */
-        .nav-hint-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          position: relative;
+        @keyframes bounceLeft {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(-6px); }
         }
 
-        .pulse-circle {
-          position: absolute;
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-          0%, 100% { transform: scale(0.8); opacity: 0.5; }
-          50% { transform: scale(1.2); opacity: 1; }
-        }
-
-        .nav-arrow-animated {
-          width: 70px;
-          height: 70px;
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 16px;
-          box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-          animation: floatIcon 3s ease-in-out infinite;
-        }
-
-        @keyframes floatIcon {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        .sliding-arrow {
-          font-size: 2rem;
-          color: white;
-          font-weight: bold;
-          animation: slideLeft 1.5s ease-in-out infinite;
-        }
-
-        @keyframes slideLeft {
-          0%, 100% { transform: translateX(5px); opacity: 0.7; }
-          50% { transform: translateX(-5px); opacity: 1; }
-        }
-
-        .nav-text {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #065f46;
-          margin-bottom: 16px;
-        }
-
-        .page-dots {
-          display: flex;
-          gap: 8px;
-        }
-
-        .dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #bbf7d0;
-          transition: all 0.3s ease;
-        }
-
-        .dot.active {
-          width: 24px;
-          border-radius: 4px;
-          background: #10b981;
-        }
-
-        /* ========== END CONTAINER ========== */
-        .end-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          text-align: center;
-        }
-
-        .sparkles {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-
-        .sparkle {
-          position: absolute;
-          font-size: 1.2rem;
-          animation: twinkle 2s ease-in-out infinite;
-        }
-
-        .sparkle-1 { top: 15%; left: 25%; animation-delay: 0s; }
-        .sparkle-2 { top: 10%; right: 25%; animation-delay: 0.7s; }
-        .sparkle-3 { bottom: 20%; left: 30%; animation-delay: 1.4s; }
-
-        @keyframes twinkle {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.3); opacity: 1; }
-        }
-
-        .end-icon {
-          position: relative;
-          width: 90px;
-          height: 90px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 16px;
-        }
-
-        .rotating-ring {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border: 3px solid transparent;
-          border-top-color: #10b981;
-          border-right-color: #10b981;
-          border-radius: 50%;
-          animation: spin 3s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .check-icon {
-          font-size: 2.5rem;
-          animation: popIn 0.6s ease-out;
-        }
-
-        @keyframes popIn {
-          0% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(1.2); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-
+        /* Back Cover */
         .end-title {
-          font-size: 1.3rem;
+          font-size: 2rem;
           font-weight: 700;
-          color: #065f46;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
         }
 
         .end-subtitle {
-          font-size: 0.95rem;
-          color: #059669;
-          margin-bottom: 16px;
-        }
-
-        .eco-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-          animation: shimmer 2s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-          0%, 100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-          50% { box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5); }
-        }
-
-        .badge-icon {
           font-size: 1rem;
+          opacity: 0.9;
+          margin-bottom: 30px;
         }
 
-        .restart-hint {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #6b7280;
-          font-size: 0.9rem;
-        }
-
-        .sliding-arrow-left {
-          animation: slideLeft 1.5s ease-in-out infinite;
-          font-weight: bold;
-          color: #10b981;
-        }
-
-        .product-card {
-          width: 100%;
-          max-width: 350px;
+        .end-stats {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          text-align: center;
+          gap: 12px;
+          margin-bottom: 35px;
         }
 
-        .product-image-wrapper {
-          width: 100%;
-          height: 350px;
+        .stat-item {
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 10px;
+          background: rgba(255,255,255,0.15);
+          padding: 10px 20px;
+          border-radius: 25px;
+        }
+
+        .stat-icon {
+          font-size: 1.1rem;
+        }
+
+        .stat-text {
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+
+        /* ========== LEFT PAGE - IMAGE ========== */
+        .left-page .page-inner {
+          padding: 30px 25px;
+          align-items: center;
+        }
+
+        .left-header {
+          text-align: center;
           margin-bottom: 20px;
+          width: 100%;
+        }
+
+        .left-title {
+          font-size: 1.6rem;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin: 0 0 12px 0;
+          line-height: 1.3;
+        }
+
+        .title-line {
+          width: 50px;
+          height: 3px;
+          background: linear-gradient(90deg, #10b981, #059669);
+          margin: 0 auto;
+          border-radius: 2px;
+        }
+
+        .left-image-area {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .image-box {
+          width: 320px;
+          height: 380px;
           background: white;
           border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          padding: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow:
+            0 4px 20px rgba(0,0,0,0.08),
+            0 1px 4px rgba(0,0,0,0.04);
+          border: 1px solid rgba(0,0,0,0.04);
         }
 
-        .page:hover .product-image-wrapper {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-image {
+        .product-img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
           border-radius: 8px;
         }
 
-        .product-name {
-          font-size: 1.4rem;
-          font-weight: 600;
-          color: #333;
-          margin-bottom: 12px;
-          line-height: 1.4;
+        /* ========== RIGHT PAGE - DETAILS ========== */
+        .right-page .page-inner {
+          padding: 25px 30px;
         }
 
-        .product-price {
+        .details-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .detail-card {
+          width: 100%;
+          background: white;
+          border-radius: 12px;
+          padding: 14px 18px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .artist-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+          border-left: 4px solid #10b981;
+        }
+
+        .detail-emoji {
           font-size: 1.8rem;
-          font-weight: 700;
-          color: #10b981;
-          margin-bottom: 10px;
         }
 
-        .click-hint {
-          font-size: 0.9rem;
-          color: #666;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-          margin-top: 8px;
+        .detail-info {
+          display: flex;
+          flex-direction: column;
         }
 
-        .page:hover .click-hint {
-          opacity: 1;
+        .detail-label {
+          font-size: 0.75rem;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
-        .page-number {
-          position: absolute;
-          bottom: 20px;
-          font-size: 0.9rem;
-          color: #999;
+        .detail-value {
+          font-size: 1.15rem;
+          font-weight: 600;
+          color: #065f46;
+        }
+
+        .desc-card {
+          text-align: center;
+        }
+
+        .desc-text {
+          font-size: 0.95rem;
+          color: #4b5563;
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        .price-card {
+          width: 100%;
+          background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+          border-radius: 12px;
+          padding: 16px;
+          text-align: center;
+        }
+
+        .price-label {
+          font-size: 0.7rem;
+          color: rgba(255,255,255,0.8);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          display: block;
+          margin-bottom: 4px;
+        }
+
+        .price-amount {
+          color: white;
+          display: flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 4px;
+        }
+
+        .rupee {
+          font-size: 1.3rem;
           font-weight: 500;
         }
 
-        .page-left .page-number {
-          left: 30px;
+        .amount {
+          font-size: 2.4rem;
+          font-weight: 700;
         }
 
-        .page-right .page-number {
-          right: 30px;
+        .info-row {
+          display: flex;
+          gap: 10px;
+          width: 100%;
+          justify-content: center;
+          flex-wrap: wrap;
         }
 
-        .navigation-hints {
-          text-align: center;
-          padding: 20px;
-          color: #666;
+        .category-tag {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          background: #fef3c7;
+          color: #92400e;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 500;
+        }
+
+        .status-tag {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 500;
+        }
+
+        .status-tag.available {
+          background: #f0fdf4;
+          color: #166534;
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: currentColor;
+        }
+
+        .stock-info {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          background: #f3f4f6;
+          padding: 8px 16px;
+          border-radius: 20px;
+        }
+
+        .stock-num {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #374151;
+        }
+
+        .stock-label {
+          font-size: 0.8rem;
+          color: #6b7280;
+        }
+
+        .view-btn {
+          margin-top: auto;
+          padding: 12px 24px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          border-radius: 10px;
           font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
-        /* Responsive Design */
+        .view-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        }
+
+        /* Page Numbers */
+        .pg-num {
+          position: absolute;
+          bottom: 15px;
+          font-size: 0.8rem;
+          color: #9ca3af;
+          font-weight: 500;
+        }
+
+        .pg-num.left {
+          left: 20px;
+        }
+
+        .pg-num.right {
+          right: 20px;
+        }
+      `}</style>
+
+      <style jsx>{`
+        .catalogue-wrapper {
+          min-height: calc(100vh - 80px);
+          display: flex;
+          flex-direction: column;
+          padding: 15px 20px;
+          background: linear-gradient(180deg,rgb(255, 255, 255) 0%, #e2e8f0 100%);
+        }
+
+        .catalogue-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 25px;
+          background: rgb(255, 255, 255);
+          border-radius: 14px;
+          
+          margin-bottom: 20px;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          
+        }
+
+        .header-icon {
+          font-size: 1.4rem;
+        }
+
+        .header-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color:rgb(239, 242, 246);
+        }
+
+        .header-center {
+          text-align: center;
+        }
+
+        .page-info {
+          font-size: 1rem;
+          font-weight: 600;
+          color: rgb(255, 255, 255);
+          background: rgb(32, 125, 46);
+          padding: 6px 18px;
+          border-radius: 18px;
+        }
+
+        .header-right {
+          text-align: right;
+        }
+
+        .total-products {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color:rgb(255, 255, 255);
+          background:rgb(32, 125, 46);
+          padding: 6px 14px;
+          border-radius: 12px;
+        }
+
+        .book-container {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 25px;
+          padding: 10px;
+        }
+
+        .book-wrapper {
+          position: relative;
+          overflow: hidden;
+          border-radius: 4px;
+        }
+
+        .book-base {
+          position: absolute;
+          bottom: -15px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 95%;
+          height: 30px;
+          background: radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, transparent 70%);
+          filter: blur(8px);
+        }
+
+        .nav-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          padding: 16px 22px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          border-radius: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-btn svg {
+          width: 26px;
+          height: 26px;
+        }
+
+        .nav-label {
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .nav-btn:hover:not(.disabled) {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .nav-btn:active:not(.disabled) {
+          transform: scale(0.98);
+        }
+
+        .nav-btn.disabled {
+          background: #d1d5db;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .catalogue-footer {
+          text-align: center;
+          padding: 15px;
+        }
+
+        .hint-text {
+          font-size: 0.9rem;
+          color: #6b7280;
+          background: white;
+          padding: 10px 22px;
+          border-radius: 22px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
         @media (max-width: 1024px) {
-          .book {
-            width: 700px;
-            height: 500px;
+          .book-container {
+            gap: 15px;
           }
 
-          .product-image-wrapper {
-            height: 280px;
+          .nav-btn {
+            padding: 12px 18px;
           }
         }
 
         @media (max-width: 768px) {
-          .book {
-            width: 90vw;
-            max-width: 600px;
-            height: 400px;
+          .catalogue-header {
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px 18px;
           }
 
-          .product-image-wrapper {
-            height: 200px;
+          .nav-btn {
+            padding: 10px 14px;
           }
 
-          .product-name {
-            font-size: 1.1rem;
+          .nav-btn svg {
+            width: 22px;
+            height: 22px;
           }
 
-          .product-price {
-            font-size: 1.4rem;
-          }
-
-          .nav-arrow {
-            width: 50px;
-            height: 50px;
-          }
-
-          .page-content {
-            padding: 20px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .book {
-            height: 350px;
-          }
-
-          .product-image-wrapper {
-            height: 150px;
-          }
-
-          .product-name {
-            font-size: 1rem;
-          }
-
-          .product-price {
-            font-size: 1.2rem;
-          }
-
-          .nav-arrow-left {
-            left: 10px;
-          }
-
-          .nav-arrow-right {
-            right: 10px;
+          .nav-label {
+            font-size: 0.7rem;
           }
         }
       `}</style>
     </>
   );
 }
+
+/* ================= LOADING STYLES ================= */
+const loadingStyles = `
+  .catalogue-loading,
+  .catalogue-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 100px);
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    gap: 20px;
+  }
+
+  .loading-book {
+    position: relative;
+    width: 100px;
+    height: 130px;
+  }
+
+  .loading-cover {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #065f46, #10b981);
+    border-radius: 0 6px 6px 0;
+    transform-origin: left;
+    animation: openBook 2s ease-in-out infinite;
+  }
+
+  .loading-pages {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    bottom: 4px;
+    left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .loading-page {
+    flex: 1;
+    background: #f0fdf4;
+    border-radius: 0 3px 3px 0;
+  }
+
+  @keyframes openBook {
+    0%, 100% { transform: rotateY(0deg); }
+    50% { transform: rotateY(-25deg); }
+  }
+
+  .loading-text {
+    font-size: 1rem;
+    color: #065f46;
+    font-weight: 500;
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-size: 1.1rem;
+    color: #6b7280;
+  }
+`;

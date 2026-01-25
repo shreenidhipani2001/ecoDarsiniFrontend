@@ -1,12 +1,13 @@
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
+import type { StaticImageData } from 'next/image';
 
 type Product = {
   id: string;
   name: string;
   price: number;
   discount?: number;
-  image: string;
+  image?: string | StaticImageData;
 };
 
 interface Props {
@@ -26,7 +27,7 @@ export default function ProductCard({ product, onClick }: Props) {
     >
       <div className="relative aspect-square">
         <Image
-          src={product.image}
+          src={product.image || '/placeholder.png'}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
