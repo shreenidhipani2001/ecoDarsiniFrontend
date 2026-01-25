@@ -564,7 +564,7 @@ export default function BookFlip() {
               clickEventForward={true}
               useMouseEvents={true}
               swipeDistance={30}
-              showPageCorners={true}
+              showPageCorners={false}
               disableFlipByClick={false}
             >
               {pages}
