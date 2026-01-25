@@ -1,454 +1,371 @@
 // 'use client';
 
-// import { useEffect, useState } from 'react';
-// import Sidebar from '../user/SideBar';         // adjust path if needed
-// import ProductCard from '../user/ProductCard';
-// import ProductModal from '../user/ProductModal';
+// import { useState, useEffect, useCallback } from 'react';
+// import Sidebar from '../user/SideBar';
+// import BookFlip from '../admin/ProductsCatalogue';
+// import { useAuthStore } from '../../store/useAuthStore';
+// import WishlistModal from '../../components/WishlistModal';
+// import CartModal from '../../components/CartModal';
+// import ProfileModal from '../../components/ProfileModal';
+// import RoleGuard from '../../components/RoleGuard';
+// import { getCart } from '../../../lib/cartApi';
+// import toast from 'react-hot-toast';
 
-// /* ================= TYPES ================= */
-// type Product = {
+// // Image type from Payload CMS (same as BookFlip)
+// type ProductImage = {
 //   id: string;
-//   name: string;
-//   price: number;
-//   cms_image_ids: string[];     // coming from your DB
-//   discount?: number;           // optional – add if your backend sends it
-//   slug?: string;               // optional – useful for future links
+//   url: string;
+//   thumbnail: string | null;
+//   card: string | null;
+//   full: string | null;
+//   alt: string;
 // };
 
-// /* ================= HELPERS ================= */
-// const getCloudinaryUrl = (
-//   publicId: string,
-//   options = "w_600,h_600,c_fill,q_auto,f_auto"
-// ) => {
-//   if (!publicId) return '/placeholder.png';
-//   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-//   if (!cloudName) {
-//     console.warn("Cloudinary cloud name not set");
-//     return '/placeholder.png';
-//   }
-//   return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
+// export type CartItem = {
+//   id: string;
+//   quantity: number;
+//   product_id: string;
+//   name: string;
+//   price: string;
+//   total_price: string;
+//   cms_image_ids?: string[];
+//   images?: ProductImage[];  // Images from Payload CMS
+//   slug: string;
+//   created_at: string;
+//   image?: string;
 // };
+
+// // Get image URL from cart item (same pattern as BookFlip's getProductImageUrl)
+// function getCartItemImageUrl(item: CartItem, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string {
+//   // First try to get from images array (Payload CMS)
+  
+//   if (item.images && item.images.length > 0) {
+//     const image = item.images[0];
+//     return image[size] || image.url || '/placeholder.png';
+//   }
+//   return '/placeholder.png';
+// }
 
 // export default function DashboardPage() {
-//   const [products, setProducts] = useState<Product[]>([]);
-//   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+//   const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
+//   const { user } = useAuthStore();
 //   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
 
-//   // Fetch products – same endpoint as BookFlip
+//   // Cart state
+//   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+//   const [cartLoading, setCartLoading] = useState(false);
+
+//   const userId = (user as any)?.user?.id || user?.id;
+
+//   const dummyUser = {
+//     id: userId,
+//     name: (user as any)?.user?.name || (user as any)?.name,
+//     email: user?.email,
+//     role: user?.role,
+//     phone: (user as any)?.user?.phone || (user as any)?.phone,
+//   };
+
+//   // Fetch cart items
+//   const fetchCartItems = useCallback(async () => {
+//     if (!userId) return;
+
+//     setCartLoading(true);
+//     try {
+//       const data = await getCart(userId);
+//       console.log('Fetched cart items:', data);
+//       const mappedItems = data?.map((item: any) => ({
+//         ...item,
+//         image: getCartItemImageUrl(item, 'card'),
+//       })) || [];
+//       setCartItems(mappedItems);
+//     } catch (err) {
+//       console.log('Failed to fetch cart items:', err);
+//       toast.error('Failed to load cart items');
+//     } finally {
+//       setCartLoading(false);
+//     }
+//   }, [userId]);
+
+//   // Fetch cart when modal opens
 //   useEffect(() => {
-//     const fetchProducts = async () => {
-//       try {
-//         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-//         if (!apiUrl) throw new Error("API URL not configured");
+//     if (activeModal === 'cart' && userId) {
+//       fetchCartItems();
+//     }
+//   }, [activeModal, userId, fetchCartItems]);
 
-//         const res = await fetch(`${apiUrl}/api/products/`, {
-//           cache: 'no-store',      
-//         });
-
-//         if (!res.ok) {
-//           throw new Error(`HTTP ${res.status} – ${res.statusText}`);
-//         }
-
-//         const data = await res.json();
-
-//         // Assuming your API returns array directly
-//         // If it's { data: [...] } or { products: [...] } → adjust accordingly
-//         const productList = Array.isArray(data) ? data : data?.products || data?.data || [];
-
-//         setProducts(productList);
-//       } catch (err: any) {
-//         console.error("Failed to load products:", err);
-//         setError(err.message || "Could not load products");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchProducts();
-//   }, []);
-
-//   // Optional: transform data if needed (e.g. add default discount)
-//   const displayProducts = products.map(p => ({
-//     ...p,
-//     discount: p.discount ?? 0, // fallback if backend doesn't send discount
-//   }));
-
-//   if (loading) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen text-gray-600">
-//         Loading products...
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen text-red-600">
-//         {error}
-//       </div>
-//     );
-//   }
-
-//   if (!products.length) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen text-gray-600">
-//         No products available
-//       </div>
-//     );
-//   }
+//   // Handle cart item removal (update local state)
+//   const handleCartItemRemoved = (itemId: string) => {
+//     setCartItems(prev => prev.filter(item => item.id !== itemId));
+//   };
 
 //   return (
-//     <div className="flex h-screen bg-gray-50">
-//       {/* Sidebar */}
-//       <Sidebar
-//         isOpen={isSidebarOpen}
-//         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-//       />
-
-//       {/* Main content */}
-//       <div className="flex-1 flex flex-col overflow-hidden">
-//         <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-//           <h1 className="text-2xl font-bold text-gray-800">
-//             {isSidebarOpen ? 'Dashboard' : 'Dashboard'}
-//           </h1>
-//           <button
-//             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-//             className="lg:hidden p-2 rounded-md hover:bg-gray-100"
-//           >
-//             {isSidebarOpen ? 'Close' : 'Menu'}
-//           </button>
-//         </header>
-
-//         <main className="flex-1 p-6 overflow-y-auto">
-//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-//             {displayProducts.map((product) => (
-//               <ProductCard
-//                 key={product.id}
-//                 product={{
-//                   ...product,
-//                   image: product.cms_image_ids?.length
-//                     ? ''
-//                     // ? getCloudinaryUrl(product.cms_image_ids[0], "w_480,h_480,c_fill,q_auto,f_auto")
-//                     : '/placeholder.png',
-//                 }}
-//                 onClick={() => setSelectedProduct(product)}
-//               />
-//             ))}
-//           </div>
-//         </main>
-//       </div>
-
-//       {/* Product Detail Modal */}
-//       {selectedProduct && (
-//         <ProductModal
-//           product={{
-//             ...selectedProduct,
-//             image: selectedProduct.cms_image_ids?.length
-//               ? getCloudinaryUrl(selectedProduct.cms_image_ids[0], "w_800,h_800,c_fill,q_auto,f_auto")
-//               : '/placeholder.png',
-//           }}
-//           onClose={() => setSelectedProduct(null)}
-//           // pass addToCart & addToWishlist functions when you implement them
+//     <RoleGuard allowedRole="USER">
+//       <div className="flex h-screen bg-gray-50">
+//         <Sidebar
+//           isOpen={isSidebarOpen}
+//           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+//           onOpenModal={setActiveModal}
 //         />
-//       )}
-//     </div>
+
+//         <div className="flex-1 flex flex-col overflow-hidden">
+//           <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+//             <h1 className="text-2xl font-bold text-gray-800">Product Catalogue</h1>
+//             <button
+//               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+//               className="lg:hidden p-2 bg-green-400 rounded-md hover:bg-green-700 text-black font-semibold"
+//             >
+//               {isSidebarOpen ? 'Close' : 'Menu'}
+//             </button>
+//           </header>
+
+//           <main className="flex-1 overflow-hidden">
+//             <BookFlip />
+//           </main>
+//         </div>
+
+//         {activeModal === 'profile' && (
+//           <ProfileModal user={dummyUser} onClose={() => setActiveModal(null)} />
+//         )}
+
+//         {activeModal === 'cart' && (
+//           <CartModal
+//             items={cartItems}
+//             loading={cartLoading}
+//             onClose={() => setActiveModal(null)}
+//             onItemRemoved={handleCartItemRemoved}
+//           />
+//         )}
+
+//         {activeModal === 'wishlist' && (
+//           <WishlistModal onClose={() => setActiveModal(null)} />
+//         )}
+//       </div>
+//     </RoleGuard>
 //   );
 // }
 
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../user/SideBar';
-import ProductCard from '../user/ProductCard';
-import ProductModal from '../user/ProductModal';
-import Image from '../../../public//bdjhbawdhja.jpeg'
-import yyy from '../../../public/bdjhbawdhja.jpeg';
+import BookFlip from '../admin/ProductsCatalogue';
+import { useAuthStore } from '../../store/useAuthStore';
+import WishlistModal from '../../components/WishlistModal';
+import CartModal from '../../components/CartModal';
+import ProfileModal from '../../components/ProfileModal';
+import RoleGuard from '../../components/RoleGuard';
+import { getCart } from '../../../lib/cartApi';
+import { getWishlist } from '../../../lib/wishlistApi';
+import toast from 'react-hot-toast';
 
-import type { StaticImageData } from 'next/image';
-/* ================= TYPES ================= */
-type Product = {
+// ────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────
+
+type ProductImage = {
   id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
+export type CartItem = {
+  id: string;
+  quantity: number;
+  product_id: string;
+  name: string;
+  price: string;
+  total_price: string;
+  cms_image_ids?: string[];
+  images?: ProductImage[];
+  slug: string;
+  created_at: string;
+  image?: string;
+};
+
+export type WishlistItem = {
+  id: number;
+  user_id: string;
+  product_id: string;
   name: string;
   price: number;
   cms_image_ids: string[];
-  discount?: number;
   slug?: string;
-  image?: string | StaticImageData; // 👈 UI-ready image
+  image?: string;
 };
 
-/* ================= HELPERS ================= */
-const getCloudinaryUrl = (
+// ────────────────────────────────────────────────
+// Cloudinary helper (you can also move this to lib/cloudinary.ts)
+// ────────────────────────────────────────────────
+
+function getCloudinaryUrl(
   publicId: string,
-  options = "w_600,h_600,c_fill,q_auto,f_auto"
-) => {
+  options = 'w_600,h_600,c_fill,q_auto,f_auto'
+): string {
   if (!publicId) return '/placeholder.png';
-
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-  if (!cloudName) {
-    console.warn("Cloudinary cloud name not set");
-    return '/placeholder.png';
-  }
-
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
-};
-
-export default function DashboardPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  /* ================= FETCH PRODUCTS ================= */
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        if (!apiUrl) throw new Error("API URL not configured");
-
-        const res = await fetch(`${apiUrl}/api/products`, {
-          cache: 'no-store',
-        });
-
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status} – ${res.statusText}`);
-        }
-
-        const data = await res.json();
-        console.log("Fetched products data:", data);
-        const productList = Array.isArray(data)
-          ? data
-          : data?.products || data?.data || [];
-        console.log("Product List:", productList);
-
-        /* API → UI TRANSFORMATION */
-        const mappedProducts: Product[] = productList.map((p: any) => {
-          const imageId =
-            Array.isArray(p.cms_image_ids) && p.cms_image_ids.length > 0
-              ? p.cms_image_ids[0]
-              : null;
-          console.log(`Product ID: ${p.id}, Image ID: ${imageId}`);
-
-          return {
-            id: p.id,
-            name: p.name,
-            price: Number(p.price),
-            slug: p.slug,
-            cms_image_ids: p.cms_image_ids || [],
-            discount: p.discount ?? 0,
-            image: imageId
-              ?  Image
-              // ? getCloudinaryUrl(imageId, "w_480,h_480,c_fill,q_auto,f_auto")
-              : '/placeholder.png',
-          };
-        });
-
-        setProducts(mappedProducts);
-      } catch (err: any) {
-        console.error("Failed to load products:", err);
-        setError(err.message || "Could not load products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  /* ================= STATES ================= */
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        Loading products...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-red-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (!products.length) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        No products available
-      </div>
-    );
-  }
-
-  /* ================= RENDER ================= */
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Dashboard
-          </h1>
-
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="lg:hidden p-2 rounded-md hover:bg-gray-100"
-          >
-            {isSidebarOpen ? 'Close' : 'Menu'}
-          </button>
-        </header>
-
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onClick={() => setSelectedProduct(product)}
-              />
-            ))}
-          </div>
-        </main>
-      </div>
-
-      {/* Product Modal */}
-      {selectedProduct && (
-        <ProductModal
-        product={{
-          ...selectedProduct,
-          image: yyy, // ✅ pass imported image FOR NOW
-        }}
-        onClose={() => setSelectedProduct(null)}
-        />
-        // <ProductModal
-        //   product={{
-        //     ...selectedProduct,
-        //     image: selectedProduct?.cms_image_ids?.length
-        //       ? '../../public/bdjhbawdhja.jpeg'
-        //       // ? getCloudinaryUrl(
-        //       //     selectedProduct.cms_image_ids[0],
-        //       //     "w_800,h_800,c_fill,q_auto,f_auto"
-        //       //   )
-        //       : '/placeholder.png',
-        //   }}
-        //   onClose={() => setSelectedProduct(null)}
-        // />
-      )}
-    </div>
-  );
+  if (!cloudName) return '/placeholder.png';
+  return `/placeholder.png`;
+  // return `https://res.cloudinary.com/${cloudName}/image/upload/${options}/${publicId}.webp`;
 }
 
+function getCartItemImageUrl(item: CartItem, size: 'thumbnail' | 'card' | 'full' | 'url' = 'card'): string {
+  if (item.images && item.images.length > 0) {
+    const image = item.images[0];
+    return image[size] || image.url || '/placeholder.png';
+  }
+  if (item.cms_image_ids && item.cms_image_ids.length > 0) {
+    return getCloudinaryUrl(item.cms_image_ids[0]);
+  }
+  return '/placeholder.png';
+}
 
-// "use client";
+export default function DashboardPage() {
+  const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
+  const { user } = useAuthStore();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-// import { useEffect, useState } from "react";
-// import Image from "next/image";
+  // Cart state
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartLoading, setCartLoading] = useState(false);
 
-// type UIProduct = {
-//   id: string;
-//   name: string;
-//   price: number;
-//   discount: number;
-//   image: string;
-// };
+  // Wishlist state
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
-// export default function ProductsGrid() {
-//   const [products, setProducts] = useState<UIProduct[]>([]);
-//   const [loading, setLoading] = useState(true);
+  const userId = (user as any)?.user?.id || user?.id;
 
-//   useEffect(() => {
-//     const fetchProducts = async () => {
-//       try {
-//         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-//         if (!apiUrl) throw new Error("NEXT_PUBLIC_API_URL not set");
+  const dummyUser = {
+    id: userId,
+    name: (user as any)?.user?.name || (user as any)?.name || 'User',
+    email: user?.email || '',
+    role: user?.role,
+    phone: (user as any)?.user?.phone || (user as any)?.phone || '',
+  };
 
-//         const res = await fetch(`${apiUrl}/api/products`, {
-//           cache: "no-store",
-//         });
+  // ────────────────────────────────────────────────
+  // Cart fetching
+  // ────────────────────────────────────────────────
 
-        
-//         if (!res.ok) {
-//           throw new Error(`HTTP error! status: ${res.status}`);
-//         }
+  const fetchCartItems = useCallback(async () => {
+    if (!userId) return;
+    setCartLoading(true);
+    try {
+      const data = await getCart(userId);
+      const mappedItems = (data || []).map((item: any) => ({
+        ...item,
+        image: getCartItemImageUrl(item, 'card'),
+      }));
+      setCartItems(mappedItems);
+    } catch (err) {
+      console.error('Failed to fetch cart items:', err);
+      toast.error('Failed to load cart');
+    } finally {
+      setCartLoading(false);
+    }
+  }, [userId]);
 
-//         const data = await res.json();
-//         console.log("Fetched products data:", data);
+  // ────────────────────────────────────────────────
+  // Wishlist fetching
+  // ────────────────────────────────────────────────
 
-//         // Ensure array
-//         const productList = Array.isArray(data) ? data : [];
+  const fetchWishlistItems = useCallback(async () => {
+    if (!userId) return;
+    setWishlistLoading(true);
+    try {
+      const data = await getWishlist(userId);
+      const mapped = (data || []).map((item: any) => ({
+        ...item,
+        image: item.cms_image_ids?.[0]
+          ? getCloudinaryUrl(item.cms_image_ids[0])
+          : '/placeholder.png',
+      }));
+      setWishlistItems(mapped);
+    } catch (err) {
+      console.error('Failed to fetch wishlist:', err);
+      toast.error('Failed to load wishlist');
+    } finally {
+      setWishlistLoading(false);
+    }
+  }, [userId]);
 
-    
-//         const mappedProducts: UIProduct[] = productList.map((product) => {
-//           const imageId =
-//             Array.isArray(product.cms_image_ids) &&
-//             product.cms_image_ids.length > 0
-//               ? product.cms_image_ids[0]
-//               : null;
+  // Load data when corresponding modal opens
+  useEffect(() => {
+    if (activeModal === 'cart' && userId) {
+      fetchCartItems();
+    }
+    if (activeModal === 'wishlist' && userId) {
+      fetchWishlistItems();
+    }
+  }, [activeModal, userId, fetchCartItems, fetchWishlistItems]);
 
-//           return {
-//             id: product.id,
-//             name: product.name,
-//             price: Number(product.price),
-//             discount: 0, // future use
-//             image: imageId
-//               ?"/images/placeholder.png"
-//               // ? `https://res.cloudinary.com/dsxzmawd9/image/upload/w_480,h_480,c_fill,q_auto,f_auto/${imageId}.webp`
-//               : "/images/placeholder.png",
-//           };
-//         });
+  // ────────────────────────────────────────────────
+  // Handlers
+  // ────────────────────────────────────────────────
 
-//         setProducts(mappedProducts);
-//       } catch (error) {
-//         console.error("Failed to fetch products:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
+  const handleCartItemRemoved = (itemId: string) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
 
-//     fetchProducts();
-//   }, []);
+  const handleWishlistItemRemoved = (itemId: number) => {
+    setWishlistItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
 
-//   if (loading) {
-//     return <p className="text-center py-10">Loading products...</p>;
-//   }
+  // ────────────────────────────────────────────────
+  // Render
+  // ────────────────────────────────────────────────
 
-//   if (!products.length) {
-//     return <p className="text-center py-10">No products found</p>;
-//   }
+  return (
+    <RoleGuard allowedRole="USER">
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          onOpenModal={setActiveModal}
+        />
 
-//   return (
-//     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-//       {products.map((product) => (
-//         <div
-//           key={product.id}
-//           className="bg-white rounded-xl shadow p-4"
-//         >
-//           <Image
-//             src={product.image}
-//             alt={product.name}
-//             width={480}
-//             height={480}
-//             className="rounded-lg object-cover"
-//           />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Product Catalogue</h1>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="lg:hidden p-2 bg-green-400 rounded-md hover:bg-green-700 text-black font-semibold"
+            >
+              {isSidebarOpen ? 'Close' : 'Menu'}
+            </button>
+          </header>
 
-//           <h3 className="mt-3 font-semibold">
-//             {product.name}
-//           </h3>
+          <main className="flex-1 overflow-hidden">
+            <BookFlip />
+          </main>
+        </div>
 
-//           <p className="text-sm text-gray-600">
-//             ₹{product.price}
-//           </p>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
+        {/* Modals */}
+        {activeModal === 'profile' && (
+          <ProfileModal user={dummyUser} onClose={() => setActiveModal(null)} />
+        )}
+
+        {activeModal === 'cart' && (
+          <CartModal
+            items={cartItems}
+            loading={cartLoading}
+            onClose={() => setActiveModal(null)}
+            onItemRemoved={handleCartItemRemoved}
+          />
+        )}
+
+        {activeModal === 'wishlist' && (
+          <WishlistModal
+            items={wishlistItems}
+            loading={wishlistLoading}
+            onClose={() => setActiveModal(null)}
+            onItemRemoved={handleWishlistItemRemoved}
+          />
+        )}
+      </div>
+    </RoleGuard>
+  );
+}
