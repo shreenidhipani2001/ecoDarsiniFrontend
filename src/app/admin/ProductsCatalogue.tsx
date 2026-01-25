@@ -44,10 +44,10 @@ type FlipBookRef = {
 /* ================= HELPERS ================= */
 const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'url'): string => {
   if (!product.images || product.images.length === 0) {
-    return '/placeholder.png';
+    return '';
   }
   const image = product.images[0];
-  return image[size] || image.url || '/placeholder.png';
+  return image[size] || image.url || '';
 };
 
 const formatPrice = (price: number | string): string => {
@@ -197,7 +197,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(({ product, pag
       alt={product.name}
       className="product-img w-80 h-80  object-cover rounded-xl"
       onError={(e) => {
-        (e.target as HTMLImageElement).src = '/placeholder.png';
+        (e.target as HTMLImageElement).style.display = 'none';
       }}
     />
   </div>
@@ -604,9 +604,16 @@ export default function BookFlip() {
           onClose={() => setSelectedProduct(null)}
           onProductUpdate={(updatedProduct) => {
             setProducts((prev) =>
-              prev.map((p) => (p.id === updatedProduct.id ? { ...updatedProduct, price: updatedProduct.price } : p))
+              prev.map((p) => (p.id === updatedProduct.id
+                ? { ...updatedProduct, images: updatedProduct.images || p.images, price: updatedProduct.price }
+                : p))
             );
-            setSelectedProduct({ ...updatedProduct, price: updatedProduct.price });
+            // Preserve the existing images from selectedProduct if not returned by API
+            setSelectedProduct({
+              ...updatedProduct,
+              images: updatedProduct.images || selectedProduct.images,
+              price: updatedProduct.price
+            });
           }}
         />
       )}

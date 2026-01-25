@@ -219,10 +219,10 @@ export type WishlistItem = {
 
 function getProductImageUrl(product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'url'): string {
   if (!product.images || product.images.length === 0) {
-    return '/placeholder.png';
+    return '';
   }
   const image = product.images[0];
-  return image[size] || image.url || '/placeholder.png';
+  return image[size] || image.url || '';
 }
 
 export default function DashboardPage() {

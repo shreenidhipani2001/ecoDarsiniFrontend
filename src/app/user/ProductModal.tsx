@@ -63,7 +63,7 @@ export default function ProductModal({ product, onClose }: Props) {
             }
           );
           const data = await res.json();
-      console.log("Add to Cart API response ::::", data);
+      console.log("Added to Cart API response ::::", data);
           if (!res.ok) {
             const err = await res.json();
             throw new Error(err.error || "Failed to add to cart");

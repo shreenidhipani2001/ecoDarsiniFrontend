@@ -22,7 +22,7 @@ const menu: {
   label: string;
   icon: React.ElementType;
 }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  // { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Products", icon: Package },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "payments", label: "Payments", icon: CreditCard },
