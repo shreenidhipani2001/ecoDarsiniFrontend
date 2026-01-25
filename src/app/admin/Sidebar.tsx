@@ -10,6 +10,7 @@ import {
   MapPin,
   ChevronLeft,
   LogOut,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -62,11 +63,14 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
 
   return (
     <aside
-      className={`bg-black text-white min-h-screen flex flex-col transition-all duration-300 border-r border-green-900/30
-      ${collapsed ? "w-20" : "w-64"}`}
+      className={`
+         bg-black text-white transition-all duration-300 ease-in-out
+        ${!collapsed  ? 'w-64' : 'w-20'}
+        flex flex-col min-h-screen relative
+      `}
     >
       {/* Header with Toggle */}
-      <div className="flex justify-between items-center p-4 border-b border-green-900/30">
+      {/* <div className="flex justify-between items-center p-4 border-b border-green-900/30">
         {collapsed ? (
           <Logo className="w-8 h-auto text-green-400" />
         ) : (
@@ -83,10 +87,30 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
             size={20}
           />
         </button>
+
+      </div> */}
+      <button
+         onClick={() => setCollapsed(!collapsed)}
+        className="absolute -right-3 top-6 bg-black text-white rounded-full p-1.5 border border-gray-700 hover:bg-gray-800 transition"
+      >
+        {!collapsed ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+      </button>
+     
+      <div
+          className={`flex items-center ${
+            !collapsed ? 'gap-3 justify-start' : 'justify-center'
+          } mt-6 mb-10`}
+        >
+          <Logo className="w-10 h-auto shrink-0" />
+          {!collapsed && (
+            <span className="text-xl font-semibold tracking-wide">
+              Ecodarshini
+            </span>
+          )}
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 py-4">
+      <nav className="py-4">
         <ul className="flex flex-col gap-1 px-2">
           {menu.map(({ id, label, icon: Icon }) => (
             <li key={id}>
@@ -125,13 +149,15 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
         </button>
       </div>
 
+
+      
       {/* Logo at bottom */}
-      <div
+      {/* <div
         className={`mb-4 flex transition-all border-t border-green-900/30 pt-4
           ${collapsed ? "justify-center" : "justify-start pl-4"}`}
       >
         <Logo className="w-8 h-auto text-green-400" />
-      </div>
+      </div> */}
     </aside>
   );
 }

@@ -1,7 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star, User, Package, Calendar, MessageSquare } from 'lucide-react';
+import { Star, User, Package, Calendar, MessageSquare, Eye } from 'lucide-react';
+import ProductDetailModal from '../../components/ProductDetailModal';
+
+type ProductImage = {
+  id: string;
+  url: string;
+  thumbnail: string | null;
+  card: string | null;
+  full: string | null;
+  alt: string;
+};
+
+type Product = {
+  id: string;
+  name: string;
+  price: number | string;
+  cms_image_ids: string[];
+  images?: ProductImage[];
+  slug: string;
+  description?: string;
+  stock: number;
+  category_id: string;
+  category_name?: string;
+  artist_name?: string;
+  is_active: boolean;
+  created_at?: string;
+};
 
 type Review = {
   id: string;
@@ -16,40 +42,74 @@ type Review = {
   product_name?: string;
 };
 
+const getProductImageUrl = (product: Product, size: 'thumbnail' | 'card' | 'full' | 'url' = 'url'): string => {
+  if (!product.images || product.images.length === 0) {
+    return '';
+  }
+  const image = product.images[0];
+  return image[size] || image.url || '';
+};
+
 export default function ReviewsGrid() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchData = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         if (!apiUrl) throw new Error('API URL not configured');
 
-        const res = await fetch(`${apiUrl}/api/review/`, {
-          credentials: 'include',
-          cache: 'no-store',
-        });
+        // Fetch reviews and products in parallel
+        const [reviewsRes, productsRes] = await Promise.all([
+          fetch(`${apiUrl}/api/review/`, {
+            credentials: 'include',
+            cache: 'no-store',
+          }),
+          fetch(`${apiUrl}/api/products/`, {
+            credentials: 'include',
+            cache: 'no-store',
+          }),
+        ]);
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status} – ${res.statusText}`);
+        if (!reviewsRes.ok) {
+          throw new Error(`Reviews: HTTP ${reviewsRes.status}`);
+        }
+        if (!productsRes.ok) {
+          throw new Error(`Products: HTTP ${productsRes.status}`);
         }
 
-        const data = await res.json();
-        console.log('Fetched reviews:', data);
-        const reviewsList = Array.isArray(data) ? data : data?.reviews || data?.data || [];
+        const reviewsData = await reviewsRes.json();
+        const productsData = await productsRes.json();
+
+        console.log('Fetched reviews:', reviewsData);
+        console.log('Fetched products:', productsData);
+
+        const reviewsList = Array.isArray(reviewsData) ? reviewsData : reviewsData?.reviews || reviewsData?.data || [];
+        const productsList = Array.isArray(productsData) ? productsData : productsData?.products || productsData?.data || [];
+
         setReviews(reviewsList);
+        setProducts(productsList);
       } catch (err: any) {
-        console.error('Failed to load reviews:', err);
-        setError(err.message || 'Could not load reviews');
+        console.error('Failed to load data:', err);
+        setError(err.message || 'Could not load data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReviews();
+    fetchData();
   }, []);
+
+  const handleViewProduct = (productId: string) => {
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -130,8 +190,8 @@ export default function ReviewsGrid() {
             {/* Comment */}
             <div className="mb-4 min-h-[60px]">
               {review.comment ? (
-                <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                  "{review.comment}"
+                <p className="text-gray-300 text-sm leading-relaxed line-clamp-3 ">
+                  {review.comment}
                 </p>
               ) : (
                 <p className="text-gray-500 text-sm italic">No comment provided</p>
@@ -167,10 +227,19 @@ export default function ReviewsGrid() {
             </div>
 
             {/* Date */}
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-gray-500 mb-4">
               <Calendar size={14} />
               <span className="text-xs">{formatDate(review.created_at)}</span>
             </div>
+
+            {/* View Product Button */}
+            <button
+              onClick={() => handleViewProduct(review.product_id)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium"
+            >
+              <Eye size={16} />
+              View Product
+            </button>
           </div>
         ))}
       </div>
@@ -190,6 +259,35 @@ export default function ReviewsGrid() {
           </p>
         </div>
       </div>
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <ProductDetailModal
+          product={{
+            ...selectedProduct,
+            price: typeof selectedProduct.price === 'string'
+              ? parseFloat(selectedProduct.price)
+              : selectedProduct.price
+          }}
+          imageUrl={getProductImageUrl(selectedProduct, 'url')}
+          isAdmin={true}
+          onClose={() => setSelectedProduct(null)}
+          onProductUpdate={(updatedProduct) => {
+            setProducts((prev) =>
+              prev.map((p) =>
+                p.id === updatedProduct.id
+                  ? { ...updatedProduct, images: updatedProduct.images || p.images, price: updatedProduct.price }
+                  : p
+              )
+            );
+            setSelectedProduct({
+              ...updatedProduct,
+              images: updatedProduct.images || selectedProduct.images,
+              price: updatedProduct.price
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

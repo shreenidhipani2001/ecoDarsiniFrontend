@@ -503,7 +503,7 @@ export default function BookFlip() {
   pages.push(<FrontCover key="front-cover" />);
   products.forEach((product, index) => {
     pages.push(
-      <LeftPage key={`left-${product.id}`} product={product} pageNumber={index * 2 + 1} />
+      <LeftPage key={`left-${product?.id}`} product={product} pageNumber={index * 2 + 1} />
     );
     pages.push(
       <RightPage

@@ -1,6 +1,6 @@
 const payments = [
-  { id: "pay_1", amount: 1200, status: "SUCCESS" },
-  { id: "pay_2", amount: 800, status: "FAILED" },
+  { name: "Krrish", amount: 1200, status: "SUCCESS" },
+  { name: "Abhaya", amount: 800, status: "FAILED" },
 ];
 
 export default function PaymentsList() {
@@ -9,17 +9,17 @@ export default function PaymentsList() {
       <table className="w-full">
         <thead className="bg-zinc-100">
           <tr>
-            <th className="p-3 text-left">Payment ID</th>
-            <th className="p-3">Amount</th>
-            <th className="p-3">Status</th>
+            <th className="p-3 text-left text-black">Payer Name</th>
+            <th className="p-3 text-black">Amount</th>
+            <th className="p-3 text-black">Status</th>
           </tr>
         </thead>
         <tbody>
           {payments.map((p) => (
-            <tr key={p.id} className="border-t">
-              <td className="p-3">{p.id}</td>
-              <td className="p-3 text-center">₹{p.amount}</td>
-              <td className="p-3 text-center">{p.status}</td>
+            <tr key={p.name} className="border-t">
+              <td className="p-3 text-black">{p.name}</td>
+              <td className="p-3 text-center text-black">₹{p.amount}</td>
+              <td className="p-3 text-center text-black">{p.status}</td>
             </tr>
           ))}
         </tbody>
