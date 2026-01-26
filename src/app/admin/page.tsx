@@ -6,6 +6,8 @@ import ProductsCatalogue from "./ProductsCatalogue";
 import OrdersGrid from "./OrdersGrid";
 import PaymentsList from "./PaymentsList";
 import ReviewsGrid from "./ReviewsGrid";
+import OrderTrackingGrid from "./OrderTrackingGrid";
+import UsersGrid from "./UsersGrid";
 import type { AdminSection } from "./types";
 import RoleGuard from "../../components/RoleGuard";
 import { useAuthStore } from '../../store/useAuthStore';
@@ -186,7 +188,15 @@ export default function AdminLayout() {
               </div>
             )}
             {active === "addresses" && (
-              <div className="text-green-400 text-xl">Addresses coming soon</div>
+              <div>
+                <h1 className="text-3xl font-bold text-green-400 mb-6">Order Tracking</h1>
+                <OrderTrackingGrid />
+              </div>
+            )}
+            {active === "users" && (
+              <div>
+                <UsersGrid />
+              </div>
             )}
           </div>
         </main>
@@ -357,6 +367,13 @@ export default function AdminLayout() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Full-screen Loading Spinner */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
     </RoleGuard>

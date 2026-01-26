@@ -1,11 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import { removeFromCart } from '../../lib/cartApi';
 import toast from 'react-hot-toast';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 type ProductImage = {
   id: string;
@@ -71,7 +77,21 @@ export default function CartModal({
 }: CartModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const { user } = useAuthStore();
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleRemoveItem = async () => {
     if (!items[currentIndex]) return;
     
@@ -96,10 +116,124 @@ export default function CartModal({
     }
   };
 
-  const handleBuyNow = () => {
-    toast('Buy option yet to be added', {
-      icon: '🛒',
-    });
+  const handleBuyNow = async () => {
+    if (!user?.id) {
+      toast.error('Please login to continue');
+      return;
+    }
+
+    const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+
+    setProcessing(true);
+
+    try {
+      // Step 1: Create Razorpay order
+      const orderRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: totalAmount,
+          currency: 'INR',
+          receipt: `order_${Date.now()}`,
+          notes: {
+            user_id: user.id,
+            items_count: items.length,
+          },
+        }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
+
+      // Step 2: Open Razorpay checkout
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Eco Darsini',
+        description: `Payment for ${items.length} item(s)`,
+        order_id: orderData.order_id,
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            // Step 3: Verify payment
+            const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: totalAmount,
+                user_id: user.id,
+                cart_items: items.map(item => ({
+                  product_id: item.product_id,
+                  quantity: item.quantity,
+                  price: item.price,
+                })),
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              // Step 4: Create orders for each cart item
+              const orderPromises = items.map(item =>
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/add`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    user_id: user.id,
+                    total_amount: parseFloat(item.total_price),
+                    status: 'CREATED',
+                    payment_id: response.razorpay_payment_id,
+                    product_id: item.product_id,
+                  }),
+                })
+              );
+
+              await Promise.all(orderPromises);
+
+              toast.success('Payment successful! Order placed.');
+              onClose();
+            } else {
+              toast.error('Payment verification failed');
+            }
+          } catch (err) {
+            console.error('Payment verification error:', err);
+            toast.error('Payment verification failed');
+          } finally {
+            setProcessing(false);
+          }
+        },
+        prefill: {
+          name: user.name || '',
+          email: user.email || '',
+        },
+        theme: {
+          color: '#166534',
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessing(false);
+            toast('Payment cancelled', { icon: '❌' });
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error('Payment error:', err);
+      toast.error(err instanceof Error ? err.message : 'Payment failed');
+      setProcessing(false);
+    }
   };
 
   if (loading) {
@@ -156,10 +290,11 @@ export default function CartModal({
             <div className="flex gap-3 mt-4">
               <button
                 onClick={handleBuyNow}
-                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold"
+                disabled={processing}
+                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
               >
                 <ShoppingBag size={18} />
-                Buy Now
+                {processing ? 'Processing...' : 'Buy Now'}
               </button>
               <button
                 onClick={handleRemoveItem}
@@ -213,6 +348,13 @@ export default function CartModal({
           </div>
         </div>
       </div>
+
+      {/* Full-screen Loading Spinner */}
+      {(removing || processing) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
     </BaseModal>
   );
 }

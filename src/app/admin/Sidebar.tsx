@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   LogOut,
   ChevronRight,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -23,12 +24,12 @@ const menu: {
   label: string;
   icon: React.ElementType;
 }[] = [
-  // { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Products", icon: Package },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "payments", label: "Payments", icon: CreditCard },
   { id: "reviews", label: "Reviews", icon: Star },
-  { id: "addresses", label: "Addresses", icon: MapPin },
+  { id: "addresses", label: "Manage Order", icon: MapPin },
+  { id: "users", label: "Users", icon: Users },
 ];
 
 interface SidebarProps {
@@ -69,26 +70,7 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
         flex flex-col min-h-screen relative
       `}
     >
-      {/* Header with Toggle */}
-      {/* <div className="flex justify-between items-center p-4 border-b border-green-900/30">
-        {collapsed ? (
-          <Logo className="w-8 h-auto text-green-400" />
-        ) : (
-          <h2 className="text-green-400 font-bold text-lg">Ecodarsini</h2>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-lg hover:bg-green-900/20 transition-colors"
-        >
-          <ChevronLeft
-            className={`transition-transform text-green-400 ${
-              collapsed ? "rotate-180" : ""
-            }`}
-            size={20}
-          />
-        </button>
-
-      </div> */}
+      
       <button
          onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-6 bg-black text-white rounded-full p-1.5 border border-gray-700 hover:bg-gray-800 transition"
