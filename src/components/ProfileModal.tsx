@@ -78,8 +78,14 @@ console.log('Initial formData:', formData);
 
   return (
     <BaseModal title="My Profile" onClose={onClose}>
-      <div className="flex flex-col md:flex-row gap-6 bg-gradient-to-br from-green-100 via-green-200 to-green-900 p-8 rounded-2xl shadow-xl">
-      {/* <div className="flex flex-col md:flex-row gap-6 bg-gradient-to-br from-green-100 via-green-200 to-green-300 p-8 rounded-2xl shadow-xl"> */}
+      <div className="flex flex-col md:flex-row gap-6 bg-green-400 p-8 rounded-2xl shadow-xl">
+      {/* <div className="
+  flex flex-col md:flex-row gap-6
+  bg-gradient-to-br from-emerald-50 via-green-100 to-emerald-700
+  p-8 rounded-2xl
+  shadow-[0_10px_30px_rgba(0,0,0,0.12)]
+  border border-white/40
+"> */}
 
         {/* Left Half - Big Avatar */}
         <div className="flex justify-center items-center md:w-1/3">

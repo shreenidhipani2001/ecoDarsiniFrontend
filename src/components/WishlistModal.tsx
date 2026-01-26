@@ -72,6 +72,7 @@ export default function WishlistModal({
 }: WishlistModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
+  const [removingT, setRemovingT] = useState(false);
   const { user } = useAuthStore();
 
   const handleRemoveItem = async () => {
@@ -139,8 +140,11 @@ export default function WishlistModal({
   //         // setLoading(false);
   //       }
   //     };
+ 
+ 
+ 
   const handleAddToCart = async () => {
-    setRemoving(true);
+    setRemovingT(true);
     const item = items[currentIndex]; // ✅ always correct item
   
     if (!item || !user?.id) {
@@ -176,8 +180,8 @@ export default function WishlistModal({
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Something went wrong");
-    }finally{
-      setRemoving(true);
+    } finally {
+      setRemovingT(false);
     }
   };
    
@@ -292,6 +296,13 @@ export default function WishlistModal({
           </div>
         </div>
       </div>
+
+      {/* Full-screen Loading Spinner */}
+      {(removing || removingT) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+          <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
     </BaseModal>
   );
 }

@@ -165,55 +165,41 @@ interface LeftPageProps {
 
 const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(({ product, pageNumber }, ref) => {
   return (
-    <div className="page product-page left-page" ref={ref}>
+    <div className="page product-page left-page border border-gray-300 border-r-amber-500 border-r-7" ref={ref}>
+    {/* <div className="page product-page left-page" ref={ref}> */}
       <div className="page-inner">
         {/* Product Name - Top Center */}
         <div className="left-header">
-        {/* <h2 className="mt-10 text-center text-black font-bold text-3xl md:text-4xl">
-            {product.name}
-          </h2>
-          <div className="title-line"></div> */}
+         
         </div>
 
-        {/* Product Image - Center */}
-        {/* <div className="left-image-area mt-10">
-          <div className="image-box flex justify-center">
-            <img
-              src={getProductImageUrl(product, 'url')}
-              alt={product.name}
-              className="product-img w-80 h-80 md:w-96 md:h-96 object-cover rounded-xl shadow-md"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder.png';
-              }}
-            />
+     
+        <div>
+
+          <div className="left-image-area mt-10 p-2  w-fit  border border-green-500 rounded-2xl shadow-lg   mt-20 ml-19">
+            <div className="flex justify-center bg-white rounded-xl">
+              <img
+                src={getProductImageUrl(product, 'url')}
+                alt={product.name}
+                className="product-img w-80 h-80  object-cover rounded-xl"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+            
+            
           </div>
-        </div> */}
- <div>
+          <div className="detail-info flex flex-col items-center justify-center text-center">
+            <span className="block text-xs uppercase tracking-wide opacity-80 text-black mt-10">
+              Crafted by
+            </span>
+            <span className="block font-semibold text-4xl text-black">
+              {product?.artist_name || 'Artisan'}
+            </span>
+          </div>
 
- <div className="left-image-area mt-10 p-2  w-fit  border border-green-500 rounded-2xl shadow-lg   mt-20 ml-19">
-  <div className="flex justify-center bg-white rounded-xl">
-    <img
-      src={getProductImageUrl(product, 'url')}
-      alt={product.name}
-      className="product-img w-80 h-80  object-cover rounded-xl"
-      onError={(e) => {
-        (e.target as HTMLImageElement).style.display = 'none';
-      }}
-    />
-  </div>
-  
-  
-</div>
-<div className="detail-info flex flex-col items-center justify-center text-center">
-  <span className="block text-xs uppercase tracking-wide opacity-80 text-black mt-10">
-    Crafted by
-  </span>
-  <span className="block font-semibold text-4xl text-black">
-    {product?.artist_name || 'Artisan'}
-  </span>
-</div>
-
- </div>
+        </div>
 
 
 
