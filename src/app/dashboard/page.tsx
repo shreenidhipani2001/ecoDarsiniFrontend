@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import WishlistModal from '../../components/WishlistModal';
 import CartModal from '../../components/CartModal';
 import ProfileModal from '../../components/ProfileModal';
+import TrackOrderModal from '../../components/TrackOrderModal';
 import RoleGuard from '../../components/RoleGuard';
 import { getCart } from '../../../lib/cartApi';
 import { getWishlist } from '../../../lib/wishlistApi';
@@ -79,7 +80,7 @@ function getProductImageUrl(product: Product, size: 'thumbnail' | 'card' | 'full
 }
 
 export default function DashboardPage() {
-  const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | null>(null);
+  const [activeModal, setActiveModal] = useState<'profile' | 'cart' | 'wishlist' | 'track' | null>(null);
   const { user } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -246,6 +247,13 @@ export default function DashboardPage() {
             loading={wishlistLoading}
             onClose={() => setActiveModal(null)}
             onItemRemoved={handleWishlistItemRemoved}
+          />
+        )}
+
+        {activeModal === 'track' && userId && (
+          <TrackOrderModal
+            userId={userId}
+            onClose={() => setActiveModal(null)}
           />
         )}
       </div>

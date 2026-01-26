@@ -4,4 +4,5 @@ export type AdminSection =
   | "orders"
   | "payments"
   | "reviews"
-  | "addresses";
+  | "addresses"
+  | "users";

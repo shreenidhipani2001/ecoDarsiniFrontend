@@ -96,6 +96,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  MapPin,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -105,7 +106,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  onOpenModal: (type: 'profile' | 'cart' | 'wishlist') => void;
+  onOpenModal: (type: 'profile' | 'cart' | 'wishlist' |'track') => void;
 }
 
 export default function Sidebar({
@@ -155,6 +156,12 @@ export default function Sidebar({
       color: 'text-blue-600',
       key: 'cart',
     },
+    {
+      name: 'Track Order',
+      icon: MapPin,
+      color: 'text-yellow-500',
+      key: 'track',
+    }
   ] as const;
 
   return (
