@@ -144,6 +144,7 @@ export default function DashboardPage() {
     setCartLoading(true);
     try {
       const data = await getCart(userId);
+      console.log('Fetched cart items:', data);
       // Just store raw cart items - CartModal will match with products for images
       setCartItems(data || []);
     } catch (err) {
@@ -175,6 +176,7 @@ export default function DashboardPage() {
 
   // Load data when corresponding modal opens
   useEffect(() => {
+    console.log('Active modal:', activeModal, 'userId:', userId);
     if (activeModal === 'cart' && userId) {
       fetchCartItems();
     }
@@ -247,6 +249,8 @@ export default function DashboardPage() {
             loading={wishlistLoading}
             onClose={() => setActiveModal(null)}
             onItemRemoved={handleWishlistItemRemoved}
+            fetchCartItems={fetchCartItems}          // ✅ new prop
+            fetchWishlistItems={fetchWishlistItems}  // ✅ new prop
           />
         )}
 
