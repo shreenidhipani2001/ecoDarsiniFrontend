@@ -24,7 +24,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getCart(userId: string) {
   try {
-    console.log('Fetching cart for user:', userId);
+    console.log('Fetching cart for user: 1111', userId);
     const res = await fetch(`${API_URL}/api/cart/user/${userId}`, {
       method: 'GET',
       credentials: 'include',
@@ -66,6 +66,7 @@ export async function addToCart(userId: string, productId: string, quantity: num
     }
 
     const data = await res.json();
+    console.log('Added to cart:', data);
     return data;
   } catch (error) {
     console.error('Failed to add to cart:', error);

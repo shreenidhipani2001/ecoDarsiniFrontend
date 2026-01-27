@@ -45,6 +45,9 @@ const fetchUsersData = async (): Promise<User[]> => {
 };
 
 export default function UsersGrid() {
+  const [openMenuUserId, setOpenMenuUserId] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +80,36 @@ export default function UsersGrid() {
     setIsModalOpen(false);
     setFormData(initialFormData);
   };
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+  
+    try {
+      setIsDeleting(true);
+  
+      const res = await fetch(
+        `${API_URL}/api/users/${userToDelete.id}`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
+  
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to delete user');
+      }
+  
+      toast.success('User deleted successfully');
+      setUserToDelete(null);
+      loadUsers();
+    } catch (err: any) {
+      console.log(' error while deleting user ',err);
+      toast.error(err.message || 'Failed to delete user');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -188,9 +221,38 @@ export default function UsersGrid() {
             {users.map((user) => (
               <div
                 key={user.id}
-                className="bg-gray-800/80 backdrop-blur-sm rounded-xl p-5 border border-green-900/30 hover:border-green-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-900/20"
+                className="relative bg-gray-800/80 backdrop-blur-sm rounded-xl p-5 border border-green-900/30 hover:border-green-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-900/20"
               >
                 {/* User Avatar and Name */}
+                {/* 3-dot menu */}
+<div className="absolute top-4 right-4">
+  <button
+    onClick={() =>
+      setOpenMenuUserId(
+        openMenuUserId === user.id ? null : user.id
+      )
+    }
+    className="p-1 rounded-full hover:bg-gray-700 transition"
+  >
+    <span className="text-xl text-gray-300">⋮</span>
+  </button>
+
+  {/* Dropdown */}
+  {openMenuUserId === user.id && (
+    <div className="absolute right-0 mt-2 w-36 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-20">
+      <button
+        onClick={() => {
+          setUserToDelete(user);
+          setOpenMenuUserId(null);
+        }}
+        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 rounded-lg"
+      >
+        🗑️ Delete
+      </button>
+    </div>
+  )}
+</div>
+
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
                     <span className="text-xl font-bold text-white">
@@ -386,6 +448,46 @@ export default function UsersGrid() {
           <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
+      {userToDelete && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center">
+    {/* Backdrop */}
+    <div
+      className="absolute inset-0 bg-black/60"
+      onClick={() => setUserToDelete(null)}
+    />
+
+    {/* Modal */}
+    <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 text-center">
+      <h3 className="text-xl font-bold text-gray-800 mb-3">
+        Delete User
+      </h3>
+      <p className="text-gray-600 mb-6">
+        Are you sure you want to delete{' '}
+        <span className="font-semibold">{userToDelete.name}</span>?
+        <br />
+        This action cannot be undone.
+      </p>
+
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={() => setUserToDelete(null)}
+          className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleDeleteUser}
+          disabled={isDeleting}
+          className="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+        >
+          {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </>
   );
 }

@@ -46,13 +46,23 @@ export type WishlistItem = {
   image?: string;
 };
 
+// interface WishlistModalProps {
+//   items: WishlistItem[];
+//   products: Product[];
+//   loading: boolean;
+//   onClose: () => void;
+//   onItemRemoved?: (itemId: number) => void;
+// }
 interface WishlistModalProps {
   items: WishlistItem[];
   products: Product[];
   loading: boolean;
   onClose: () => void;
   onItemRemoved?: (itemId: number) => void;
+  fetchCartItems?: () => Promise<void>;      // ✅ new prop
+  fetchWishlistItems?: () => Promise<void>;  // ✅ new prop
 }
+
 
 // Helper to get product image URL by matching product_id
 function getImageForWishlistItem(wishlistItem: WishlistItem, products: Product[]): string {
@@ -68,21 +78,24 @@ export default function WishlistModal({
   products,
   loading,
   onClose,
-  onItemRemoved,
+  onItemRemoved,fetchCartItems,    
+  fetchWishlistItems,
 }: WishlistModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
   const [removingT, setRemovingT] = useState(false);
   const { user } = useAuthStore();
+  console.log('User in WishlistModal 1:', user);
 
   const handleRemoveItem = async () => {
     const item = items[currentIndex];
     if (!item || !user?.id) return;
 
     setRemoving(true);
+    console.log('Removing item from wishlist:', item.id, 'for user id:', user.id);
 
     try {
-      await removeFromWishlist(item.id, Number(user.id));
+      await removeFromWishlist(item?.id, user?.id);
       toast.success('Item removed from wishlist');
 
       // Tell parent to update list
@@ -102,89 +115,102 @@ export default function WishlistModal({
 
   
   
-  // const handleAddToCart = async () => {
-  //   // setLoading(true);
-       
-  //       console.log('Adding to cart for user id:', user);
-      
-  //       try {
-         
-            
-  //         const res = await fetch(
-  //           `${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`,
-  //           {
-  //             method: "POST",
-  //             credentials: "include", // send cookie if needed
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({
-  //               user_id: user?.id,  
-  //               product_id: item?.id,
-  //               quantity: 1,
-  //             }),
-  //           }
-  //         );
-  //         const data = await res.json();
-  //     console.log("Add to Cart API response ::::", data);
-  //         if (!res.ok) {
-  //           const err = await res.json();
-  //           throw new Error(err.error || "Failed to add to cart");
-  //         }
-  //         toast.success("Item added to cart successfully");
-          
-  //       } catch (err: any) {
-  //         console.error(err);
-  //         toast.error(err.message || "Something went wrong");
-  //       } finally {
-  //         // setLoading(false);
-  //       }
-  //     };
- 
- 
- 
-  const handleAddToCart = async () => {
-    setRemovingT(true);
-    const item = items[currentIndex]; // ✅ always correct item
-  
-    if (!item || !user?.id) {
-      toast.error("User or item missing");
-      return;
-    }
-  
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            product_id: item.product_id, // ✅ CORRECT ID
-            quantity: 1,
-          }),
-        }
-      );
-  
-      const data = await res.json();
-      console.log("Add to Cart API response ::::", data);
-  
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to add to cart");
-      }
-  
-      toast.success("Item added to cart successfully");
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Something went wrong");
-    } finally {
-      setRemovingT(false);
-    }
-  };
    
+ 
+ 
+//   const handleAddToCart = async () => {
+//     console.log('handleAddToCart called');
+//     setRemovingT(true);
+//     const item = items[currentIndex]; // ✅ always correct item
+//     const userId = user?.id;
+//  console.log('Adding to cart for user id:', userId);
+//  console.log('Adding to cart item:', item);
+//    if (!item || !user?.id) {
+//       toast.error("User or item missing");
+//       return;
+//     }
+  
+//     try {
+//       const res = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`,
+//         {
+//           method: "POST",
+//           credentials: "include",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify({
+//             user_id: user.id,
+//             product_id: item.product_id, // ✅ CORRECT ID
+//             quantity: 1,
+//           }),
+//         }
+//       );
+  
+//       const data = await res.json();
+//       console.log("Add to Cart API response ::::", data);
+  
+//       if (!res.ok) {
+//         throw new Error(data.error || "Failed to add to cart");
+//       }
+
+//       const deleteFromWishList =await removeFromWishlist(item?.id, user?.id);
+//       console.log("Remove from wishlist response ::::", deleteFromWishList);
+
+  
+//       toast.success("Item added to cart successfully");
+//     } catch (err: any) {
+//       console.error(err);
+//       toast.error(err.message || "Something went wrong");
+//     } finally {
+//       setRemovingT(false);
+//     }
+//   };
+   
+const handleAddToCart = async () => {
+  setRemovingT(true);
+  const item = items[currentIndex];
+  const userId = user?.id;
+
+  if (!item || !userId) {
+    toast.error("User or item missing");
+    setRemovingT(false);
+    return;
+  }
+
+  try {
+    // Add to cart
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        product_id: item.product_id,
+        quantity: 1,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to add to cart");
+
+    // Remove from wishlist
+    await removeFromWishlist(item.id, userId);
+    toast.success("Item added to cart successfully");
+
+    // Refresh parent state
+    await fetchCartItems?.();      // refresh cart in Dashboard
+    await fetchWishlistItems?.();  // refresh wishlist in Dashboard
+
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err.message || "Something went wrong");
+  } finally {
+    setRemovingT(false);
+  }
+};
+
+
  
    
   

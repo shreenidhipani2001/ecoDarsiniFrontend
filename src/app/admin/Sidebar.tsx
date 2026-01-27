@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   LogOut,
   ChevronRight,
-  Users,
+  Users,Home
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -90,9 +90,20 @@ export default function Sidebar({ active, setActive }: SidebarProps) {
             </span>
           )}
       </div>
+      <div className="px-2 mb-2">
+    <button
+      onClick={() => router.push('/')}
+      className={`flex items-center gap-4 w-full px-4  rounded-lg cursor-pointer
+        transition-all duration-200
+        text-gray-300 hover:bg-green-900/20 hover:text-green-400`}
+    >
+      <Home size={20} />
+      {!collapsed && <span className="font-medium">Home</span>}
+    </button>
+  </div>
 
       {/* Menu */}
-      <nav className="py-4">
+      <nav className="">
         <ul className="flex flex-col gap-1 px-2">
           {menu.map(({ id, label, icon: Icon }) => (
             <li key={id}>
