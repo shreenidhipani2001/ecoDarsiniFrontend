@@ -152,34 +152,80 @@ interface LeftPageProps {
 
 const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(({ product, pageNumber }, ref) => {
   return (
+    // <div className="page product-page left-page" ref={ref}>
+    //   <div className="page-inner">
+    //     <div className="left-header  flex justify-center">
+    //     <h2 className="left-title text-3xl font-bold text-red-400">
+    //       {product.name}
+    //     </h2>         
+    //      <div className="mt-20"></div>
+    //     </div>
+
+    //     <div className="left-image-area">
+    //       <div className="image-box">
+    //         <img
+    //           src={getProductImageUrl(product, 'url')}
+    //           alt={product.name}
+    //           className="product-img"
+    //           onError={(e) => {
+    //             (e.target as HTMLImageElement).style.display = 'none';
+    //           }}
+    //         />
+    //       </div>
+    //     </div>
+
+    //     <div className="artist-info">
+    //       <span className="artist-label">Crafted by</span>
+    //       <span className="artist-name">{product?.artist_name || 'Artisan'}</span>
+    //     </div>
+
+    //     <span className="pg-num left">{pageNumber}</span>
+    //   </div>
+    // </div>
     <div className="page product-page left-page" ref={ref}>
-      <div className="page-inner">
-        <div className="left-header">
-          <h2 className="left-title">{product.name}</h2>
-          <div className="title-line"></div>
-        </div>
+  <div className="page-inner flex flex-col items-center">
 
-        <div className="left-image-area">
-          <div className="image-box">
-            <img
-              src={getProductImageUrl(product, 'url')}
-              alt={product.name}
-              className="product-img"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-        </div>
+    {/* Title (already correct) */}
+    <div className="left-header flex justify-center w-full">
+      <h2 className="left-title text-3xl font-bold text-black mt-5">
+        {product.name}
+      </h2>
+    </div>
 
-        <div className="artist-info">
-          <span className="artist-label">Crafted by</span>
-          <span className="artist-name">{product?.artist_name || 'Artisan'}</span>
-        </div>
-
-        <span className="pg-num left">{pageNumber}</span>
+    {/* Image Area */}
+    <div className="left-image-area mt-10 w-full flex justify-center">
+      <div className="image-box
+       w-[420px] h-[420px]
+        border-2 border-green-500
+        rounded-xl
+        flex items-center justify-center
+        overflow-hidden
+      ">
+        <img
+          src={getProductImageUrl(product, 'url')}
+          alt={product.name}
+          className="max-w-190 max-h-100 object-contain"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
       </div>
     </div>
+
+    {/* Artist Info */}
+    <div className="artist-info mt-5 flex flex-col items-center text-center">
+      <span className="artist-label text-xs uppercase tracking-wide text-gray-500">
+        Crafted by
+      </span>
+      <span className="artist-name text-lg font-semibold text-black">
+        {product?.artist_name || 'Artisan'}
+      </span>
+    </div>
+
+    <span className="pg-num left">{pageNumber}</span>
+  </div>
+</div>
+
   );
 });
 LeftPage.displayName = 'LeftPage';
@@ -196,67 +242,67 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(
   ({ product, pageNumber, onAddToCart, onAddToWishlist }, ref) => {
     return (
       <div className="page product-page right-page" ref={ref}>
-        <div className="page-inner">
-          <div className="details-container">
-            {/* Description */}
-            <div className="detail-card desc-card">
-              <p className="desc-text">
-                {product.description || 'A beautifully handcrafted eco-friendly product made with sustainable materials.'}
-              </p>
+      <div className="page-inner flex flex-col items-center justify-center min-h-full text-black">
+    
+        <div className="details-container w-full max-w-md flex flex-col items-center text-center">
+    
+          {/* Description */}
+          <div className="w-full bg-white rounded-xl shadow-sm p-5 mb-6">
+            <p className="text-sm leading-relaxed">
+              {product.description ||
+                'A beautifully handcrafted eco-friendly product made with sustainable materials.'}
+            </p>
+          </div>
+    
+          {/* Category & Status */}
+          <div className="flex gap-4 items-center justify-center mb-8">
+            <div className="flex items-center gap-2 px-4 py-2 border border-black rounded-full text-sm">
+              <span>📦</span>
+              <span>{product.category_name || 'Eco Product'}</span>
             </div>
-
-            {/* Category & Status */}
-            <div className="info-row">
-              <div className="category-tag">
-                <span>📦</span>
-                <span>{product.category_name || 'Eco Product'}</span>
-              </div>
-              <div className={`status-tag ${product.is_active ? 'available' : 'unavailable'}`}>
-                <span className="status-dot"></span>
-                <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
-              </div>
-            </div>
-
-            {/* Price Card */}
-            <div className="price-card">
-              <span className="price-label">Price</span>
-              <div className="price-amount">
-                <span className="rupee">₹</span>
-                <span className="amount">{formatPrice(product.price)}</span>
-              </div>
-            </div>
-
-            {/* Stock Info */}
-            {product.stock > 0 && (
-              <div className="stock-info">
-                <span className="stock-num">{product.stock}</span>
-                <span className="stock-label">items in stock</span>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              <button
-                className="action-btn cart-btn"
-                onClick={() => onAddToCart?.(product)}
-                disabled={!product.is_active || product.stock <= 0}
-              >
-                <ShoppingCart className="btn-icon" />
-                Add to Cart
-              </button>
-              <button
-                className="action-btn wishlist-btn"
-                onClick={() => onAddToWishlist?.(product)}
-              >
-                <Heart className="btn-icon" />
-                Wishlist
-              </button>
+    
+            <div className="flex items-center gap-2 px-4 py-2 border border-black rounded-full text-sm">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  product.is_active ? 'bg-black' : 'bg-gray-400'
+                }`}
+              />
+              <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
             </div>
           </div>
-
-          <span className="pg-num right">{pageNumber}</span>
+    
+          {/* Price + Stock Group */}
+          <div className="w-full flex flex-col items-center mt-2">
+    
+            {/* Price */}
+            <div className="w-full bg-white rounded-xl shadow-md p-6 mb-2">
+              <span className="block text-xs uppercase tracking-wide mb-1">
+                Price
+              </span>
+              <div className="flex items-end justify-center gap-1">
+                <span className="text-2xl font-semibold">₹</span>
+                <span className="text-4xl font-bold">
+                  {formatPrice(product.price)}
+                </span>
+              </div>
+            </div>
+    
+            {/* Stock */}
+            {product.stock > 0 && (
+              <div className="text-sm mt-1">
+                <span className="font-semibold">{product.stock}</span>{' '}
+                <span className="opacity-70">items in stock</span>
+              </div>
+            )}
+          </div>
         </div>
+    
+        <span className="pg-num right mt-10">{pageNumber}</span>
       </div>
+    </div>
+    
+    
+
     );
   }
 );
@@ -983,6 +1029,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
         .amount {
           font-size: clamp(1.5rem, 5vw, 2.4rem);
           font-weight: 700;
+          color:rgb(0, 0, 0);
         }
 
         .stock-info {
@@ -997,11 +1044,11 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
 
         .stock-num {
           font-weight: 700;
-          color: #374151;
+          color:rgb(0, 0, 0);
         }
 
         .stock-label {
-          color: #6b7280;
+          color:rgb(0, 0, 0);
         }
 
         .action-buttons {
