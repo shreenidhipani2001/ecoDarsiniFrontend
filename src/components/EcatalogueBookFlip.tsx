@@ -230,6 +230,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(({ product, pag
 });
 LeftPage.displayName = 'LeftPage';
 
+
 // Right Page - Product Details
 interface RightPageProps {
   product: Product;
