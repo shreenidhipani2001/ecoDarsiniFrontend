@@ -60,12 +60,21 @@ interface CartModalProps {
 }
 
 // Helper to get product image URL by matching product_id
+// function getImageForCartItem(cartItem: CartItem, products: Product[]): string {
+//   console.log('Getting image for cart item:', cartItem);  
+//   const product = products.find((p) => p.id === cartItem.product_id);
+//   if (product && product.images && product.images.length > 0) {
+//     return product.images[0].url || product.images[0].card || '';
+//   }
+//   return '';
+// }
 function getImageForCartItem(cartItem: CartItem, products: Product[]): string {
-  const product = products.find((p) => p.id === cartItem.product_id);
-  if (product && product.images && product.images.length > 0) {
-    return product.images[0].url || product.images[0].card || '';
-  }
-  return '';
+  if (!cartItem?.product_id || products.length === 0) return '';
+
+  const product = products.find(p => p.id === cartItem.product_id);
+  if (!product?.images?.length) return '';
+
+  return product.images[0].url || product.images[0].card || '';
 }
 
 export default function CartModal({
@@ -258,8 +267,23 @@ export default function CartModal({
   }
 
   const item = items[currentIndex];
+  if (!item ) {
+  return (
+    <BaseModal title="My Cart" onClose={onClose}>
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        Cart Is Empty
+      </div>
+    </BaseModal>
+  );
+}
   const itemImage = getImageForCartItem(item, products);
-  const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+  // const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+  const totalAmount = Array.isArray(items)
+  ? items.reduce((sum, item) => {
+      const price = parseFloat(item?.total_price ?? '0');
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0)
+  : 0;
 
   return (
     <BaseModal title="My Cart" onClose={onClose}>

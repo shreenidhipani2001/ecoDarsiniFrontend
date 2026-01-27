@@ -147,7 +147,7 @@ export default function DashboardPage() {
       // Just store raw cart items - CartModal will match with products for images
       setCartItems(data || []);
     } catch (err) {
-      console.error('Failed to fetch cart items:', err);
+      console.log('Failed to fetch cart items:', err);
       toast.error('Failed to load cart');
     } finally {
       setCartLoading(false);

@@ -80,6 +80,7 @@ export default function WishlistModal({
     if (!item || !user?.id) return;
 
     setRemoving(true);
+    console.log('Removing item from wishlist:', item.id, 'for user id:', user.id);
 
     try {
       await removeFromWishlist(item.id, Number(user.id));

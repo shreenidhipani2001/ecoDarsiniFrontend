@@ -96,7 +96,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  MapPin,
+  MapPin,Home
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -138,6 +138,12 @@ export default function Sidebar({
   };
 
   const navItems = [
+    {
+      name: 'Home',
+      icon: Home,
+      color: 'text-green-500',
+      key: 'home',
+    },
     {
       name: 'Profile',
       icon: CircleUser,
@@ -200,7 +206,13 @@ export default function Sidebar({
           {navItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => onOpenModal(item.key)}
+              onClick={() => {
+                if (item.key === 'home') {
+                  router.push('/');
+                } else {
+                  onOpenModal(item.key);
+                }
+              }}
               className={`
                 w-full flex items-center rounded-lg transition-colors
                 hover:bg-gray-800 focus:outline-none
@@ -216,10 +228,21 @@ export default function Sidebar({
             </button>
           ))}
         </nav>
+        <button
+  onClick={handleLogout}
+  className={`
+    w-full flex items-center rounded-lg transition-colors
+    hover:bg-red-900/30 text-red-400 hover:text-red-300 focus:outline-none
+    ${isOpen ? 'gap-4 px-4 py-3' : 'justify-center p-3'}
+  `}
+>
+  <LogOut className="w-6 h-6 shrink-0" />
+  {isOpen && <span className="font-medium">Logout</span>}
+</button>
       </div>
 
       {/* Logout Button at Bottom */}
-      <div className="mt-auto p-4 border-t border-gray-700">
+      {/* <div className="mt-auto p-4 border-t border-gray-700">
         <button
           onClick={handleLogout}
           className={`
@@ -231,7 +254,7 @@ export default function Sidebar({
           <LogOut className="w-6 h-6 shrink-0" />
           {isOpen && <span className="font-medium">Logout</span>}
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 }
