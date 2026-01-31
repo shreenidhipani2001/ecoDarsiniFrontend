@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import HomeHeader from '../components/HomeHeader';
+import NavMenu from '../components/NavMenu';
 import HeroBanner from '../components/HeroBanner';
 import FeatureBenefits from '../components/FeatureBenefits';
 import CategoryFilter from '../components/CategoryFilter';
@@ -35,6 +36,8 @@ interface Product {
   stock: number;
   category_id: string;
   category_name?: string;
+  sub_category_id?: string;
+  subcategory_name?: string;
   cms_image_ids: string[];
   images?: ProductImage[];
   artist_name?: string;
@@ -66,6 +69,7 @@ export default function HomePage() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   // Modal state
   const [activeModal, setActiveModal] = useState<ModalType>('none');
@@ -187,29 +191,31 @@ export default function HomePage() {
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === null || product.category_id === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSubcategory =
+      selectedSubcategory === null || product.sub_category_id === selectedSubcategory;
+    return matchesSearch && matchesCategory && matchesSubcategory;
   });
 
-  // Get featured products for hero banner (first 5 products with images)
-  const featuredProducts = products
-    .filter((p) => p.images && p.images.length > 0)
-    .slice(0, 5)
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      price: String(p.price),
-      slug: p.slug,
-      description: p.description,
-      category_name: p.category_name,
-      artist_name: p.artist_name,
-      images: p.images,
-    }));
+  // Handle subcategory selection from NavMenu
+  const handleSubcategorySelect = (subcategoryId: string | null, categoryId: string | null) => {
+    setSelectedSubcategory(subcategoryId);
+    if (categoryId !== null) {
+      setSelectedCategory(categoryId);
+    }
+  };
+
+  // Handle category selection (reset subcategory when category changes)
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory(null);
+  };
 
   // Scroll to products
   const scrollToProducts = () => {
     productGridRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  
   // Handle product actions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleProductAction = async (product: any, actionType: ActionType) => {
@@ -312,11 +318,17 @@ export default function HomePage() {
         onLoginClick={openLoginModal}
       />
 
-      {/* Hero Banner with Featured Products */}
-      <HeroBanner
-        onShopNowClick={scrollToProducts}
-        featuredProducts={featuredProducts}
+      {/* Navigation Menu with Category/Subcategory Dropdowns */}
+      <NavMenu
+        categories={categories}
+        onCategorySelect={handleCategorySelect}
+        onSubcategorySelect={handleSubcategorySelect}
+        selectedCategory={selectedCategory}
+        selectedSubcategory={selectedSubcategory}
       />
+
+      {/* Hero Banner */}
+      <HeroBanner onShopNowClick={scrollToProducts} />
 
       {/* Feature Benefits Bar */}
       <FeatureBenefits />
@@ -325,7 +337,7 @@ export default function HomePage() {
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
+        onCategorySelect={handleCategorySelect}
         loading={categoriesLoading}
       />
 
@@ -370,11 +382,12 @@ export default function HomePage() {
                   ? `No products match "${searchQuery}"`
                   : 'No products available in this category'}
               </p>
-              {(searchQuery || selectedCategory) && (
+              {(searchQuery || selectedCategory || selectedSubcategory) && (
                 <button
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory(null);
+                    setSelectedSubcategory(null);
                   }}
                   className="mt-4 text-green-600 hover:text-green-700 font-medium"
                 >

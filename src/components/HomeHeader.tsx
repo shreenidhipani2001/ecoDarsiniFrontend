@@ -108,14 +108,14 @@ export default function HomeHeader({
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex flex-row items-center gap-1 lg:gap-3">
+            <div className="flex flex-row items-end gap-4 lg:gap-6">
               {/* Wishlist - Desktop */}
               <button
                 onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
-                className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors relative group"
+                className="hidden sm:inline-flex flex-col items-center justify-end p-2 text-gray-600 hover:text-green-600 transition-colors"
                 title="Wishlist"
               >
-                <div className="relative">
+                <div className="relative mb-1">
                   <Heart className="h-6 w-6" />
                   {wishlistCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -123,20 +123,20 @@ export default function HomeHeader({
                     </span>
                   )}
                 </div>
-                <span className="text-xs mt-1 hidden lg:block">Wishlist</span>
+                <span className="text-xs hidden lg:block">Wishlist</span>
               </button>
 
               {/* User/Profile - Desktop */}
               {isAuthenticated ? (
-                <div className="relative flex items-center">
+                <div className="relative">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors"
+                    className="hidden sm:inline-flex flex-col items-center justify-end p-2 text-gray-600 hover:text-green-600 transition-colors"
                   >
-                    <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="h-6 w-6 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-xs mb-1">
                       {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
-                    <span className="text-xs mt-1 hidden lg:block truncate max-w-[60px]">
+                    <span className="text-xs hidden lg:block truncate max-w-[50px]">
                       {user?.name || 'User'}
                     </span>
                   </button>
@@ -164,20 +164,20 @@ export default function HomeHeader({
               ) : (
                 <button
                   onClick={onLoginClick}
-                  className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors"
+                  className="hidden sm:inline-flex flex-col items-center justify-end p-2 text-gray-600 hover:text-green-600 transition-colors"
                 >
-                  <User className="h-6 w-6" />
-                  <span className="text-xs mt-1 hidden lg:block">Login</span>
+                  <User className="h-6 w-6 mb-1" />
+                  <span className="text-xs hidden lg:block">Login</span>
                 </button>
               )}
 
               {/* Cart - Desktop */}
               <button
                 onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
-                className="hidden sm:inline-flex items-center gap-2 p-2 text-gray-600 hover:text-green-600 transition-colors relative group"
+                className="hidden sm:inline-flex flex-col items-center justify-end p-2 text-gray-600 hover:text-green-600 transition-colors"
                 title="Cart"
               >
-                <div className="relative">
+                <div className="relative mb-1">
                   <ShoppingCart className="h-6 w-6" />
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -185,12 +185,7 @@ export default function HomeHeader({
                     </span>
                   )}
                 </div>
-                <div className="hidden lg:flex flex-col items-start">
-                  <span className="text-xs text-gray-500">My Cart</span>
-                  <span className="text-sm font-semibold text-gray-800">
-                    {cartCount} items
-                  </span>
-                </div>
+                <span className="text-xs hidden lg:block">My Cart</span>
               </button>
 
               {/* Mobile Menu Toggle */}

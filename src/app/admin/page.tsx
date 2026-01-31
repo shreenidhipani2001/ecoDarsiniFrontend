@@ -18,6 +18,12 @@ type Category = {
   name: string;
 };
 
+type Subcategory = {
+  id: string;
+  name: string;
+  category_id: string;
+};
+
 type ProductFormData = {
   name: string;
   slug: string;
@@ -25,6 +31,7 @@ type ProductFormData = {
   price: string;
   stock: string;
   category_id: string;
+  sub_category_id: string;
   artist_name: string;
 };
 
@@ -35,6 +42,7 @@ const initialFormData: ProductFormData = {
   price: "",
   stock: "",
   category_id: "",
+  sub_category_id: "",
   artist_name: "",
 };
 
@@ -47,6 +55,8 @@ export default function AdminLayout() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [catalogueKey, setCatalogueKey] = useState(0);
 
@@ -70,6 +80,35 @@ export default function AdminLayout() {
     fetchCategories();
   }, []);
 
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!formData.category_id) {
+        setSubcategories([]);
+        return;
+      }
+
+      setLoadingSubcategories(true);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) return;
+
+        const res = await fetch(`${apiUrl}/api/subcategories/category/${formData.category_id}`);
+        if (!res.ok) throw new Error('Failed to fetch subcategories');
+
+        const data = await res.json();
+        setSubcategories(Array.isArray(data) ? data : data?.subcategories || []);
+      } catch (err) {
+        console.error('Failed to fetch subcategories:', err);
+        setSubcategories([]);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    };
+
+    fetchSubcategories();
+  }, [formData.category_id]);
+
   const handleAddProduct = () => {
     if (!isAdmin) {
       toast.error("You do not have permission to add products.");
@@ -92,6 +131,11 @@ export default function AdminLayout() {
     if (name === 'name') {
       const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       setFormData(prev => ({ ...prev, slug }));
+    }
+
+    // Reset subcategory when category changes
+    if (name === 'category_id') {
+      setFormData(prev => ({ ...prev, sub_category_id: '' }));
     }
   };
 
@@ -123,6 +167,7 @@ export default function AdminLayout() {
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
           category_id: formData.category_id,
+          sub_category_id: formData.sub_category_id || null,
           cms_image_ids: [],
           artist_name: formData.artist_name,
           added_by: user?.id,
@@ -318,6 +363,35 @@ export default function AdminLayout() {
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subcategory Dropdown */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subcategory
+                </label>
+                <select
+                  name="sub_category_id"
+                  value={formData.sub_category_id}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={!formData.category_id || loadingSubcategories}
+                >
+                  <option value="">
+                    {!formData.category_id
+                      ? 'Select a category first'
+                      : loadingSubcategories
+                        ? 'Loading...'
+                        : subcategories.length === 0
+                          ? 'No subcategories available'
+                          : 'Select a subcategory'}
+                  </option>
+                  {subcategories.map((subcategory) => (
+                    <option key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
                     </option>
                   ))}
                 </select>
