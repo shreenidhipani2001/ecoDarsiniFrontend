@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
 interface Category {
   id: string;
   name: string;
+  slug?: string;
+  cms_image_id?: string;
 }
 
 interface CategoryFilterProps {
@@ -13,6 +15,25 @@ interface CategoryFilterProps {
   selectedCategory: string | null;
   onCategorySelect: (categoryId: string | null) => void;
   loading?: boolean;
+}
+
+// Category icon/color mapping for visual distinction
+const categoryStyles: Record<string, { bg: string; icon: string }> = {
+  'pottery-ceramics': { bg: 'bg-orange-100', icon: '🏺' },
+  'tribal-paintings': { bg: 'bg-amber-100', icon: '🎨' },
+  'brass-artifacts': { bg: 'bg-yellow-100', icon: '🔔' },
+  'wooden-crafts': { bg: 'bg-emerald-100', icon: '🪵' },
+  'textiles': { bg: 'bg-pink-100', icon: '🧵' },
+  'jewelry': { bg: 'bg-purple-100', icon: '💎' },
+  'home-decor': { bg: 'bg-blue-100', icon: '🏠' },
+  'default': { bg: 'bg-green-100', icon: '🌿' },
+};
+
+function getCategoryStyle(slug?: string) {
+  if (slug && categoryStyles[slug]) {
+    return categoryStyles[slug];
+  }
+  return categoryStyles.default;
 }
 
 export default function CategoryFilter({
@@ -55,14 +76,17 @@ export default function CategoryFilter({
 
   if (loading) {
     return (
-      <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex gap-3 overflow-hidden">
+      <section className="bg-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Top Categories</h2>
+          </div>
+          <div className="flex gap-6 overflow-hidden">
             {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="h-10 w-24 bg-gray-200 rounded-full animate-pulse flex-shrink-0"
-              />
+              <div key={i} className="flex flex-col items-center gap-3 flex-shrink-0">
+                <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+              </div>
             ))}
           </div>
         </div>
@@ -71,64 +95,133 @@ export default function CategoryFilter({
   }
 
   return (
-    <section className="bg-white border-b border-gray-100 sticky top-16 lg:top-20 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="relative flex items-center">
-          {/* Left Arrow */}
-          {showLeftArrow && (
+    <section className="bg-white py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Top Categories</h2>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => scroll('left')}
-              className="absolute left-0 z-10 h-10 w-10 bg-white shadow-md rounded-full flex items-center justify-center text-gray-600 hover:text-green-600 transition-colors -ml-2"
+              disabled={!showLeftArrow}
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
+                showLeftArrow
+                  ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                  : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              }`}
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-          )}
-
-          {/* Categories Container */}
-          <div
-            ref={scrollContainerRef}
-            onScroll={checkScrollButtons}
-            className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth px-1"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {/* All Categories Button */}
-            <button
-              onClick={() => onCategorySelect(null)}
-              className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                selectedCategory === null
-                  ? 'bg-green-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Grid3X3 className="h-4 w-4" />
-              All Products
-            </button>
-
-            {/* Category Buttons */}
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => onCategorySelect(category.id)}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                  selectedCategory === category.id
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Right Arrow */}
-          {showRightArrow && (
             <button
               onClick={() => scroll('right')}
-              className="absolute right-0 z-10 h-10 w-10 bg-white shadow-md rounded-full flex items-center justify-center text-gray-600 hover:text-green-600 transition-colors -mr-2"
+              disabled={!showRightArrow}
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
+                showRightArrow
+                  ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                  : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              }`}
             >
               <ChevronRight className="h-5 w-5" />
             </button>
-          )}
+          </div>
+        </div>
+
+        {/* Categories Carousel */}
+        <div className="relative">
+          <div
+            ref={scrollContainerRef}
+            onScroll={checkScrollButtons}
+            className="flex gap-6 lg:gap-8 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {/* All Products */}
+            <button
+              onClick={() => onCategorySelect(null)}
+              className="flex flex-col items-center gap-3 flex-shrink-0 group"
+            >
+              <div
+                className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center transition-all ${
+                  selectedCategory === null
+                    ? 'bg-green-600 ring-2 ring-green-600 ring-offset-2'
+                    : 'bg-gray-100 hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
+                }`}
+              >
+                <Grid3X3
+                  className={`h-8 w-8 lg:h-10 lg:w-10 ${
+                    selectedCategory === null ? 'text-white' : 'text-green-600'
+                  }`}
+                />
+              </div>
+              <span
+                className={`text-sm font-medium text-center ${
+                  selectedCategory === null ? 'text-green-600' : 'text-gray-700'
+                }`}
+              >
+                All Products
+              </span>
+            </button>
+
+            {/* Category Items */}
+            {categories.map((category) => {
+              const style = getCategoryStyle(category.slug);
+              const isSelected = selectedCategory === category.id;
+
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => onCategorySelect(category.id)}
+                  className="flex flex-col items-center gap-3 flex-shrink-0 group"
+                >
+                  <div
+                    className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-green-600 ring-offset-2'
+                        : 'group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
+                    } ${style.bg}`}
+                  >
+                    <span className="text-3xl lg:text-4xl">{style.icon}</span>
+                    {isSelected && (
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <span
+                    className={`text-sm font-medium text-center max-w-[80px] lg:max-w-[96px] truncate ${
+                      isSelected ? 'text-green-600' : 'text-gray-700'
+                    }`}
+                  >
+                    {category.name}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* View More */}
+            <button
+              onClick={() => onCategorySelect(null)}
+              className="flex flex-col items-center gap-3 flex-shrink-0 group"
+            >
+              <div className="relative w-20 h-20 lg:w-24 lg:h-24 rounded-full border-2 border-dashed border-green-300 flex items-center justify-center transition-all hover:border-green-500 hover:bg-green-50">
+                <span className="text-green-600 font-medium text-sm">View More</span>
+              </div>
+              <span className="text-sm font-medium text-green-600 hover:underline">
+                Browse All
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

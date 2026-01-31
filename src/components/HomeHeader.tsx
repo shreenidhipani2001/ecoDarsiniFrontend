@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingCart, Heart, User, LogOut, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, LogOut, Menu, X, Mail, Phone } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
 interface HomeHeaderProps {
@@ -50,158 +50,223 @@ export default function HomeHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <h1
-              className="text-2xl lg:text-3xl font-bold text-green-600 cursor-pointer"
-              onClick={() => router.push('/')}
-            >
-              EcoDarshini
-            </h1>
+    <header className="sticky top-0 z-50">
+      {/* Top Promotional Bar */}
+      <div className="bg-green-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-10 text-sm">
+            <div className="flex items-center gap-6">
+              <span className="font-medium">Get 20% Off On Your First Order!</span>
+              <div className="hidden md:flex items-center gap-4 text-green-100">
+                <a href="mailto:support@ecodarshini.com" className="flex items-center gap-1 hover:text-white transition-colors">
+                  <Mail className="h-3.5 w-3.5" />
+                  <span>support@ecodarshini.com</span>
+                </a>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-green-100">
+              <a href="tel:+919876543210" className="hidden sm:flex items-center gap-1 hover:text-white transition-colors">
+                <Phone className="h-3.5 w-3.5" />
+                <span>+91 98765 43210</span>
+              </a>
+              <span className="text-green-300">|</span>
+              <span>India (INR ₹)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <h1
+                className="text-2xl lg:text-3xl font-bold text-green-600 cursor-pointer"
+                onClick={() => router.push('/')}
+              >
+                EcoDarshini
+              </h1>
+            </div>
+
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <div className="relative w-full flex">
+                <input
+                  type="text"
+                  placeholder="Search for eco-friendly products..."
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                />
+                <button className="px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-r-lg transition-colors flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  <span className="hidden lg:inline">SEARCH</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="flex flex-row items-center gap-1 lg:gap-3">
+              {/* Wishlist - Desktop */}
+              <button
+                onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors relative group"
+                title="Wishlist"
+              >
+                <div className="relative">
+                  <Heart className="h-6 w-6" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistCount > 9 ? '9+' : wishlistCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs mt-1 hidden lg:block">Wishlist</span>
+              </button>
+
+              {/* User/Profile - Desktop */}
+              {isAuthenticated ? (
+                <div className="relative flex items-center">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors"
+                  >
+                    <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold text-sm">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="text-xs mt-1 hidden lg:block truncate max-w-[60px]">
+                      {user?.name || 'User'}
+                    </span>
+                  </button>
+
+                  {/* Profile Dropdown */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                      <button
+                        onClick={handleDashboardClick}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <User className="h-4 w-4" />
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={onLoginClick}
+                  className="hidden sm:inline-flex flex-col items-center justify-center p-2 text-gray-600 hover:text-green-600 transition-colors"
+                >
+                  <User className="h-6 w-6" />
+                  <span className="text-xs mt-1 hidden lg:block">Login</span>
+                </button>
+              )}
+
+              {/* Cart - Desktop */}
+              <button
+                onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                className="hidden sm:inline-flex items-center gap-2 p-2 text-gray-600 hover:text-green-600 transition-colors relative group"
+                title="Cart"
+              >
+                <div className="relative">
+                  <ShoppingCart className="h-6 w-6" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </div>
+                <div className="hidden lg:flex flex-col items-start">
+                  <span className="text-xs text-gray-500">My Cart</span>
+                  <span className="text-sm font-semibold text-gray-800">
+                    {cartCount} items
+                  </span>
+                </div>
+              </button>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-gray-600 hover:text-green-600"
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
+          {/* Mobile Search Bar */}
+          <div className="md:hidden pb-4">
+            <div className="relative flex">
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                className="w-full pl-4 pr-4 py-2.5 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <button className="px-4 bg-green-600 hover:bg-green-700 text-white rounded-r-lg transition-colors">
+                <Search className="h-5 w-5" />
+              </button>
             </div>
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center gap-2 lg:gap-4">
-            {/* Wishlist - Desktop */}
-            {isAuthenticated && (
-              <button
-                onClick={handleDashboardClick}
-                className="hidden sm:flex items-center gap-1 p-2 text-gray-600 hover:text-green-600 transition-colors relative"
-                title="Wishlist"
-              >
-                <Heart className="h-6 w-6" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Cart - Desktop */}
-            {isAuthenticated && (
-              <button
-                onClick={handleDashboardClick}
-                className="hidden sm:flex items-center gap-1 p-2 text-gray-600 hover:text-green-600 transition-colors relative"
-                title="Cart"
-              >
-                <ShoppingCart className="h-6 w-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Login/Profile Button */}
-            {isAuthenticated ? (
-              <div className="relative">
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-100 py-4">
+              <div className="flex flex-col gap-3">
                 <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 p-2 text-gray-600 hover:text-green-600 transition-colors"
-                >
-                  <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <span className="hidden lg:block text-sm font-medium">
-                    {user?.name || 'User'}
-                  </span>
-                </button>
-
-                {/* Profile Dropdown */}
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                    <button
-                      onClick={handleDashboardClick}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <User className="h-4 w-4" />
-                      Dashboard
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={onLoginClick}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm"
-              >
-                Login
-              </button>
-            )}
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-600 hover:text-green-600"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 py-4">
-            {isAuthenticated && (
-              <div className="flex items-center gap-4 mb-4">
-                <button
-                  onClick={handleDashboardClick}
-                  className="flex items-center gap-2 text-gray-600"
+                  onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                  className="flex items-center gap-3 text-gray-600 py-2"
                 >
                   <Heart className="h-5 w-5" />
                   <span>Wishlist ({wishlistCount})</span>
                 </button>
                 <button
-                  onClick={handleDashboardClick}
-                  className="flex items-center gap-2 text-gray-600"
+                  onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                  className="flex items-center gap-3 text-gray-600 py-2"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span>Cart ({cartCount})</span>
                 </button>
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={handleDashboardClick}
+                      className="flex items-center gap-3 text-gray-600 py-2"
+                    >
+                      <User className="h-5 w-5" />
+                      <span>Dashboard</span>
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 text-red-600 py-2"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={onLoginClick}
+                    className="flex items-center gap-3 text-green-600 font-medium py-2"
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Login / Sign Up</span>
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Click outside to close dropdown */}

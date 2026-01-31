@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import HomeHeader from '../components/HomeHeader';
 import HeroBanner from '../components/HeroBanner';
+import FeatureBenefits from '../components/FeatureBenefits';
 import CategoryFilter from '../components/CategoryFilter';
 import HomeProductCard from '../components/HomeProductCard';
 import HomeFooter from '../components/HomeFooter';
@@ -44,6 +45,8 @@ interface Product {
 interface Category {
   id: string;
   name: string;
+  slug?: string;
+  cms_image_id?: string;
 }
 
 type ModalType = 'none' | 'authPrompt' | 'login' | 'register';
@@ -187,6 +190,21 @@ export default function HomePage() {
     return matchesSearch && matchesCategory;
   });
 
+  // Get featured products for hero banner (first 5 products with images)
+  const featuredProducts = products
+    .filter((p) => p.images && p.images.length > 0)
+    .slice(0, 5)
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: String(p.price),
+      slug: p.slug,
+      description: p.description,
+      category_name: p.category_name,
+      artist_name: p.artist_name,
+      images: p.images,
+    }));
+
   // Scroll to products
   const scrollToProducts = () => {
     productGridRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -294,8 +312,14 @@ export default function HomePage() {
         onLoginClick={openLoginModal}
       />
 
-      {/* Hero Banner */}
-      <HeroBanner onShopNowClick={scrollToProducts} />
+      {/* Hero Banner with Featured Products */}
+      <HeroBanner
+        onShopNowClick={scrollToProducts}
+        featuredProducts={featuredProducts}
+      />
+
+      {/* Feature Benefits Bar */}
+      <FeatureBenefits />
 
       {/* Category Filter */}
       <CategoryFilter
@@ -306,61 +330,72 @@ export default function HomePage() {
       />
 
       {/* Products Section */}
-      <section ref={productGridRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Section Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              {selectedCategory
-                ? categories.find((c) => c.id === selectedCategory)?.name || 'Products'
-                : 'All Products'}
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-            </p>
+      <section ref={productGridRef} className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedCategory
+                  ? categories.find((c) => c.id === selectedCategory)?.name || 'Products'
+                  : 'Our Products'}
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
+              <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <option>Featured</option>
+                <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
+                <option>Newest</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        {/* Products Grid */}
-        {productsLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-            <span className="ml-3 text-gray-500">Loading products...</span>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-gray-400 text-6xl mb-4">🌱</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-500">
-              {searchQuery
-                ? `No products match "${searchQuery}"`
-                : 'No products available in this category'}
-            </p>
-            {(searchQuery || selectedCategory) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory(null);
-                }}
-                className="mt-4 text-green-600 hover:text-green-700 font-medium"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <HomeProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={(p) => handleProductAction(p, 'cart')}
-                onBuyNow={(p) => handleProductAction(p, 'buy')}
-                onAddToWishlist={(p) => handleProductAction(p, 'wishlist')}
-              />
-            ))}
-          </div>
-        )}
+          {/* Products Grid */}
+          {productsLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+              <span className="ml-3 text-gray-500">Loading products...</span>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-gray-400 text-6xl mb-4">🌱</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-500">
+                {searchQuery
+                  ? `No products match "${searchQuery}"`
+                  : 'No products available in this category'}
+              </p>
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory(null);
+                  }}
+                  className="mt-4 text-green-600 hover:text-green-700 font-medium"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <HomeProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={(p) => handleProductAction(p, 'cart')}
+                  onBuyNow={(p) => handleProductAction(p, 'buy')}
+                  onAddToWishlist={(p) => handleProductAction(p, 'wishlist')}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Footer */}
