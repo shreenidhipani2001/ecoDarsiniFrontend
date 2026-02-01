@@ -21,6 +21,8 @@ import AboutSection from '../components/AboutSection';
 import BlogsSection from '../components/BlogsSection';
 import EcatalogueBookFlip from '../components/EcatalogueBookFlip';
 import EventsSection from '../components/EventsSection';
+import HomeProductDetailModal from '../components/HomeProductDetailModal';
+import WhatsAppChat from '../components/WhatsAppChat';
 
 interface ProductImage {
   id: string;
@@ -72,6 +74,11 @@ export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const productGridRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLDivElement>(null);
+  const ecatalogueRef = useRef<HTMLDivElement>(null);
+  const blogsRef = useRef<HTMLDivElement>(null);
 
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,6 +111,7 @@ export default function HomePage() {
   const [wishlistCount, setWishlistCount] = useState(0);
 
   const [imageError, setImageError] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -221,13 +229,32 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
 
   const handleSectionChange = (section: SectionType) => {
     setActiveSection(section);
-  
-    // optional scroll
-    if (section === 'products') {
-      scrollToProducts();
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+
+    // Scroll to the corresponding section
+    setTimeout(() => {
+      switch (section) {
+        case 'products':
+          productGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'about':
+          aboutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'events':
+          eventsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'contact':
+          contactRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'ecatalogue':
+          ecatalogueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'blogs':
+          blogsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        default:
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100); // Small delay to ensure DOM is updated
   };
 
   // Cart & Wishlist counts
@@ -413,11 +440,31 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
 
       
 
-      {activeSection === 'about' && <AboutSection />}
-      {activeSection === 'events' && <EventsSection />}
-      {activeSection === 'contact' && <Contact />}
-      {activeSection === 'ecatalogue' && <EcatalogueBookFlip />}
-      {activeSection === 'blogs' && <BlogsSection />}
+      {activeSection === 'about' && (
+        <div ref={aboutRef}>
+          <AboutSection />
+        </div>
+      )}
+      {activeSection === 'events' && (
+        <div ref={eventsRef}>
+          <EventsSection />
+        </div>
+      )}
+      {activeSection === 'contact' && (
+        <div ref={contactRef}>
+          <Contact />
+        </div>
+      )}
+      {activeSection === 'ecatalogue' && (
+        <div ref={ecatalogueRef}>
+          <EcatalogueBookFlip />
+        </div>
+      )}
+      {activeSection === 'blogs' && (
+        <div ref={blogsRef}>
+          <BlogsSection />
+        </div>
+      )}
 
 
       {activeSection === 'products' && (
@@ -484,13 +531,18 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <HomeProductCard
+                <div
                   key={product.id}
-                  product={product}
-                  onAddToCart={() => handleProductAction(product, 'cart')}
-                  onBuyNow={() => handleProductAction(product, 'buy')}
-                  onAddToWishlist={() => handleProductAction(product, 'wishlist')}
-                />
+                  onClick={() => setSelectedProduct(product)}
+                  className="cursor-pointer"
+                >
+                  <HomeProductCard
+                    product={product}
+                    onAddToCart={() => handleProductAction(product, 'cart')}
+                    onBuyNow={() => handleProductAction(product, 'buy')}
+                    onAddToWishlist={() => handleProductAction(product, 'wishlist')}
+                  />
+                </div>
               ))}
             </div>
 
@@ -555,6 +607,28 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onBackToPrompt={pendingAction ? handleBackToPrompt : undefined}
         onSwitchToLogin={handleSwitchToLogin}
       />
+      {/* WhatsApp Chat Widget */}
+<WhatsAppChat phoneNumber="+919876543210" message="Hello! I need support." />
+
+
+      {/* Home Product Detail Modal */}
+      {selectedProduct && (
+        <HomeProductDetailModal
+          product={selectedProduct}
+          imageUrl={
+            selectedProduct.images && selectedProduct.images.length > 0
+              ? selectedProduct.images[0].card || selectedProduct.images[0].url || ''
+              : ''
+          }
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={(product) => {
+            handleProductAction(product, 'cart');
+          }}
+          onAddToWishlist={(product) => {
+            handleProductAction(product, 'wishlist');
+          }}
+        />
+      )}
     </div>
   );
 }

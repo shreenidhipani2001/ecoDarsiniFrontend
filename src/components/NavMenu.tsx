@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Menu, Book, Phone, Home } from 'lucide-react';
+import { ChevronRight,Clipboard,Package,CalendarDays, Menu, Book, Phone, Home } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -107,8 +107,17 @@ export default function NavMenu({
       <nav className="bg-black-600 text-black">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center h-12 gap-3">
-            <div className="h-8 w-8 bg-gray-400 rounded animate-pulse" />
-            <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+
+          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
           </div>
         </div>
       </nav>
@@ -126,12 +135,13 @@ export default function NavMenu({
           <div className="relative">
             <button
               onClick={toggleMoreDropdown}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors ${
-                activeMoreDropdown ? 'bg-green-700' : ''
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium hover:bg-gray-200  rounded-b-lg transition-colors ${
+                activeMoreDropdown ? 'bg-gray-300' : ''
               }`}
+              title="Categories"
             >
-              <Menu className="h-4 w-4" />
-              Categories
+              <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Categories</span>
             </button>
 
             {activeMoreDropdown && (
@@ -212,27 +222,33 @@ export default function NavMenu({
             <Book className="h-4 w-4" /> Blogs
           </button> */}
 
-                  <button onClick={() => onSectionChange('about')} className="navBtn">
-                    <Home className="h-4 w-4" /> About Us
+                  <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
+                    <Home className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">About Us</span>
                   </button>
-                  <button onClick={() => onSectionChange('products')} className="navBtn">
-                    <Book className="h-4 w-4" /> Products
-                  </button>
-
-                  <button onClick={() => onSectionChange('events')} className="navBtn">
-                    <Home className="h-4 w-4" /> Events
+                  <button onClick={() => onSectionChange('products')} className="navBtn" title="Products">
+                    <Package className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Products</span>
                   </button>
 
-                  <button onClick={() => onSectionChange('contact')} className="navBtn">
-                    <Phone className="h-4 w-4" /> Contact Us
+                  <button onClick={() => onSectionChange('events')} className="navBtn" title="Events">
+                    <CalendarDays className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Events</span>
                   </button>
 
-                  <button onClick={() => onSectionChange('ecatalogue')} className="navBtn">
-                    <Book className="h-4 w-4" /> Ecatalogue
+                  <button onClick={() => onSectionChange('contact')} className="navBtn" title="Contact Us">
+                    <Phone className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Contact Us</span>
                   </button>
 
-                  <button onClick={() => onSectionChange('blogs')} className="navBtn">
-                    <Book className="h-4 w-4" /> Blogs
+                  <button onClick={() => onSectionChange('ecatalogue')} className="navBtn" title="Ecatalogue">
+                    <Book className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Ecatalogue</span>
+                  </button>
+
+                  <button onClick={() => onSectionChange('blogs')} className="navBtn" title="Blogs">
+                    <Clipboard className="h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Blogs</span>
                   </button>
 
         </div>
@@ -243,8 +259,9 @@ export default function NavMenu({
         .navBtn {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 6px;
-          padding: 8px 12px;
+          padding: 10px;
           font-size: 14px;
           font-weight: 500;
           border-radius: 6px;
@@ -252,6 +269,12 @@ export default function NavMenu({
         }
         .navBtn:hover {
           background: #e5e7eb;
+        }
+        @media (min-width: 640px) {
+          .navBtn {
+            padding: 8px 12px;
+            justify-content: flex-start;
+          }
         }
       `}</style>
     </nav>
