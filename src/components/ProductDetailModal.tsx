@@ -1,12 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Save, Edit3, Eye, Camera } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Save, Edit3, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Logo from '../../public/svg/Logo';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
-// const { isAuthenticated, user } = useAuthStore();
+
+type Category = {
+  id: string;
+  name: string;
+};
+
+type Subcategory = {
+  id: string;
+  name: string;
+  category_id: string;
+};
 
 
 
@@ -27,6 +36,9 @@ type Product = {
   price: number;
   stock: number;
   category_id: string;
+  category_name?: string;
+  sub_category_id?: string;
+  subcategory_name?: string;
   cms_image_ids: string[];
   images?: ProductImage[];
   artist_name?: string;
@@ -36,6 +48,7 @@ type Product = {
 
 interface Props {
   product: Product;
+  showEdit:boolean;
   imageUrl: string;
   isAdmin: boolean;
   onClose: () => void;
@@ -48,6 +61,7 @@ export default function ProductDetailModal({
   isAdmin,
   onClose,
   onProductUpdate,
+  showEdit
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,10 +71,59 @@ export default function ProductDetailModal({
     description: product.description || '',
     price: product.price,
     stock: product.stock,
+    category_id: product.category_id,
+    sub_category_id: product.sub_category_id || '',
     artist_name: product.artist_name || '',
     is_active: product.is_active,
   });
   const { user } = useAuthStore();
+
+  // Categories and subcategories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) return;
+        const res = await fetch(`${apiUrl}/api/categories/`);
+        if (!res.ok) throw new Error('Failed to fetch categories');
+        const data = await res.json();
+        setCategories(Array.isArray(data) ? data : data?.categories || []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!formData.category_id) {
+        setSubcategories([]);
+        return;
+      }
+      setLoadingSubcategories(true);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) return;
+        const res = await fetch(`${apiUrl}/api/subcategories/category/${formData.category_id}`);
+        if (!res.ok) throw new Error('Failed to fetch subcategories');
+        const data = await res.json();
+        setSubcategories(Array.isArray(data) ? data : data?.subcategories || []);
+      } catch (err) {
+        console.error('Failed to fetch subcategories:', err);
+        setSubcategories([]);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    };
+    fetchSubcategories();
+  }, [formData.category_id]);
 
   // Review modal state
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -79,6 +142,11 @@ export default function ProductDetailModal({
       setFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
+    // Reset subcategory when category changes
+    if (name === 'category_id') {
+      setFormData((prev) => ({ ...prev, sub_category_id: '' }));
     }
   };
 
@@ -244,6 +312,8 @@ export default function ProductDetailModal({
             description: formData?.description,
             price: formData?.price,
             stock: formData?.stock,
+            category_id: formData?.category_id,
+            sub_category_id: formData?.sub_category_id || null,
             artist_name: formData?.artist_name,
             is_active: formData?.is_active,
           }),
@@ -278,6 +348,8 @@ export default function ProductDetailModal({
       description: product.description || '',
       price: product.price,
       stock: product.stock,
+      category_id: product.category_id,
+      sub_category_id: product.sub_category_id || '',
       artist_name: product.artist_name || '',
       is_active: product.is_active,
     });
@@ -386,7 +458,7 @@ export default function ProductDetailModal({
               </div>
 
               {/* Slug */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Slug
                 </label>
@@ -401,6 +473,63 @@ export default function ProductDetailModal({
                 ) : (
                   <p className="text-gray-700">{product.slug}</p>
                 )}
+              </div> */}
+
+              {/* Category & Subcategory Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    Category
+                  </label>
+                  {isAdmin && isEditing ? (
+                    <select
+                      name="category_id"
+                      value={formData.category_id}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black"
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-gray-700">{product.category_name || 'Not specified'}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    Subcategory
+                  </label>
+                  {isAdmin && isEditing ? (
+                    <select
+                      name="sub_category_id"
+                      value={formData.sub_category_id}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      disabled={!formData.category_id || loadingSubcategories}
+                    >
+                      <option value="">
+                        {!formData.category_id
+                          ? 'Select category first'
+                          : loadingSubcategories
+                            ? 'Loading...'
+                            : subcategories.length === 0
+                              ? 'No subcategories'
+                              : 'Select subcategory'}
+                      </option>
+                      {subcategories.map((subcategory) => (
+                        <option key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-gray-700">{product.subcategory_name || 'Not specified'}</p>
+                  )}
+                </div>
               </div>
 
               {/* Price & Stock Row */}
@@ -529,86 +658,90 @@ export default function ProductDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-green-700">
-          {isAdmin ? (
-            <div className="flex justify-end gap-3">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleCancel}
-                    disabled={loading}
-                    className="px-6 py-2 rounded-lg border bg-slate-100 text-slate-900 hover:bg-slate-300 transition disabled:opacity-50"
-                    // className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2 disabled:opacity-50"
-                    // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={18} />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 rounded-lg bg-white text-green-800 hover:bg-slate-300 transition flex items-center gap-2"
-                  // className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2"
-                  // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
-                >
-                  <Edit3 size={18} />
-                  Edit Product
-                </button>
-              )}
-            </div>
-          ) : (
-            // <div className="flex justify-end">
-            //   <Logo className="w-12 h-auto text-green-400" />
-            // </div>
-            <div className="flex ml-27 justify-end gap-3 w-150 ">
-                   <button
-                      onClick={() => setShowReviewModal(true)}
-                      disabled={loading}
-                      className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                    <Camera color="white" size={22} />
-                   Add a Review
-                  </button>
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={loading}
-                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <ShoppingCart size={20} />
-                    Add to Cart
-                  </button>
+        {showEdit && (
+  <div className="p-4 border-t bg-green-700">
+  {isAdmin ? (
+    <div className="flex justify-end gap-3">
+      {isEditing ? (
+        <>
+          <button
+            onClick={handleCancel}
+            disabled={loading}
+            className="px-6 py-2 rounded-lg border bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition disabled:opacity-50"
+            // className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-6 py-2 rounded-lg bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition flex items-center gap-2 disabled:opacity-50"
+            // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                Save Changes
+              </>
+            )}
+          </button>
+        </>
+      ) : (
+        
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-6 py-2 rounded-lg bg-white text-green-800 hover:bg-neutral-300 transition flex items-center gap-2"
+          // className="px-6 py-2 rounded-lg bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition flex items-center gap-2"
+          // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
+        >
+          <Edit3 size={18} />
+          Edit Product
+        </button>
+      )}
+    </div>
+  ) : (
+    // <div className="flex justify-end">
+    //   <Logo className="w-12 h-auto text-green-400" />
+    // </div>
+    <div className="flex ml-27 justify-end gap-3 w-150 ">
+           <button
+              onClick={() => setShowReviewModal(true)}
+              disabled={loading}
+              className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+            <Camera color="white" size={22} />
+           Add a Review
+          </button>
+          <button
+            onClick={handleAddToCart}
+            disabled={loading}
+            className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <ShoppingCart size={20} />
+            Add to Cart
+          </button>
 
-                  <button
-                    onClick={handleAddToWishlist}
-                    disabled={loading}
-                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                    // className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
-                    title="Add to Wishlist"
-                  >
-                    <Heart size={22} className="text-white" />
-                    Add to Wishlist
-                  </button>
-            </div>
-          )
-          }
-        </div>
+          <button
+            onClick={handleAddToWishlist}
+            disabled={loading}
+            className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            // className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
+            title="Add to Wishlist"
+          >
+            <Heart size={22} className="text-white" />
+            Add to Wishlist
+          </button>
+    </div>
+  )
+  }
+</div>
+)}
+       
       </div>
 
       {/* Review Modal */}

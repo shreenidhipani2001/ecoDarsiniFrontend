@@ -217,9 +217,11 @@ import { useAuthStore } from '../store/useAuthStore';
 export default function ProfileModal({
   user,
   onClose,
+  inline = false,
 }: {
   user: any;
   onClose: () => void;
+  inline?: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -232,9 +234,14 @@ export default function ProfileModal({
     password: '',
   });
 
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    if (inline) {
+      return <div className="bg-white rounded-xl p-6">{children}</div>;
+    }
+    return <BaseModal title="My Profile" onClose={onClose}>{children}</BaseModal>;
+  };
+
   if (!user) return null;
-console.log('Rendering ProfileModal for user:', user);
-console.log('Initial formData:', formData);
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -284,7 +291,7 @@ console.log('Initial formData:', formData);
   };
 
   return (
-    <BaseModal title="My Profile" onClose={onClose}>
+    <Wrapper>
       <div className="flex flex-col md:flex-row gap-6 bg-emerald-50 p-8 rounded-2xl shadow-xl">
       {/* <div className="
   flex flex-col md:flex-row gap-6
@@ -406,6 +413,6 @@ console.log('Initial formData:', formData);
           )}
         </div>
       </div>
-    </BaseModal>
+    </Wrapper>
   );
 }

@@ -57,6 +57,8 @@ interface CartModalProps {
   loading: boolean;
   onClose: () => void;
   onItemRemoved: (itemId: string) => void;
+  inline?: boolean;
+  onIndexChange?: (index: number) => void;
 }
 
 // Helper to get product image URL by matching product_id
@@ -83,8 +85,16 @@ export default function CartModal({
   loading,
   onClose,
   onItemRemoved,
+  inline = false,
+  onIndexChange,
 }: CartModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Notify parent when index changes (for lazy loading)
+  const handleIndexChange = (newIndex: number) => {
+    setCurrentIndex(newIndex);
+    onIndexChange?.(newIndex);
+  };
   const [removing, setRemoving] = useState(false);
   const [processing, setProcessing] = useState(false);
   const { user } = useAuthStore();
@@ -245,37 +255,44 @@ export default function CartModal({
     }
   };
 
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    if (inline) {
+      return <div className="bg-white rounded-xl p-6">{children}</div>;
+    }
+    return <BaseModal title="My Cart" onClose={onClose}>{children}</BaseModal>;
+  };
+
   if (loading) {
     return (
-      <BaseModal title="My Cart" onClose={onClose}>
+      <Wrapper>
         <div className="flex justify-center items-center h-64">
           <div className="w-16 h-16 border-4 border-gray-200 border-t-green-600 rounded-full animate-spin"></div>
         </div>
-      </BaseModal>
+      </Wrapper>
     );
   }
 
   if (!items || items.length === 0) {
     return (
-      <BaseModal title="My Cart" onClose={onClose}>
+      <Wrapper>
         <div className="text-center text-gray-700 py-10">
           <ShoppingBag className="mx-auto h-16 w-16 text-gray-400 mb-4" />
           <p className="text-lg">Your cart is empty.</p>
         </div>
-      </BaseModal>
+      </Wrapper>
     );
   }
 
   const item = items[currentIndex];
-  if (!item ) {
-  return (
-    <BaseModal title="My Cart" onClose={onClose}>
-      <div className="flex justify-center items-center h-64 text-gray-500">
-        Cart Is Empty
-      </div>
-    </BaseModal>
-  );
-}
+  if (!item) {
+    return (
+      <Wrapper>
+        <div className="flex justify-center items-center h-64 text-gray-500">
+          Cart Is Empty
+        </div>
+      </Wrapper>
+    );
+  }
   const itemImage = getImageForCartItem(item, products);
   // const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
   const totalAmount = Array.isArray(items)
@@ -286,7 +303,7 @@ export default function CartModal({
   : 0;
 
   return (
-    <BaseModal title="My Cart" onClose={onClose}>
+    <Wrapper>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           {/* Left - Product Image */}
@@ -335,20 +352,20 @@ export default function CartModal({
               <>
                 <div className="flex items-center gap-4 mt-4">
                   <button
-                    onClick={() =>
-                      setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev))
-                    }
+                    onClick={() => {
+                      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+                      handleIndexChange(newIndex);
+                    }}
                     className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
                     disabled={currentIndex === 0}
                   >
                     Previous
                   </button>
                   <button
-                    onClick={() =>
-                      setCurrentIndex((prev) =>
-                        prev < items.length - 1 ? prev + 1 : prev
-                      )
-                    }
+                    onClick={() => {
+                      const newIndex = currentIndex < items.length - 1 ? currentIndex + 1 : currentIndex;
+                      handleIndexChange(newIndex);
+                    }}
                     className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
                     disabled={currentIndex === items.length - 1}
                   >
@@ -379,6 +396,6 @@ export default function CartModal({
           <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-    </BaseModal>
+    </Wrapper>
   );
 }
