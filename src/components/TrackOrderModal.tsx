@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import { Package, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
 
 type TrackingEntry = {
   id: string;
@@ -82,16 +81,24 @@ const STATUS_TEXT_COLORS: Record<string, string> = {
 export default function TrackOrderModal({
   userId,
   onClose,
+  inline = false,
 }: {
   userId: string;
   onClose: () => void;
+  inline?: boolean;
 }) {
   const [orders, setOrders] = useState<OrderWithTracking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-const user = useAuthStore((state) => state.user);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    if (inline) {
+      return <div className="bg-white rounded-xl p-6">{children}</div>;
+    }
+    return <BaseModal title="Track My Orders" onClose={onClose}>{children}</BaseModal>;
+  };
 
   useEffect(() => {
     const fetchMyOrders = async () => {
@@ -197,7 +204,7 @@ const user = useAuthStore((state) => state.user);
   };
 
   return (
-    <BaseModal title="Track My Orders" onClose={onClose}>
+    <Wrapper>
       <div className="min-h-[300px]">
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -338,6 +345,6 @@ const user = useAuthStore((state) => state.user);
           </div>
         )}
       </div>
-    </BaseModal>
+    </Wrapper>
   );
 }

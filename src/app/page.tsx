@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import HomeHeader from '../components/HomeHeader';
@@ -16,6 +16,11 @@ import HomeFooter from '../components/HomeFooter';
 import AuthPromptModal from '../components/AuthPromptModal';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
+import Contact from '../components/Contact';
+import AboutSection from '../components/AboutSection';
+import BlogsSection from '../components/BlogsSection';
+import EcatalogueBookFlip from '../components/EcatalogueBookFlip';
+import EventsSection from '../components/EventsSection';
 
 interface ProductImage {
   id: string;
@@ -25,6 +30,7 @@ interface ProductImage {
   full: string | null;
   alt: string;
 }
+
 
 interface Product {
   id: string;
@@ -52,6 +58,13 @@ interface Category {
   cms_image_id?: string;
 }
 
+interface Subcategory {
+  id: string;
+  name: string;
+  slug?: string;
+  category_id: string;
+}
+
 type ModalType = 'none' | 'authPrompt' | 'login' | 'register';
 type ActionType = 'cart' | 'wishlist' | 'buy';
 
@@ -60,178 +73,224 @@ export default function HomePage() {
   const { user, isAuthenticated } = useAuthStore();
   const productGridRef = useRef<HTMLDivElement>(null);
 
-  // State
+  // Data states
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+
   const [productsLoading, setProductsLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [subcategoriesLoading, setSubcategoriesLoading] = useState(true);
 
-  // Filter state
+  // Filter & pagination
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
 
-  // Modal state
+  const PRODUCTS_PER_PAGE = 20;
+
+
+
+  // Modal states
   const [activeModal, setActiveModal] = useState<ModalType>('none');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [pendingAction, setPendingAction] = useState<{
-    type: ActionType;
-    product: any;
-  } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ type: ActionType; product: any } | null>(null);
 
-  // Cart/Wishlist counts (for header)
+  // Cart / Wishlist counts
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
 
-  // Fetch products
+  const [imageError, setImageError] = useState(false);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  type SectionType =
+  | 'products'
+  | 'about'
+  | 'events'
+  | 'contact'
+  | 'ecatalogue'
+  | 'blogs';
+
+const [activeSection, setActiveSection] = useState<SectionType>('products');
+
+  // Fetch paginated products
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        if (!apiUrl) throw new Error('API URL not set');
+      if (!apiUrl) {
+        toast.error('API URL not configured');
+        return;
+      }
 
-        const res = await fetch(`${apiUrl}/api/products/`, {
+      setProductsLoading(true);
+
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: PRODUCTS_PER_PAGE.toString(),
+        });
+
+        if (searchQuery.trim()) {
+          params.append('search', searchQuery.trim());
+        }
+        if (selectedCategory) {
+          params.append('category_id', selectedCategory);
+        }
+        if (selectedSubcategory) {
+          params.append('sub_category_id', selectedSubcategory);
+        }
+
+        const res = await fetch(`${apiUrl}/api/products?${params.toString()}`, {
           cache: 'no-store',
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`HTTP error ${res.status}`);
+        }
 
         const data = await res.json();
-        const productList = Array.isArray(data)
-          ? data
-          : data?.products || data?.data || [];
 
-        // Filter only active products
-        const activeProducts = productList.filter((p: Product) => p.is_active);
-        setProducts(activeProducts);
+        setProducts(data.products || data.docs || []);
+        setTotalProducts(data.total || 0);
+        setTotalPages(data.totalPages || Math.ceil((data.total || 0) / PRODUCTS_PER_PAGE));
       } catch (err) {
-        console.error('Failed to load products:', err);
+        console.error('Products fetch error:', err);
         toast.error('Failed to load products');
+        setProducts([]);
       } finally {
         setProductsLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [currentPage, searchQuery, selectedCategory, selectedSubcategory, apiUrl]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedSubcategory]);
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
+      if (!apiUrl) return;
+      setCategoriesLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        if (!apiUrl) throw new Error('API URL not set');
-
-        const res = await fetch(`${apiUrl}/api/categories/`, {
-          cache: 'no-store',
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+        const res = await fetch(`${apiUrl}/api/categories/`, { cache: 'no-store' });
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        const categoryList = Array.isArray(data)
-          ? data
-          : data?.categories || data?.data || [];
-        setCategories(categoryList);
+        setCategories(Array.isArray(data) ? data : data.categories || data.data || []);
       } catch (err) {
-        console.error('Failed to load categories:', err);
+        console.error('Categories fetch failed', err);
       } finally {
         setCategoriesLoading(false);
       }
     };
-
     fetchCategories();
-  }, []);
+  }, [apiUrl]);
 
-  // Fetch cart and wishlist counts for authenticated users
+  // Fetch subcategories
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!apiUrl) return;
+      setSubcategoriesLoading(true);
+      try {
+        const res = await fetch(`${apiUrl}/api/subcategories`, { cache: 'no-store' });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setSubcategories(Array.isArray(data) ? data : data.subcategories || []);
+      } catch (err) {
+        console.error('Subcategories fetch failed', err);
+      } finally {
+        setSubcategoriesLoading(false);
+      }
+    };
+    fetchSubcategories();
+  }, [apiUrl]);
+
+  const subcategoriesByCategory = useMemo(() => {
+    return subcategories.reduce<Record<string, Subcategory[]>>((acc, sub) => {
+      if (!acc[sub.category_id]) acc[sub.category_id] = [];
+      acc[sub.category_id].push(sub);
+      return acc;
+    }, {});
+  }, [subcategories]);
+
+  const handleSectionChange = (section: SectionType) => {
+    setActiveSection(section);
+  
+    // optional scroll
+    if (section === 'products') {
+      scrollToProducts();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Cart & Wishlist counts
   useEffect(() => {
     const fetchCounts = async () => {
-      if (!isAuthenticated || !user?.id) {
+      if (!isAuthenticated || !user?.id || !apiUrl) {
         setCartCount(0);
         setWishlistCount(0);
         return;
       }
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-        // Fetch cart count
+        // Cart
         const cartRes = await fetch(`${apiUrl}/api/cart/user/${user.id}`, {
           credentials: 'include',
         });
         if (cartRes.ok) {
           const cartData = await cartRes.json();
-          const cartItems = Array.isArray(cartData) ? cartData : cartData?.items || [];
-          setCartCount(cartItems.length);
+          setCartCount((cartData.items || cartData).length || 0);
         }
 
-        // Fetch wishlist count
-        const wishlistRes = await fetch(`${apiUrl}/api/wishes/unique/${user.id}`, {
+        // Wishlist
+        const wishRes = await fetch(`${apiUrl}/api/wishes/unique/${user.id}`, {
           credentials: 'include',
         });
-        if (wishlistRes.ok) {
-          const wishlistData = await wishlistRes.json();
-          const wishlistItems = Array.isArray(wishlistData)
-            ? wishlistData
-            : wishlistData?.items || [];
-          setWishlistCount(wishlistItems.length);
+        if (wishRes.ok) {
+          const wishData = await wishRes.json();
+          setWishlistCount((wishData.items || wishData).length || 0);
         }
       } catch (err) {
-        console.error('Failed to fetch counts:', err);
+        console.error('Failed to fetch cart/wishlist counts', err);
       }
     };
 
     fetchCounts();
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, apiUrl]);
 
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === null || product.category_id === selectedCategory;
-    const matchesSubcategory =
-      selectedSubcategory === null || product.sub_category_id === selectedSubcategory;
-    return matchesSearch && matchesCategory && matchesSubcategory;
-  });
-
-  // Handle subcategory selection from NavMenu
-  const handleSubcategorySelect = (subcategoryId: string | null, categoryId: string | null) => {
-    setSelectedSubcategory(subcategoryId);
-    if (categoryId !== null) {
-      setSelectedCategory(categoryId);
-    }
-  };
-
-  // Handle category selection (reset subcategory when category changes)
+  // Handlers
   const handleCategorySelect = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
     setSelectedSubcategory(null);
   };
 
-  // Scroll to products
+  const handleSubcategorySelect = (subcategoryId: string | null, categoryId: string | null) => {
+    setSelectedSubcategory(subcategoryId);
+    if (categoryId) setSelectedCategory(categoryId);
+  };
+
   const scrollToProducts = () => {
     productGridRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  
-  // Handle product actions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleProductAction = async (product: any, actionType: ActionType) => {
+  // Product action logic (add to cart / wishlist / buy now)
+  const handleProductAction = async (product: Product, actionType: ActionType) => {
     if (!isAuthenticated) {
       setPendingAction({ type: actionType, product });
       setActiveModal('authPrompt');
       return;
     }
-
-    // Perform the action
     await performAction(product, actionType);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const performAction = async (product: any, actionType: ActionType) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const performAction = async (product: Product, actionType: ActionType) => {
     if (!apiUrl || !user?.id) return;
 
     try {
@@ -247,7 +306,7 @@ export default function HomePage() {
           }),
         });
 
-        if (!res.ok) throw new Error('Failed to add to cart');
+        if (!res.ok) throw new Error('Cart add failed');
 
         toast.success('Added to cart!');
         setCartCount((prev) => prev + 1);
@@ -266,42 +325,25 @@ export default function HomePage() {
           }),
         });
 
-        if (!res.ok) throw new Error('Failed to add to wishlist');
+        if (!res.ok) throw new Error('Wishlist add failed');
 
         toast.success('Added to wishlist!');
         setWishlistCount((prev) => prev + 1);
       }
     } catch (err) {
-      console.error('Action error:', err);
+      console.error(err);
       toast.error(`Failed to ${actionType === 'wishlist' ? 'add to wishlist' : 'add to cart'}`);
     }
   };
 
-  // Modal handlers
-  const openLoginModal = () => {
-    setActiveModal('login');
-  };
+  // Modal controls
+  const openLoginModal = () => setActiveModal('login');
 
-  const handleAuthPromptLogin = () => {
-    setActiveModal('login');
-  };
-
-  const handleAuthPromptSignUp = () => {
-    setActiveModal('register');
-  };
-
-  const handleBackToPrompt = () => {
-    setActiveModal('authPrompt');
-  };
-
-  const handleSwitchToRegister = () => {
-    setActiveModal('register');
-  };
-
-  const handleSwitchToLogin = () => {
-    setActiveModal('login');
-  };
-
+  const handleAuthPromptLogin = () => setActiveModal('login');
+  const handleAuthPromptSignUp = () => setActiveModal('register');
+  const handleBackToPrompt = () => setActiveModal('authPrompt');
+  const handleSwitchToRegister = () => setActiveModal('register');
+  const handleSwitchToLogin = () => setActiveModal('login');
   const closeAllModals = () => {
     setActiveModal('none');
     setPendingAction(null);
@@ -309,7 +351,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <HomeHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -318,103 +359,181 @@ export default function HomePage() {
         onLoginClick={openLoginModal}
       />
 
-      {/* Navigation Menu with Category/Subcategory Dropdowns */}
-      <NavMenu
+      {/* <NavMenu
         categories={categories}
+        subcategoriesByCategory={subcategoriesByCategory}
+        loading={categoriesLoading || subcategoriesLoading}
         onCategorySelect={handleCategorySelect}
         onSubcategorySelect={handleSubcategorySelect}
         selectedCategory={selectedCategory}
         selectedSubcategory={selectedSubcategory}
-      />
+      /> */}
+      <NavMenu
+  categories={categories}
+  subcategoriesByCategory={subcategoriesByCategory}
+  loading={categoriesLoading || subcategoriesLoading}
+  onCategorySelect={handleCategorySelect}
+  onSubcategorySelect={handleSubcategorySelect}
+  selectedCategory={selectedCategory}
+  selectedSubcategory={selectedSubcategory}
+  onSectionChange={handleSectionChange}   // NEW
+/>
 
-      {/* Hero Banner */}
       <HeroBanner onShopNowClick={scrollToProducts} />
 
-      {/* Feature Benefits Bar */}
       <FeatureBenefits />
 
-      {/* Category Filter */}
-      <CategoryFilter
+      <div
+        className="banners banners1"
+        style={{
+          width: '100%',
+          height: '70px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f5f5f5',
+          overflow: 'hidden',
+        }}
+      >
+        {!imageError ? (
+          <img
+            src="/image/catalog/banners/id2-banner1.jpg"
+            alt="banner"
+            onError={() => setImageError(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div className="marquee">
+            <span className="marquee-text">Welcome To The World Of Nature</span>
+            <span className="marquee-text">Welcome To The World Of Nature</span>
+            <span className="marquee-text">Welcome To The World Of Nature</span>
+          </div>
+        )}
+      </div>
+
+      
+
+      {activeSection === 'about' && <AboutSection />}
+      {activeSection === 'events' && <EventsSection />}
+      {activeSection === 'contact' && <Contact />}
+      {activeSection === 'ecatalogue' && <EcatalogueBookFlip />}
+      {activeSection === 'blogs' && <BlogsSection />}
+
+
+      {activeSection === 'products' && (
+        <>
+        <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
         onCategorySelect={handleCategorySelect}
         loading={categoriesLoading}
       />
-
-      {/* Products Section */}
-      <section ref={productGridRef} className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedCategory
-                  ? categories.find((c) => c.id === selectedCategory)?.name || 'Products'
-                  : 'Our Products'}
-              </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
-              <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                <option>Featured</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest</option>
-              </select>
-            </div>
+    <section ref={productGridRef} className="bg-white py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {selectedCategory
+                ? categories.find((c) => c.id === selectedCategory)?.name || 'Products'
+                : 'Our Products'}
+            </h2>
+            <p className="text-gray-500 text-sm mt-1">
+              {totalProducts} product{totalProducts !== 1 ? 's' : ''} found
+            </p>
           </div>
 
-          {/* Products Grid */}
-          {productsLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-              <span className="ml-3 text-gray-500">Loading products...</span>
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-gray-400 text-6xl mb-4">🌱</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-500">
-                {searchQuery
-                  ? `No products match "${searchQuery}"`
-                  : 'No products available in this category'}
-              </p>
-              {(searchQuery || selectedCategory || selectedSubcategory) && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory(null);
-                    setSelectedSubcategory(null);
-                  }}
-                  className="mt-4 text-green-600 hover:text-green-700 font-medium"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-          ) : (
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            <span className="text-sm text-gray-800 font-bold hidden sm:inline">Sort by:</span>
+            <select className="border border-gray-200 text-gray-800 font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option>Featured</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest</option>
+            </select>
+          </div>
+        </div>
+
+        {productsLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+            <span className="ml-3 text-gray-600">Loading products...</span>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-gray-400 text-6xl mb-4">🌱</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-500">
+              {searchQuery || selectedCategory || selectedSubcategory
+                ? 'Try adjusting your filters'
+                : 'Check back later for new arrivals'}
+            </p>
+            {(searchQuery || selectedCategory || selectedSubcategory) && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory(null);
+                  setSelectedSubcategory(null);
+                }}
+                className="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <HomeProductCard
                   key={product.id}
                   product={product}
-                  onAddToCart={(p) => handleProductAction(p, 'cart')}
-                  onBuyNow={(p) => handleProductAction(p, 'buy')}
-                  onAddToWishlist={(p) => handleProductAction(p, 'wishlist')}
+                  onAddToCart={() => handleProductAction(product, 'cart')}
+                  onBuyNow={() => handleProductAction(product, 'buy')}
+                  onAddToWishlist={() => handleProductAction(product, 'wishlist')}
                 />
               ))}
             </div>
-          )}
-        </div>
-      </section>
 
-      {/* Footer */}
+            {totalPages > 1 && (
+              <div className="mt-12 flex justify-center items-center gap-6 flex-wrap">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1 || productsLoading}
+                  className="flex items-center text-gray-700 gap-2 px-6 py-3 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  Previous
+                </button>
+
+                <span className="text-gray-700 font-medium">
+                  Page <strong>{currentPage}</strong> of {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || productsLoading}
+                  className="flex items-center text-gray-700 gap-2 px-6 py-3 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  Next
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      </section>
+        
+        </>
+  
+
+
+      )}
+
+
+     
       <HomeFooter />
 
-      {/* Auth Prompt Modal */}
       <AuthPromptModal
         isOpen={activeModal === 'authPrompt'}
         onClose={closeAllModals}
@@ -423,7 +542,6 @@ export default function HomePage() {
         actionType={pendingAction?.type}
       />
 
-      {/* Login Modal */}
       <LoginModal
         isOpen={activeModal === 'login'}
         onClose={closeAllModals}
@@ -431,7 +549,6 @@ export default function HomePage() {
         onSwitchToRegister={handleSwitchToRegister}
       />
 
-      {/* Register Modal */}
       <RegisterModal
         isOpen={activeModal === 'register'}
         onClose={closeAllModals}

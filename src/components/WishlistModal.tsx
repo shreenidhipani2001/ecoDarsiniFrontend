@@ -59,8 +59,10 @@ interface WishlistModalProps {
   loading: boolean;
   onClose: () => void;
   onItemRemoved?: (itemId: number) => void;
-  fetchCartItems?: () => Promise<void>;      // ✅ new prop
-  fetchWishlistItems?: () => Promise<void>;  // ✅ new prop
+  fetchCartItems?: () => Promise<void>;
+  fetchWishlistItems?: () => Promise<void>;
+  inline?: boolean;
+  onIndexChange?: (index: number) => void;
 }
 
 
@@ -78,14 +80,29 @@ export default function WishlistModal({
   products,
   loading,
   onClose,
-  onItemRemoved,fetchCartItems,    
+  onItemRemoved,
+  fetchCartItems,
   fetchWishlistItems,
+  inline = false,
+  onIndexChange,
 }: WishlistModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [removing, setRemoving] = useState(false);
   const [removingT, setRemovingT] = useState(false);
   const { user } = useAuthStore();
-  console.log('User in WishlistModal 1:', user);
+
+  // Notify parent when index changes (for lazy loading)
+  const handleIndexChange = (newIndex: number) => {
+    setCurrentIndex(newIndex);
+    onIndexChange?.(newIndex);
+  };
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    if (inline) {
+      return <div className="bg-white rounded-xl p-6">{children}</div>;
+    }
+    return <BaseModal title="My Wishlist" onClose={onClose}>{children}</BaseModal>;
+  };
 
   const handleRemoveItem = async () => {
     const item = items[currentIndex];
@@ -217,22 +234,22 @@ const handleAddToCart = async () => {
 
   if (loading) {
     return (
-      <BaseModal title="My Wishlist" onClose={onClose}>
+      <Wrapper>
         <div className="flex justify-center items-center h-64">
           <div className="w-16 h-16 border-4 border-gray-200 border-t-green-600 rounded-full animate-spin" />
         </div>
-      </BaseModal>
+      </Wrapper>
     );
   }
 
   if (items.length === 0) {
     return (
-      <BaseModal title="My Wishlist" onClose={onClose}>
+      <Wrapper>
         <div className="text-center text-gray-700 py-10">
           <Heart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
           <p className="text-lg">Your wishlist is empty.</p>
         </div>
-      </BaseModal>
+      </Wrapper>
     );
   }
 
@@ -240,7 +257,7 @@ const handleAddToCart = async () => {
   const itemImage = getImageForWishlistItem(item, products);
 
   return (
-    <BaseModal title="My Wishlist" onClose={onClose}>
+    <Wrapper>
       <div className="flex flex-col gap-6">
         {/* Main content area */}
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
@@ -252,7 +269,7 @@ const handleAddToCart = async () => {
               fill
               className="object-cover rounded-xl"
               sizes="(max-width: 768px) 256px, 320px"
-              priority={currentIndex === 0} // optional optimization
+              priority={currentIndex === 0}
             />
           </div>
 
@@ -289,7 +306,10 @@ const handleAddToCart = async () => {
               <>
                 <div className="flex items-center gap-4 mt-6">
                   <button
-                    onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                    onClick={() => {
+                      const newIndex = Math.max(0, currentIndex - 1);
+                      handleIndexChange(newIndex);
+                    }}
                     disabled={currentIndex === 0}
                     className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -297,7 +317,10 @@ const handleAddToCart = async () => {
                   </button>
 
                   <button
-                    onClick={() => setCurrentIndex((prev) => Math.min(items.length - 1, prev + 1))}
+                    onClick={() => {
+                      const newIndex = Math.min(items.length - 1, currentIndex + 1);
+                      handleIndexChange(newIndex);
+                    }}
                     disabled={currentIndex === items.length - 1}
                     className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -316,7 +339,6 @@ const handleAddToCart = async () => {
         {/* Summary footer */}
         <div className="border-t pt-4 mt-4">
           <div className="flex justify-end items-center text-lg font-semibold gap-2">
-            
             <span className="text-black">Items in wishlist -</span>
             <span className="text-green-600">{items.length}</span>
           </div>
@@ -329,6 +351,6 @@ const handleAddToCart = async () => {
           <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-    </BaseModal>
+    </Wrapper>
   );
 }

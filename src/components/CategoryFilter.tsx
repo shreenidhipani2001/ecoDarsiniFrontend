@@ -82,7 +82,7 @@ export default function CategoryFilter({
             <h2 className="text-xl font-bold text-gray-900">Top Categories</h2>
           </div>
           <div className="flex gap-6 overflow-hidden">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(10)].map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-3 flex-shrink-0">
                 <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gray-200 rounded-full animate-pulse" />
                 <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
