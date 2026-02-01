@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import ProductDetailModal from '../../components/ProductDetailModal';
 import { useAuthStore } from '../../store/useAuthStore';
+import Logo from '../../../public/svg/Logo';
+import WhiteLogo from '../../../public/svg/WhiteLogo';
 
 /* ================= TYPES ================= */
 type ProductImage = {
@@ -58,41 +60,56 @@ const formatPrice = (price: number | string): string => {
 /* ================= PAGE COMPONENTS ================= */
 
 // Front Cover Page
+// const FrontCover = React.forwardRef<HTMLDivElement>((_, ref) => {
+//   return (
+//     <div className="page page-cover front-cover" ref={ref} data-density="hard">
+//       <div className="cover-inner">
+//         <div className="cover-decoration">
+//           <div className="leaf-pattern leaf-tl"></div>
+//           <div className="leaf-pattern leaf-tr"></div>
+//           <div className="leaf-pattern leaf-bl"></div>
+//           <div className="leaf-pattern leaf-br"></div>
+//         </div>
+
+//         <div className="cover-content">
+//           <div className="cover-emblem">
+//             <div className="emblem-ring"></div>
+//             <div className="emblem-ring emblem-ring-2"></div>
+             
+//           </div>
+
+         
+//           <div className="cover-divider">
+             
+//           </div>
+        
+//             <div className="cover-footer">
+            
+//             <Logo className="w-32 h-32 mx-auto mb-2" />
+//             <span className="footer-arrow"></span>
+//           </div>
+//         </div>
+
+//         <div className="cover-spine"></div>
+//       </div>
+//     </div>
+//   );
+// });
+
 const FrontCover = React.forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div className="page page-cover front-cover" ref={ref} data-density="hard">
-      <div className="cover-inner">
-        <div className="cover-decoration">
-          <div className="leaf-pattern leaf-tl"></div>
-          <div className="leaf-pattern leaf-tr"></div>
-          <div className="leaf-pattern leaf-bl"></div>
-          <div className="leaf-pattern leaf-br"></div>
-        </div>
+      <div className="cover-inner bg-white">
+        
+        <div className="cover-content flex flex-col items-center justify-center text-center h-full">
+          
+          <WhiteLogo className="w-36 h-36 mb-6" />
+          {/* <Logo className="w-36 h-36 mb-6" /> */}
 
-        <div className="cover-content">
-          <div className="cover-emblem">
-            <div className="emblem-ring"></div>
-            <div className="emblem-ring emblem-ring-2"></div>
-            {/* <span className="emblem-icon">🌿</span> */}
-          </div>
+          <h1 className="text-4xl font-extrabold uppercase tracking-wider text-green-400">
+            ECO DARSHINI
+          </h1>
 
-          {/* <h1 className="cover-title">Eco Darsini</h1> */}
-          <div className="cover-divider">
-            {/* <span className="divider-leaf">❧</span> */}
-          </div>
-          {/* <h2 className="cover-subtitle">Product Catalogue</h2> */}
-          {/* <h2 className="cover-subtitle">Product Catalogue</h2> */}
-
-          {/* <p className="cover-tagline">Handcrafted with Love & Nature</p>
-
-          <div className="cover-footer">
-            <span className="footer-text">Turn the page to explore</span>
-            <span className="footer-arrow">→</span>
-          </div> */}
-            <div className="cover-footer">
-            <span className="footer-text text-4xl font-bold">Welcome</span>
-            <span className="footer-arrow"></span>
-          </div>
         </div>
 
         <div className="cover-spine"></div>
@@ -115,33 +132,9 @@ const BackCover = React.forwardRef<HTMLDivElement>((_, ref) => {
         </div>
 
         <div className="cover-content">
-          <div className="cover-emblem small">
-            {/* <span className="emblem-icon">🌍</span> */}
-          </div>
+           
 
-          {/* <h2 className="end-title">Thank You</h2> */}
-          
-          {/* <p className="end-subtitle">For Supporting Sustainable Artisans</p> */}
-{/* 
-          <div className="end-stats">
-            <div className="stat-item">
-              <span className="stat-icon">•</span>
-              
-              <span className="stat-text">Handmade Products</span>
-            </div>
-            <div className="stat-item">
-              
-              <span className="stat-icon">•</span>
-
-              <span className="stat-text">Eco-Friendly Materials</span>
-            </div>
-            <div className="stat-item">
-              
-              <span className="stat-icon">•</span>
-
-              <span className="stat-text">Supporting Local Artists</span>
-            </div>
-          </div> */}
+        
 
           <div className="cover-footer m-auto text-4xl font-bold">
              
@@ -224,121 +217,13 @@ interface RightPageProps {
 
 const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(({ product, pageNumber, onViewMore }, ref) => {
   return (
-    // <div className="page product-page right-page" ref={ref}>
-    //   <div className="page-inner">
-    //     <div className="details-container">
-          
-    //       <div className="detail-card artist-card">
-    //         <span className="detail-emoji">🎨</span>
-    //         <div className="detail-info">
-    //           <span className="detail-label">Crafted by</span>
-    //           <span className="detail-value">{product.artist_name || 'Artisan'}</span>
-    //         </div>
-    //       </div>
-
-        
-    //       <div className="detail-card desc-card">
-    //         <p className="desc-text">
-    //           {product.description || 'A beautifully handcrafted eco-friendly product.'}
-    //         </p>
-    //       </div>
-
-           
-    //       <div className="price-card">
-    //         <span className="price-label">Price</span>
-    //         <div className="price-amount">
-    //           <span className="rupee">₹</span>
-    //           <span className="amount">{formatPrice(product.price)}</span>
-    //         </div>
-    //       </div>
-
-           
-    //       <div className="info-row">
-    //         <div className="category-tag">
-    //           <span>📦</span>
-    //           <span>{product.category_name || 'Eco Product'}</span>
-    //         </div>
-    //         <div className={`status-tag ${product.is_active ? 'available' : 'unavailable'}`}>
-    //           <span className="status-dot"></span>
-    //           <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
-    //         </div>
-    //       </div>
-
-          
-    //       {product.stock > 0 && (
-    //         <div className="stock-info">
-    //           <span className="stock-num">{product.stock}</span>
-    //           <span className="stock-label">items in stock</span>
-    //         </div>
-    //       )}
-
-          
-    //       {onViewMore && (
-    //         <button className="view-btn" onClick={() => onViewMore(product)}>
-    //           View Full Details
-    //         </button>
-    //       )}
-    //     </div>
-
-        
-    //     <span className="pg-num right">{pageNumber}</span>
-    //   </div>
-    // </div>
+     
 
     <div
   className="page product-page right-page flex justify-center items-center"
   ref={ref}
 >
-  {/* <div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
-    <div className="details-container flex flex-col gap-5 text-center">
-    <div className="left-header">
-        <h2 className="mt-10 text-center text-black font-bold text-3xl md:text-4xl">
-            {product.name}
-          </h2>
-          <div className="title-line"></div>
-        </div>
-     
-          
-          <div className="info-row flex gap-3 mt-30">
-         
-        
-      </div>
-
-      
-      <div className="price-card rounded-2xl bg-green-700 px-3 py-2  mt-25">
-        <span className="block text-xs uppercase tracking-wide opacity-80">
-          Price
-        </span>
-        <div className="mt-1 flex justify-center items-end gap-1 font-extrabold">
-          <span className="text-xl">₹</span>
-          <span className="text-4xl">{formatPrice(product.price)}</span>
-        </div>
-      </div>
-
-  
-
-     
-      {product.stock > 0 && (
-        <div className="text-sm opacity-90 text-black">
-          <span className="font-semibold">{product.stock}</span>{' '}
-          items in stock
-        </div>
-      )}
-
-      
-      {onViewMore && (
-        <button
-          onClick={() => onViewMore(product)}
-          className="mt-2 rounded-xl bg-white py-3 font-bold text-green-800 transition hover:bg-green-100 hover:-translate-y-0.5"
-        >
-          View Full Details
-        </button>
-      )}
-    </div>
-
-    
-    
-  </div> */}
+   
 
 <div className="page-inner relative w-full max-w-[420px] rounded-2xl bg-gradient-to-br from-green-800 via-green-700 to-green-600 p-8 shadow-2xl text-white">
   <div className="details-container flex flex-col justify-center items-center gap-6 text-center h-full">
@@ -445,6 +330,8 @@ export default function BookFlip() {
       setTotalPages(flipBookRef.current.pageFlip().getPageCount());
     }
   }, []);
+  const [showEdit, setShowEdit] = useState(false);
+
 
   /* ========== KEYBOARD NAVIGATION ========== */
   useEffect(() => {
@@ -587,6 +474,7 @@ export default function BookFlip() {
           }}
           imageUrl={getProductImageUrl(selectedProduct, 'url')}
           isAdmin={isAdmin}
+          showEdit={showEdit}
           onClose={() => setSelectedProduct(null)}
           onProductUpdate={(updatedProduct) => {
             setProducts((prev) =>

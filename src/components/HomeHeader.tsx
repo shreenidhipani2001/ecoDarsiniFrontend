@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Heart, User, LogOut, Menu, X, Mail, Phone } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import SVGComponent from './Logo';
+import Image from 'next/image';
 
 interface HomeHeaderProps {
   searchQuery: string;
@@ -82,12 +84,21 @@ export default function HomeHeader({
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <h1
+              {/* <h1
                 className="text-2xl lg:text-3xl font-bold text-green-600 cursor-pointer"
                 onClick={() => router.push('/')}
               >
                 EcoDarshini
-              </h1>
+              </h1> */}
+ 
+               {/* <Logo className="h-12" /> */}
+               <div className="flex-shrink-0">
+               <SVGComponent
+  className="h-10 w-auto cursor-pointer transition-transform hover:scale-105"
+  onClick={() => router.push("/")}
+/>
+</div>
+               
             </div>
 
             {/* Search Bar - Desktop */}

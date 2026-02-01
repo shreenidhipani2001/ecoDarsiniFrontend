@@ -122,12 +122,12 @@ export default function OrderDetailModal({ order, product, onClose }: Props) {
               </h3>
 
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                <div>
+                {/* <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Order ID
                   </label>
                   <p className="text-sm font-mono text-gray-800 break-all">{order.id}</p>
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -184,17 +184,17 @@ export default function OrderDetailModal({ order, product, onClose }: Props) {
                   <p className="text-sm text-gray-800">{order.user_email || 'N/A'}</p>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
                     User ID
                   </label>
                   <p className="text-xs font-mono text-gray-600 break-all">{order.user_id}</p>
-                </div>
+                </div> */}
               </div>
             </div>
 
             {/* Payment Information */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-green-600" />
                 Payment Information
@@ -217,7 +217,7 @@ export default function OrderDetailModal({ order, product, onClose }: Props) {
                   <p className="text-xs font-mono text-gray-600 break-all">{order.product_id}</p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Date Information */}
             <div className="space-y-4">

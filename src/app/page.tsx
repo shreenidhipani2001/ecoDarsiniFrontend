@@ -20,9 +20,11 @@ import Contact from '../components/Contact';
 import AboutSection from '../components/AboutSection';
 import BlogsSection from '../components/BlogsSection';
 import EcatalogueBookFlip from '../components/EcatalogueBookFlip';
+import ProductsCatalouge from '../app/admin/ProductsCatalogue';
 import EventsSection from '../components/EventsSection';
 import HomeProductDetailModal from '../components/HomeProductDetailModal';
 import WhatsAppChat from '../components/WhatsAppChat';
+import ShopBot from '../components/ShopBot';
 
 interface ProductImage {
   id: string;
@@ -99,7 +101,7 @@ export default function HomePage() {
 
   const PRODUCTS_PER_PAGE = 20;
 
-
+  
 
   // Modal states
   const [activeModal, setActiveModal] = useState<ModalType>('none');
@@ -430,7 +432,14 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <div className="marquee">
+            <div
+              className="marquee"
+              style={{
+                backgroundImage: "url('/banner.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
             <span className="marquee-text">Welcome To The World Of Nature</span>
             <span className="marquee-text">Welcome To The World Of Nature</span>
             <span className="marquee-text">Welcome To The World Of Nature</span>
@@ -457,7 +466,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
       )}
       {activeSection === 'ecatalogue' && (
         <div ref={ecatalogueRef}>
-          <EcatalogueBookFlip />
+          <ProductsCatalouge />
+          {/* <EcatalogueBookFlip /> */}
         </div>
       )}
       {activeSection === 'blogs' && (
@@ -608,7 +618,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onSwitchToLogin={handleSwitchToLogin}
       />
       {/* WhatsApp Chat Widget */}
-<WhatsAppChat phoneNumber="+919876543210" message="Hello! I need support." />
+      <ShopBot />
+{/* <WhatsAppChat phoneNumber="+919876543210" message="Hello! I need support." /> */}
 
 
       {/* Home Product Detail Modal */}

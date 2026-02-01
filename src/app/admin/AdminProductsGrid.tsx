@@ -245,6 +245,7 @@ export default function AdminProductsGrid() {
                 ? parseFloat(selectedProduct.price)
                 : selectedProduct.price,
           }}
+          showEdit={true}
           imageUrl={getProductImageUrl(selectedProduct, 'url')}
           isAdmin={isAdmin}
           onClose={() => setSelectedProduct(null)}

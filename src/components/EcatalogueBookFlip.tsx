@@ -248,15 +248,18 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(
         <div className="details-container w-full max-w-md flex flex-col items-center text-center">
     
           {/* Description */}
-          <div className="w-full bg-white rounded-xl shadow-sm p-5 mb-6">
+          {/* <div className="w-full bg-white rounded-xl shadow-sm p-5 mb-6">
             <p className="text-sm leading-relaxed">
               {product.description ||
                 'A beautifully handcrafted eco-friendly product made with sustainable materials.'}
             </p>
-          </div>
+          </div> */}
+          <div className="w-full bg-white rounded-xl shadow-sm p-6 text-center">
+  <p className="text-sm leading-relaxed">{product.description || 'A beautifully handcrafted eco-friendly product made with sustainable materials.'}</p>
+</div>
     
           {/* Category & Status */}
-          <div className="flex gap-4 items-center justify-center mb-8">
+          {/* <div className="flex gap-4 items-center justify-center mb-8">
             <div className="flex items-center gap-2 px-4 py-2 border border-black rounded-full text-sm">
               <span>📦</span>
               <span>{product.category_name || 'Eco Product'}</span>
@@ -270,12 +273,28 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(
               />
               <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
             </div>
-          </div>
+          </div> */}
+
+<div className="flex gap-4 items-center justify-center">
+  <div className="flex items-center gap-2 px-4 py-2 border border-black rounded-full text-sm">
+    <span>📦</span>
+    <span>{product.category_name || 'Eco Product'}</span>
+  </div>
+
+  <div className="flex items-center gap-2 px-4 py-2 border border-black rounded-full text-sm">
+    <span
+      className={`w-3 h-3 rounded-full ${
+        product.is_active ? 'bg-black' : 'bg-gray-400'
+      }`}
+    />
+    <span>{product.is_active ? 'Available' : 'Out of Stock'}</span>
+  </div>
+</div>
     
           {/* Price + Stock Group */}
-          <div className="w-full flex flex-col items-center mt-2">
+          {/* <div className="w-full flex flex-col items-center mt-2">
     
-            {/* Price */}
+             
             <div className="w-full bg-white rounded-xl shadow-md p-6 mb-2">
               <span className="block text-xs uppercase tracking-wide mb-1">
                 Price
@@ -288,17 +307,38 @@ const RightPage = React.forwardRef<HTMLDivElement, RightPageProps>(
               </div>
             </div>
     
-            {/* Stock */}
+            
             {product.stock > 0 && (
               <div className="text-sm mt-1">
                 <span className="font-semibold">{product.stock}</span>{' '}
                 <span className="opacity-70">items in stock</span>
               </div>
             )}
-          </div>
+          </div> */}
+
+
+<div className="flex flex-col items-center w-full space-y-2">
+  {/* Price */}
+  <div className="w-full bg-white rounded-xl shadow-md p-6 text-center">
+    <span className="block text-xs uppercase tracking-wide mb-1">Price</span>
+    <div className="flex items-end justify-center gap-1">
+      <span className="text-2xl font-semibold">₹</span>
+      <span className="text-4xl font-bold">{formatPrice(product.price)}</span>
+    </div>
+  </div>
+
+  {/* Stock */}
+  {product.stock > 0 && (
+    <div className="text-sm">
+      <span className="font-semibold">{product.stock}</span>{' '}
+      <span className="opacity-70">items in stock</span>
+    </div>
+  )}
+</div>
         </div>
     
-        <span className="pg-num right mt-10">{pageNumber}</span>
+        <span className="pg-num right mt-6">{pageNumber}</span>
+        {/* <span className="pg-num right mt-10">{pageNumber}</span> */}
       </div>
     </div>
     

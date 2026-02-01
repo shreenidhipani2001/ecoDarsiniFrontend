@@ -269,76 +269,76 @@ export default function BlogsSection() {
                     </article>
                   );
                 })} */}
-                {blogs.map((blog) => {
-  const isExpanded = expandedBlogId === blog.id;
-  
-  return (
-    <article
-      key={blog.id}
-      className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
-    >
-      <div className="relative">
-        {blog.image ? (
-          <img
-            src={blog.image}
-            alt={blog.name}
-            className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-56 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-            <span className="text-green-600 text-6xl">📄</span>
-          </div>
-        )}
-        <div className="absolute bottom-4 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-          {formatDate(blog.created_at)}
-        </div>
-      </div>
+                  {blogs.map((blog) => {
+                    const isExpanded = expandedBlogId === blog.id;
+            
+                    return (
+                      <article
+                        key={blog.id}
+                        className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
+                      >
+                        <div className="relative">
+                          {blog.image ? (
+                            <img
+                              src={blog.image}
+                              alt={blog.name}
+                              className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-56 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                              <span className="text-green-600 text-6xl">📄</span>
+                            </div>
+                          )}
+                          <div className="absolute bottom-4 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                            {formatDate(blog.created_at)}
+                          </div>
+                        </div>
 
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
-          {blog.name}
-        </h3>
+                        <div className="p-6 flex flex-col flex-grow">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
+                            {blog.name}
+                          </h3>
 
-        <div className="text-sm text-gray-500 mb-4 flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-            </svg>
-            {blog.added_by_name || 'Admin'}
-          </span>
-        </div>
+                          <div className="text-sm text-gray-500 mb-4 flex items-center gap-4">
+                            <span className="flex items-center gap-1.5">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                              </svg>
+                              {blog.added_by_name || 'Admin'}
+                            </span>
+                          </div>
 
-        {/* Changed: using max-height transition instead of line-clamp */}
-        {isExpanded?( <div
-          className="text-gray-600 mb-4 overflow-hidden transition-all duration-500 ease-in-out"
-          style={{
-            maxHeight: isExpanded ? '1000px' : '4.5em', // ≈ 3-4 lines at normal font size
-          }}
-        >
-          {blog.description}
-        </div>):( <div
-           
-        >
-          
-        </div>)}
-       
+                          {/* Changed: using max-height transition instead of line-clamp */}
+                          {isExpanded?( <div
+                            className="text-gray-600 mb-4 overflow-hidden transition-all duration-500 ease-in-out"
+                            style={{
+                              maxHeight: isExpanded ? '1000px' : '4.5em', // ≈ 3-4 lines at normal font size
+                            }}
+                          >
+                            {blog.description}
+                          </div>):( <div
+                            
+                          >
+                            
+                          </div>)}
+                        
 
-        {/* Toggle Button */}
-        <button
-          onClick={() => toggleBlogExpand(blog.id)}
-          className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-800 transition mt-auto self-start"
-        >
-          {isExpanded ? 'Show Less' : 'Read More'}
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 transition-transform" />
-          ) : (
-            <ChevronDown className="w-5 h-5 transition-transform" />
-          )}
-        </button>
-      </div>
-    </article>
-  );
-})}
+                          {/* Toggle Button */}
+                          <button
+                            onClick={() => toggleBlogExpand(blog.id)}
+                            className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-800 transition mt-auto self-start"
+                          >
+                            {isExpanded ? 'Show Less' : 'Read More'}
+                            {isExpanded ? (
+                              <ChevronUp className="w-5 h-5 transition-transform" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 transition-transform" />
+                            )}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
               </div>
             )}
           </div>

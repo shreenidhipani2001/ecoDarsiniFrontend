@@ -11,6 +11,7 @@ import RoleGuard from '../../components/RoleGuard';
 import { getCart } from '../../../lib/cartApi';
 import { getWishlist } from '../../../lib/wishlistApi';
 import toast from 'react-hot-toast';
+import OrdersModal from '../../components/OrdersModal';
 
 // ────────────────────────────────────────────────
 // Types
@@ -69,7 +70,10 @@ export type WishlistItem = {
 const PRODUCTS_PER_PAGE = 10;
 
 export default function DashboardPage() {
-  const [activeSection, setActiveSection] = useState<'profile' | 'cart' | 'wishlist' | 'track'>('cart');
+  // const [activeSection, setActiveSection] = useState<'profile' | 'cart' | 'wishlist' | 'track'>('cart');
+  const [activeSection, setActiveSection] =
+  useState<'profile' | 'cart' | 'wishlist' | 'track' | 'orders'>('cart');
+
   const { user } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -286,6 +290,8 @@ export default function DashboardPage() {
         return 'My Profile';
       case 'track':
         return 'Track My Orders';
+      case 'orders':
+        return 'My Orders';
       default:
         return 'Dashboard';
     }
@@ -335,6 +341,10 @@ export default function DashboardPage() {
                 inline
               />
             )}
+
+              {activeSection === 'orders' && userId && (
+                <OrdersModal userId={userId} inline />
+              )}
 
             {activeSection === 'wishlist' && (
               <WishlistModal

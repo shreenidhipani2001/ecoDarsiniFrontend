@@ -116,7 +116,6 @@ export default function NavMenu({
           <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
           <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
           <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-
           <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
           </div>
         </div>
@@ -200,27 +199,7 @@ export default function NavMenu({
           </div>
 
           {/* STATIC NAV ITEMS */}
-
-          {/* <button onClick={handleHomeClick} className="navBtn">
-            <Home className="h-4 w-4" /> About Us
-          </button> */}
-
-
-          {/* <button onClick={handleHomeClick} className="navBtn">
-            <Home className="h-4 w-4" /> Events
-          </button>
-
-          <button onClick={handleHomeClick} className="navBtn">
-            <Phone className="h-4 w-4" /> Contact Us
-          </button>
-
-          <button onClick={handleHomeClick} className="navBtn">
-            <Book className="h-4 w-4" /> Ecatalogue
-          </button>
-
-          <button onClick={handleHomeClick} className="navBtn">
-            <Book className="h-4 w-4" /> Blogs
-          </button> */}
+ 
 
                   <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
                     <Home className="h-5 w-5 sm:h-4 sm:w-4" />

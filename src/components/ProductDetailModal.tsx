@@ -48,6 +48,7 @@ type Product = {
 
 interface Props {
   product: Product;
+  showEdit:boolean;
   imageUrl: string;
   isAdmin: boolean;
   onClose: () => void;
@@ -60,6 +61,7 @@ export default function ProductDetailModal({
   isAdmin,
   onClose,
   onProductUpdate,
+  showEdit
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -456,7 +458,7 @@ export default function ProductDetailModal({
               </div>
 
               {/* Slug */}
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Slug
                 </label>
@@ -471,7 +473,7 @@ export default function ProductDetailModal({
                 ) : (
                   <p className="text-gray-700">{product.slug}</p>
                 )}
-              </div>
+              </div> */}
 
               {/* Category & Subcategory Row */}
               <div className="grid grid-cols-2 gap-4">
@@ -656,86 +658,90 @@ export default function ProductDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-green-700">
-          {isAdmin ? (
-            <div className="flex justify-end gap-3">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleCancel}
-                    disabled={loading}
-                    className="px-6 py-2 rounded-lg border bg-slate-100 text-slate-900 hover:bg-slate-300 transition disabled:opacity-50"
-                    // className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2 disabled:opacity-50"
-                    // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={18} />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 rounded-lg bg-white text-green-800 hover:bg-slate-300 transition flex items-center gap-2"
-                  // className="px-6 py-2 rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-300 transition flex items-center gap-2"
-                  // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
-                >
-                  <Edit3 size={18} />
-                  Edit Product
-                </button>
-              )}
-            </div>
-          ) : (
-            // <div className="flex justify-end">
-            //   <Logo className="w-12 h-auto text-green-400" />
-            // </div>
-            <div className="flex ml-27 justify-end gap-3 w-150 ">
-                   <button
-                      onClick={() => setShowReviewModal(true)}
-                      disabled={loading}
-                      className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                    <Camera color="white" size={22} />
-                   Add a Review
-                  </button>
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={loading}
-                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <ShoppingCart size={20} />
-                    Add to Cart
-                  </button>
+        {showEdit && (
+  <div className="p-4 border-t bg-green-700">
+  {isAdmin ? (
+    <div className="flex justify-end gap-3">
+      {isEditing ? (
+        <>
+          <button
+            onClick={handleCancel}
+            disabled={loading}
+            className="px-6 py-2 rounded-lg border bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition disabled:opacity-50"
+            // className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-6 py-2 rounded-lg bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition flex items-center gap-2 disabled:opacity-50"
+            // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                Save Changes
+              </>
+            )}
+          </button>
+        </>
+      ) : (
+        
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-6 py-2 rounded-lg bg-white text-green-800 hover:bg-neutral-300 transition flex items-center gap-2"
+          // className="px-6 py-2 rounded-lg bg-neutral-100 text-slate-900 hover:bg-neutral-300 transition flex items-center gap-2"
+          // className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
+        >
+          <Edit3 size={18} />
+          Edit Product
+        </button>
+      )}
+    </div>
+  ) : (
+    // <div className="flex justify-end">
+    //   <Logo className="w-12 h-auto text-green-400" />
+    // </div>
+    <div className="flex ml-27 justify-end gap-3 w-150 ">
+           <button
+              onClick={() => setShowReviewModal(true)}
+              disabled={loading}
+              className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+            <Camera color="white" size={22} />
+           Add a Review
+          </button>
+          <button
+            onClick={handleAddToCart}
+            disabled={loading}
+            className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <ShoppingCart size={20} />
+            Add to Cart
+          </button>
 
-                  <button
-                    onClick={handleAddToWishlist}
-                    disabled={loading}
-                    className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                    // className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
-                    title="Add to Wishlist"
-                  >
-                    <Heart size={22} className="text-white" />
-                    Add to Wishlist
-                  </button>
-            </div>
-          )
-          }
-        </div>
+          <button
+            onClick={handleAddToWishlist}
+            disabled={loading}
+            className="flex-1 bg-black text-white px-3 py-3 rounded-xl font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            // className="p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition disabled:opacity-50"
+            title="Add to Wishlist"
+          >
+            <Heart size={22} className="text-white" />
+            Add to Wishlist
+          </button>
+    </div>
+  )
+  }
+</div>
+)}
+       
       </div>
 
       {/* Review Modal */}

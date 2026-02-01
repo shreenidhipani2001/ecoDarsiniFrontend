@@ -271,6 +271,7 @@ export default function ReviewsGrid() {
           }}
           imageUrl={getProductImageUrl(selectedProduct, 'url')}
           isAdmin={true}
+          showEdit={true}
           onClose={() => setSelectedProduct(null)}
           onProductUpdate={(updatedProduct) => {
             setProducts((prev) =>

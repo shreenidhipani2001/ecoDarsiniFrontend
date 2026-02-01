@@ -195,8 +195,8 @@ export default function AdminLayout() {
         <header className="sr-only">Admin Sidebar</header>
         <Sidebar active={active} setActive={setActive} />
 
-        <main className="flex-1 min-h-screen bg-blue-100 ">
-        {/* <main className="flex-1 min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black"> */}
+        {/* <main className="flex-1 min-h-screen bg-blue-100 "> */}
+        <main className="flex-1 min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black">
           <div className="p-6">
             {/* {active === "dashboard" && (
               <div>
@@ -207,7 +207,7 @@ export default function AdminLayout() {
             {active === "products" && (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                <h1 className="text-3xl font-bold text-black mb-2">Products</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">Products</h1>
                 <button onClick={handleAddProduct} className="bg-white text-green-500 px-5 py-2 rounded-full border border-green-400 hover:bg-green-50 transition text-lg font-bold">
                   Add a product
                 </button>               
@@ -217,25 +217,25 @@ export default function AdminLayout() {
             )}
             {active === "orders" && (
               <div>
-                <h1 className="text-3xl font-bold text-black mb-6">Orders</h1>
+                <h1 className="text-3xl font-bold text-white mb-6">Orders</h1>
                 <OrdersGrid />
               </div>
             )}
             {active === "payments" && (
               <div>
-                <h1 className="text-3xl font-bold text-black mb-6">Payments</h1>
+                <h1 className="text-3xl font-bold text-white mb-6">Payments</h1>
                 <PaymentsList />
               </div>
             )}
             {active === "reviews" && (
               <div>
-                <h1 className="text-3xl font-bold text-black mb-6">Reviews</h1>
+                <h1 className="text-3xl font-bold text-white mb-6">Reviews</h1>
                 <ReviewsGrid />
               </div>
             )}
             {active === "addresses" && (
               <div>
-                <h1 className="text-3xl font-bold text-black mb-6">Order Tracking</h1>
+                <h1 className="text-3xl font-bold text-white mb-6">Order Tracking</h1>
                 <OrderTrackingGrid />
               </div>
             )}
