@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronRight,Clipboard,Package,CalendarDays, Menu, Book, Phone, Home } from 'lucide-react';
+import { ChevronRight, ChevronDown, Clipboard, Package, CalendarDays, Menu, Book, Phone, Home, Grid3X3 } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -45,18 +45,32 @@ export default function NavMenu({
   selectedSubcategory,
   onSectionChange
 }: NavMenuProps) {
-  
-  const [activeMoreDropdown, setActiveMoreDropdown] = useState(false);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [activeNestedId, setActiveNestedId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const hiddenCategories = categories; // all inside menu
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   /* ---------------- TOGGLES ---------------- */
 
-  const toggleMoreDropdown = () => {
-    setActiveMoreDropdown((prev) => !prev);
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+    setCategoriesOpen(false);
+    setActiveNestedId(null);
+  };
+
+  const toggleCategories = () => {
+    setCategoriesOpen((prev) => !prev);
     setActiveNestedId(null);
   };
 
@@ -65,7 +79,8 @@ export default function NavMenu({
   };
 
   const closeAll = () => {
-    setActiveMoreDropdown(false);
+    setMenuOpen(false);
+    setCategoriesOpen(false);
     setActiveNestedId(null);
   };
 
@@ -94,9 +109,8 @@ export default function NavMenu({
     closeAll();
   };
 
-  const handleHomeClick = () => {
-    onCategorySelect(null);
-    onSubcategorySelect(null, null);
+  const handleSectionClick = (section: SectionType) => {
+    onSectionChange(section);
     closeAll();
   };
 
@@ -107,128 +121,291 @@ export default function NavMenu({
       <nav className="bg-black-600 text-black">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center h-12 gap-3">
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+            <div className="h-8 w-24 bg-gray-400 rounded animate-pulse" />
+            <div className="h-8 w-24 bg-gray-400 rounded animate-pulse hidden sm:block" />
+            <div className="h-8 w-24 bg-gray-400 rounded animate-pulse hidden sm:block" />
           </div>
         </div>
       </nav>
     );
   }
 
+  /* ---------------- NAV ITEMS CONFIG ---------------- */
+
+  const navItems = [
+    { id: 'categories', label: 'Categories', icon: Grid3X3, isCategories: true },
+    { id: 'about', label: 'About Us', icon: Home, section: 'about' as SectionType },
+    { id: 'products', label: 'Products', icon: Package, section: 'products' as SectionType },
+    { id: 'events', label: 'Events', icon: CalendarDays, section: 'events' as SectionType },
+    { id: 'contact', label: 'Contact Us', icon: Phone, section: 'contact' as SectionType },
+    { id: 'ecatalogue', label: 'Ecatalogue', icon: Book, section: 'ecatalogue' as SectionType },
+    { id: 'blogs', label: 'Blogs', icon: Clipboard, section: 'blogs' as SectionType },
+  ];
+
+  // Get current active category for subcategories (desktop)
+  const activeCategory = activeNestedId ? categories.find(c => c.id === activeNestedId) : null;
+  const activeSubs = activeNestedId ? (subcategoriesByCategory[activeNestedId] || []) : [];
+
+  /* ---------------- MOBILE ACCORDION DROPDOWN ---------------- */
+
+  const renderMobileDropdown = () => (
+    <div className="absolute top-full left-0 w-[280px] bg-white text-gray-800 shadow-xl rounded-b-lg border z-50 max-h-[70vh] overflow-y-auto">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+
+        if (item.isCategories) {
+          return (
+            <div key={item.id}>
+              {/* Categories Header */}
+              <button
+                onClick={toggleCategories}
+                className={`w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center justify-between border-b ${
+                  categoriesOpen ? 'bg-green-50 text-green-600' : ''
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </span>
+                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Categories Accordion */}
+              {categoriesOpen && (
+                <div className="bg-gray-50">
+                  {categories.length > 0 ? (
+                    categories.map((category) => {
+                      const subs = subcategoriesByCategory[category.id] || [];
+                      const isExpanded = activeNestedId === category.id;
+
+                      return (
+                        <div key={category.id}>
+                          {/* Category Item */}
+                          <button
+                            onClick={() => subs.length > 0 ? toggleNested(category.id) : handleCategoryClick(category.id)}
+                            className={`w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between ${
+                              isExpanded ? 'bg-green-100 text-green-600' : ''
+                            }`}
+                          >
+                            {category.name}
+                            {subs.length > 0 && (
+                              <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            )}
+                          </button>
+
+                          {/* Subcategories Accordion */}
+                          {isExpanded && subs.length > 0 && (
+                            <div className="bg-white border-l-2 border-green-500 ml-4">
+                              <button
+                                onClick={() => handleCategoryClick(category.id)}
+                                className="w-full px-6 py-2 text-left text-sm font-medium text-green-600 hover:bg-green-50"
+                              >
+                                All {category.name}
+                              </button>
+                              {subs.map((sub) => (
+                                <button
+                                  key={sub.id}
+                                  onClick={() => handleSubcategoryClick(sub.id, category.id)}
+                                  className={`w-full px-6 py-2 text-left text-sm hover:bg-green-50 ${
+                                    selectedSubcategory === sub.id
+                                      ? 'bg-green-50 text-green-600 font-medium'
+                                      : 'text-gray-700'
+                                  }`}
+                                >
+                                  {sub.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="px-6 py-3 text-sm text-gray-400">
+                      No categories available
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <button
+            key={item.id}
+            onClick={() => handleSectionClick(item.section!)}
+            className="w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center gap-2 border-b border-gray-100"
+          >
+            <Icon className="h-4 w-4" />
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  /* ---------------- DESKTOP FLYOUT DROPDOWN ---------------- */
+
+  const renderDesktopDropdown = () => (
+    <>
+      {/* Main Menu Dropdown */}
+      <div className="absolute top-full left-0 min-w-[240px] bg-white text-gray-800 shadow-xl rounded-b-lg border py-2 z-50 max-h-[280px] overflow-y-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+
+          if (item.isCategories) {
+            return (
+              <div key={item.id} className="relative group">
+                <button
+                  onClick={toggleCategories}
+                  onMouseEnter={() => setCategoriesOpen(true)}
+                  className={`w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between ${
+                    categoriesOpen ? 'bg-green-50 text-green-600' : ''
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleSectionClick(item.section!)}
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2"
+            >
+              <Icon className="h-4 w-4" />
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Categories Flyout */}
+      {categoriesOpen && (
+        <div
+          className="absolute top-full left-[240px] min-w-[220px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50 max-h-[308px] overflow-y-auto"
+          onMouseLeave={() => !activeNestedId && setCategoriesOpen(false)}
+        >
+          {categories.length > 0 ? (
+            categories.map((category) => {
+              const subs = subcategoriesByCategory[category.id] || [];
+              const isNestedActive = activeNestedId === category.id;
+
+              return (
+                <div key={category.id} className="relative">
+                  <button
+                    onClick={() => subs.length > 0 ? toggleNested(category.id) : handleCategoryClick(category.id)}
+                    onMouseEnter={() => subs.length > 0 && setActiveNestedId(category.id)}
+                    className={`w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between ${
+                      isNestedActive ? 'bg-green-50 text-green-600' : ''
+                    }`}
+                  >
+                    {category.name}
+                    {subs.length > 0 && (
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              );
+            })
+          ) : (
+            <div className="px-4 py-3 text-sm text-gray-400">
+              No categories available
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Subcategories Flyout */}
+      {categoriesOpen && activeNestedId && activeSubs.length > 0 && (
+        <div
+          className="absolute top-full left-[460px] min-w-[220px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50 max-h-[396px] overflow-y-auto"
+          onMouseLeave={() => setActiveNestedId(null)}
+        >
+          <button
+            onClick={() => handleCategoryClick(activeNestedId)}
+            className="w-full px-4 py-2 text-left text-sm font-medium text-green-600 hover:bg-green-50 border-b"
+          >
+            All {activeCategory?.name}
+          </button>
+
+          {activeSubs.map((sub) => (
+            <button
+              key={sub.id}
+              onClick={() => handleSubcategoryClick(sub.id, activeNestedId)}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-green-50 ${
+                selectedSubcategory === sub.id
+                  ? 'bg-green-50 text-green-600 font-medium'
+                  : 'text-gray-700'
+              }`}
+            >
+              {sub.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
   /* ---------------- UI ---------------- */
 
   return (
-    <nav className="bg-black-600 text-black" ref={dropdownRef}>
+    <nav className="bg-black-600 text-black">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center h-12 gap-2">
 
           {/* MENU BUTTON */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={toggleMoreDropdown}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium hover:bg-gray-200  rounded-b-lg transition-colors ${
-                activeMoreDropdown ? 'bg-gray-300' : ''
+              onClick={toggleMenu}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium hover:bg-gray-200 rounded-lg transition-colors ${
+                menuOpen ? 'bg-gray-300' : ''
               }`}
-              title="Categories"
+              title="Menu"
             >
               <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Categories</span>
+              <span className="hidden sm:inline">Menu</span>
             </button>
 
-            {activeMoreDropdown && (
-              <div className="absolute top-full left-0 min-w-[240px] bg-white text-gray-800 shadow-xl rounded-b-lg border py-2 z-50">
-
-                {hiddenCategories.map((category) => {
-                  const subs = subcategoriesByCategory[category.id] || [];
-                  const isNestedActive = activeNestedId === category.id;
-
-                  return (
-                    <div key={category.id} className="relative">
-                      <button
-                        onClick={() => toggleNested(category.id)}
-                        className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between"
-                      >
-                        {category.name}
-                        {subs.length > 0 && <ChevronRight className="h-4 w-4 text-gray-400" />}
-                      </button>
-
-                      {/* NESTED */}
-                      {isNestedActive && (
-                        <div className="absolute left-full top-0 min-w-[220px] bg-white shadow-xl rounded-lg border py-2 z-50">
-                          <button
-                            onClick={() => handleCategoryClick(category.id)}
-                            className="w-full px-4 py-2 text-left text-sm font-medium text-green-600 hover:bg-green-50 border-b"
-                          >
-                            All {category.name}
-                          </button>
-
-                          {subs.length > 0 ? (
-                            subs.map((sub) => (
-                              <button
-                                key={sub.id}
-                                onClick={() => handleSubcategoryClick(sub.id, category.id)}
-                                className={`w-full px-4 py-2 text-left text-sm hover:bg-green-50 ${
-                                  selectedSubcategory === sub.id
-                                    ? 'bg-green-50 text-green-600 font-medium'
-                                    : 'text-gray-700'
-                                }`}
-                              >
-                                {sub.name}
-                              </button>
-                            ))
-                          ) : (
-                            <div className="px-4 py-3 text-sm text-gray-400">
-                              No subcategories
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {/* Dropdown - Mobile or Desktop */}
+            {menuOpen && (isMobile ? renderMobileDropdown() : renderDesktopDropdown())}
           </div>
 
-          {/* STATIC NAV ITEMS */}
- 
-
-                  <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
-                    <Home className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">About Us</span>
-                  </button>
-                  <button onClick={() => onSectionChange('products')} className="navBtn" title="Products">
-                    <Package className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Products</span>
-                  </button>
-
-                  <button onClick={() => onSectionChange('events')} className="navBtn" title="Events">
-                    <CalendarDays className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Events</span>
-                  </button>
-
-                  <button onClick={() => onSectionChange('contact')} className="navBtn" title="Contact Us">
-                    <Phone className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Contact Us</span>
-                  </button>
-
-                  <button onClick={() => onSectionChange('ecatalogue')} className="navBtn" title="Ecatalogue">
-                    <Book className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Ecatalogue</span>
-                  </button>
-
-                  <button onClick={() => onSectionChange('blogs')} className="navBtn" title="Blogs">
-                    <Clipboard className="h-5 w-5 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Blogs</span>
-                  </button>
+          {/* DESKTOP STATIC NAV ITEMS - Hidden on mobile, visible on sm+ */}
+          <div className="hidden sm:flex items-center gap-1">
+            <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
+              <Home className="h-4 w-4" />
+              <span>About Us</span>
+            </button>
+            <button onClick={() => onSectionChange('products')} className="navBtn" title="Products">
+              <Package className="h-4 w-4" />
+              <span>Products</span>
+            </button>
+            <button onClick={() => onSectionChange('events')} className="navBtn" title="Events">
+              <CalendarDays className="h-4 w-4" />
+              <span>Events</span>
+            </button>
+            
+            <button onClick={() => onSectionChange('ecatalogue')} className="navBtn" title="Ecatalogue">
+              <Book className="h-4 w-4" />
+              <span>Ecatalogue</span>
+            </button>
+            <button onClick={() => onSectionChange('blogs')} className="navBtn" title="Blogs">
+              <Clipboard className="h-4 w-4" />
+              <span>Blogs</span>
+            </button>
+            <button onClick={() => onSectionChange('contact')} className="navBtn" title="Contact Us">
+              <Phone className="h-4 w-4" />
+              <span>Contact Us</span>
+            </button>
+          </div>
 
         </div>
       </div>
@@ -238,9 +415,9 @@ export default function NavMenu({
         .navBtn {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           gap: 6px;
-          padding: 10px;
+          padding: 8px 12px;
           font-size: 14px;
           font-weight: 500;
           border-radius: 6px;
@@ -248,12 +425,6 @@ export default function NavMenu({
         }
         .navBtn:hover {
           background: #e5e7eb;
-        }
-        @media (min-width: 640px) {
-          .navBtn {
-            padding: 8px 12px;
-            justify-content: flex-start;
-          }
         }
       `}</style>
     </nav>

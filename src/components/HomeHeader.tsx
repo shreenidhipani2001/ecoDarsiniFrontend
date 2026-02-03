@@ -52,7 +52,7 @@ export default function HomeHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-500">
       {/* Top Promotional Bar */}
       <div className="bg-green-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,37 +84,28 @@ export default function HomeHeader({
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              {/* <h1
-                className="text-2xl lg:text-3xl font-bold text-green-600 cursor-pointer"
-                onClick={() => router.push('/')}
-              >
-                EcoDarshini
-              </h1> */}
- 
-               {/* <Logo className="h-12" /> */}
-               <div className="flex-shrink-0">
-               <SVGComponent
-  className="h-10 w-auto cursor-pointer transition-transform hover:scale-105"
-  onClick={() => router.push("/")}
-/>
-</div>
-               
+              <SVGComponent
+                className="h-10 w-auto cursor-pointer transition-transform hover:scale-105"
+                onClick={() => router.push("/")}
+              />
             </div>
 
             {/* Search Bar - Desktop */}
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full flex">
+              <div className="relative w-full">
                 <input
                   type="text"
                   placeholder="Search for eco-friendly products..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
-                />
-                <button className="px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-r-lg transition-colors flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  <span className="hidden lg:inline">SEARCH</span>
-                </button>
+                   className="w-full pl-4 pr-17 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent hover:ring-1 hover:ring-green-500 hover:border-green-500 hover:bg-white-0 "     />
+
+
+
+            
+<div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pl-3 border-l border-gray-300">
+                  <Search className="h-5 w-5 text-green-600" />
+                </div>
               </div>
             </div>
 
