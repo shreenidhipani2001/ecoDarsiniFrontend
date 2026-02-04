@@ -32,6 +32,7 @@ export async function getCart(userId: string) {
         'Content-Type': 'application/json',
       },
     });
+    
 
     if (!res.ok) {
       console.error('Response not ok:', res.status, res.statusText);
