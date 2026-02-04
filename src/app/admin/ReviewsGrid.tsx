@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Star, User, Package, Calendar, MessageSquare, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 import ProductDetailModal from '../../components/ProductDetailModal';
 
 type ProductImage = {
@@ -105,9 +106,25 @@ export default function ReviewsGrid() {
   }, []);
 
   const handleViewProduct = (productId: string) => {
+    console.log('Looking for product with ID:', productId);
+    console.log('Available products:', products.map(p => ({ id: p.id, name: p.name })));
+
     const product = products.find((p) => p.id === productId);
     if (product) {
+      console.log('Found product:', product.name);
       setSelectedProduct(product);
+    } else {
+      console.error('Product not found with ID:', productId);
+      // Try to find by partial match in case of ID format mismatch
+      const partialMatch = products.find((p) =>
+        p.id.includes(productId) || productId.includes(p.id)
+      );
+      if (partialMatch) {
+        console.log('Found partial match:', partialMatch.name);
+        setSelectedProduct(partialMatch);
+      } else {
+        toast.error('Product not found');
+      }
     }
   };
 
