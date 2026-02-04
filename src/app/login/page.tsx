@@ -54,7 +54,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black  flex items-center justify-center p-4">
+    {/* <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black flex items-center justify-center p-4"> */}
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-32 h-32 border border-white rounded-full" />
@@ -66,21 +67,21 @@ export default function LoginPage() {
         {/* Back to Home */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-white hover:text-green-300 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
 
         {/* Login Card */}
-        <div className="bg-black/40 backdrop-blur-sm rounded-2xl shadow-2xl border border-green-900/30 p-8">
+        <div className="bg-green-600 rounded-2xl shadow-2xl border border-white p-8">
           {/* Logo/Title */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center h-16 w-16 bg-green-600/20 rounded-full mb-4">
               <Leaf className="h-8 w-8 text-green-400" />
             </div>
-            <h1 className="text-3xl font-bold text-green-400 mb-2">EcoDarshini</h1>
-            <p className="text-gray-400 text-sm">Sign in to your account</p>
+            <h1 className="text-3xl font-bold text-black mb-2">EcoDarshini</h1>
+            <p className="text-black text-sm">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,7 +89,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-green-400 text-sm font-medium mb-2"
+                className="block text-black  text-lg font-bold mb-2"
               >
                 Email Address
               </label>
@@ -110,7 +111,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-green-400 text-sm font-medium mb-2"
+                className="block text-black text-lg  font-bold mb-2"
               >
                 Password
               </label>
@@ -122,7 +123,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-green-900/30 text-white placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 hover:bg-gray-400 pr-4 py-3 bg-gray-900/50 border border-green-900/30 text-white placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 />
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
               </div>
@@ -139,7 +140,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-white hover:bg-gray-400 text-black py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -154,11 +155,11 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-gray-500 text-sm">
+            <p className="Don't have an account text-sm">
               Don&apos;t have an account?{' '}
               <Link
                 href="/"
-                className="text-green-400 hover:text-green-300 font-medium"
+                className="Don't have an account hover:text-black font-medium"
               >
                 Browse as guest
               </Link>
@@ -167,7 +168,7 @@ export default function LoginPage() {
         </div>
 
         {/* Copyright */}
-        <p className="text-center text-gray-600 text-sm mt-6">
+        <p className="text-center text-white text-sm mt-6">
           &copy; {new Date().getFullYear()} EcoDarshini. All rights reserved.
         </p>
       </div>

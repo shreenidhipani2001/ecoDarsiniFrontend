@@ -33,6 +33,7 @@ interface NavMenuProps {
   selectedCategory: string | null;
   selectedSubcategory: string | null;
   onSectionChange: (section: SectionType) => void;
+  disabled?: boolean;
 }
 
 export default function NavMenu({
@@ -43,7 +44,8 @@ export default function NavMenu({
   onSubcategorySelect,
   selectedCategory,
   selectedSubcategory,
-  onSectionChange
+  onSectionChange,
+  disabled = false
 }: NavMenuProps) {
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -132,14 +134,23 @@ export default function NavMenu({
 
   /* ---------------- NAV ITEMS CONFIG ---------------- */
 
+  // const navItems = [
+  //   { id: 'categories', label: 'Categories', icon: Grid3X3, isCategories: true },
+  //   { id: 'about', label: 'About Us', icon: Home, section: 'about' as SectionType },
+  //   { id: 'products', label: 'Products', icon: Package, section: 'products' as SectionType },
+  //   { id: 'events', label: 'Events', icon: CalendarDays, section: 'events' as SectionType },
+  //   { id: 'contact', label: 'Contact Us', icon: Phone, section: 'contact' as SectionType },
+  //   { id: 'ecatalogue', label: 'Ecatalogue', icon: Book, section: 'ecatalogue' as SectionType },
+  //   { id: 'blogs', label: 'Blogs', icon: Clipboard, section: 'blogs' as SectionType },
+  // ];
   const navItems = [
-    { id: 'categories', label: 'Categories', icon: Grid3X3, isCategories: true },
-    { id: 'about', label: 'About Us', icon: Home, section: 'about' as SectionType },
-    { id: 'products', label: 'Products', icon: Package, section: 'products' as SectionType },
-    { id: 'events', label: 'Events', icon: CalendarDays, section: 'events' as SectionType },
-    { id: 'contact', label: 'Contact Us', icon: Phone, section: 'contact' as SectionType },
-    { id: 'ecatalogue', label: 'Ecatalogue', icon: Book, section: 'ecatalogue' as SectionType },
-    { id: 'blogs', label: 'Blogs', icon: Clipboard, section: 'blogs' as SectionType },
+    { id: 'categories', label: 'Categories', isCategories: true },
+    { id: 'about', label: 'About Us',  section: 'about' as SectionType },
+    { id: 'products', label: 'Products', section: 'products' as SectionType },
+    { id: 'events', label: 'Events',  section: 'events' as SectionType },
+    { id: 'contact', label: 'Contact Us',  section: 'contact' as SectionType },
+    { id: 'ecatalogue', label: 'Ecatalogue',  section: 'ecatalogue' as SectionType },
+    { id: 'blogs', label: 'Blogs',  section: 'blogs' as SectionType },
   ];
 
   // Get current active category for subcategories (desktop)
@@ -151,7 +162,7 @@ export default function NavMenu({
   const renderMobileDropdown = () => (
     <div className="absolute top-full left-0 w-[280px] bg-white text-gray-800 shadow-xl rounded-b-lg border z-50 max-h-[70vh] overflow-y-auto">
       {navItems.map((item) => {
-        const Icon = item.icon;
+         
 
         if (item.isCategories) {
           return (
@@ -164,7 +175,7 @@ export default function NavMenu({
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
+                  {/* <Icon className="h-4 w-4" /> */}
                   {item.label}
                 </span>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
@@ -237,7 +248,7 @@ export default function NavMenu({
             onClick={() => handleSectionClick(item.section!)}
             className="w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center gap-2 border-b border-gray-100"
           >
-            <Icon className="h-4 w-4" />
+            {/* <Icon className="h-4 w-4" /> */}
             {item.label}
           </button>
         );
@@ -252,7 +263,7 @@ export default function NavMenu({
       {/* Main Menu Dropdown */}
       <div className="absolute top-full left-0 min-w-[240px] bg-white text-gray-800 shadow-xl rounded-b-lg border py-2 z-50 max-h-[280px] overflow-y-auto">
         {navItems.map((item) => {
-          const Icon = item.icon;
+          // const Icon = item.icon;
 
           if (item.isCategories) {
             return (
@@ -265,7 +276,7 @@ export default function NavMenu({
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" />
+                    {/* <Icon className="h-4 w-4" /> */}
                     {item.label}
                   </span>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -280,7 +291,7 @@ export default function NavMenu({
               onClick={() => handleSectionClick(item.section!)}
               className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2"
             >
-              <Icon className="h-4 w-4" />
+              {/* <Icon className="h-4 w-4" /> */}
               {item.label}
             </button>
           );
@@ -364,10 +375,11 @@ export default function NavMenu({
           {/* MENU BUTTON */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={toggleMenu}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium hover:bg-gray-200 rounded-lg transition-colors ${
-                menuOpen ? 'bg-gray-300' : ''
-              }`}
+              onClick={disabled ? undefined : toggleMenu}
+              disabled={disabled}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                disabled ? 'cursor-default opacity-70' : 'hover:bg-gray-200'
+              } ${menuOpen ? 'bg-gray-300' : ''}`}
               title="Menu"
             >
               <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -375,34 +387,34 @@ export default function NavMenu({
             </button>
 
             {/* Dropdown - Mobile or Desktop */}
-            {menuOpen && (isMobile ? renderMobileDropdown() : renderDesktopDropdown())}
+            {!disabled && menuOpen && (isMobile ? renderMobileDropdown() : renderDesktopDropdown())}
           </div>
 
           {/* DESKTOP STATIC NAV ITEMS - Hidden on mobile, visible on sm+ */}
           <div className="hidden sm:flex items-center gap-1">
-            <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
-              <Home className="h-4 w-4" />
+            <button onClick={disabled ? undefined : () => onSectionChange('about')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="About Us">
+              {/* <Home className="h-4 w-4" /> */}
               <span>About Us</span>
             </button>
-            <button onClick={() => onSectionChange('products')} className="navBtn" title="Products">
-              <Package className="h-4 w-4" />
+            <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
+              {/* <Package className="h-4 w-4" /> */}
               <span>Products</span>
             </button>
-            <button onClick={() => onSectionChange('events')} className="navBtn" title="Events">
-              <CalendarDays className="h-4 w-4" />
+            <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
+              {/* <CalendarDays className="h-4 w-4" /> */}
               <span>Events</span>
             </button>
-            
-            <button onClick={() => onSectionChange('ecatalogue')} className="navBtn" title="Ecatalogue">
-              <Book className="h-4 w-4" />
+
+            <button onClick={disabled ? undefined : () => onSectionChange('ecatalogue')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Ecatalogue">
+              {/* <Book className="h-4 w-4" /> */}
               <span>Ecatalogue</span>
             </button>
-            <button onClick={() => onSectionChange('blogs')} className="navBtn" title="Blogs">
-              <Clipboard className="h-4 w-4" />
+            <button onClick={disabled ? undefined : () => onSectionChange('blogs')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Blogs">
+              {/* <Clipboard className="h-4 w-4" /> */}
               <span>Blogs</span>
             </button>
-            <button onClick={() => onSectionChange('contact')} className="navBtn" title="Contact Us">
-              <Phone className="h-4 w-4" />
+            <button onClick={disabled ? undefined : () => onSectionChange('contact')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Contact Us">
+              {/* <Phone className="h-4 w-4" /> */}
               <span>Contact Us</span>
             </button>
           </div>

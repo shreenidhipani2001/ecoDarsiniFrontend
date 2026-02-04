@@ -549,7 +549,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                   <HomeProductCard
                     product={product}
                     onAddToCart={() => handleProductAction(product, 'cart')}
-                    onBuyNow={() => handleProductAction(product, 'buy')}
+                    onBuyNow={() => router.push(`/product/${product.id}`)}
                     onAddToWishlist={() => handleProductAction(product, 'wishlist')}
                   />
                 </div>

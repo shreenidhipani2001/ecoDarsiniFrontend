@@ -17,23 +17,35 @@ interface CategoryFilterProps {
   loading?: boolean;
 }
 
-// Category icon/color mapping for visual distinction
-const categoryStyles: Record<string, { bg: string; icon: string }> = {
-  'pottery-ceramics': { bg: 'bg-orange-100', icon: '🏺' },
-  'tribal-paintings': { bg: 'bg-amber-100', icon: '🎨' },
-  'brass-artifacts': { bg: 'bg-yellow-100', icon: '🔔' },
-  'wooden-crafts': { bg: 'bg-emerald-100', icon: '🪵' },
-  'textiles': { bg: 'bg-pink-100', icon: '🧵' },
-  'jewelry': { bg: 'bg-purple-100', icon: '💎' },
-  'home-decor': { bg: 'bg-blue-100', icon: '🏠' },
-  'default': { bg: 'bg-green-100', icon: '🌿' },
+// Category image mapping - maps slug to public folder image
+const categoryImages: Record<string, string> = {
+  'books': '/book.jpeg',
+  'cuisine': '/cuisine.jpeg',
+  'gifts': '/gift.jpeg',
+  'furnishing': '/funtiturre.jpeg',
+  'health-hygiene': '/health.jpeg',
+  'handloom': '/handloom.jpeg',
+  'clothing-accessories': '/clothing.jpeg',
+  'art-craft': '/art.jpeg',
+  'sustainable-living': '/ecofriend.jpeg',
+  'handcrafted-decor': '/handcraft.jpeg',
+  'pottery-ceramics': '/pottery.jpeg',
+  'spiritual-pooja-items': '/pooja.jpeg',
+  'home-living': '/homeandliving.jpeg',
+  'eco-friendly-products': '/ecoproducts.jpeg',
+  'wall-decor': '/walldecor.jpeg',
+  'bamboo-cane-crafts': '/bamboo.jpeg',
+  'metal-crafts': '/art.jpeg',
+  'wooden-handicrafts': '/bamboo.jpeg',
+  'handloom-textiles': '/handloom.jpeg',
+  'tribal-paintings': '/tribal-art-statues-stockcake.webp',
 };
 
-function getCategoryStyle(slug?: string) {
-  if (slug && categoryStyles[slug]) {
-    return categoryStyles[slug];
+function getCategoryImage(slug?: string): string | null {
+  if (slug && categoryImages[slug]) {
+    return categoryImages[slug];
   }
-  return categoryStyles.default;
+  return null;
 }
 
 export default function CategoryFilter({
@@ -163,7 +175,7 @@ export default function CategoryFilter({
 
             {/* Category Items */}
             {categories.map((category) => {
-              const style = getCategoryStyle(category.slug);
+              const imageUrl = getCategoryImage(category.slug);
               const isSelected = selectedCategory === category.id;
 
               return (
@@ -173,13 +185,23 @@ export default function CategoryFilter({
                   className="flex flex-col items-center gap-3 flex-shrink-0 group"
                 >
                   <div
-                    className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center transition-all ${
+                    className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden transition-all ${
                       isSelected
                         ? 'ring-2 ring-green-600 ring-offset-2'
                         : 'group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
-                    } ${style.bg}`}
+                    } bg-green-50`}
                   >
-                    <span className="text-3xl lg:text-4xl">{style.icon}</span>
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={category.name}
+                        className="w-full h-full object-cover object-center p-2"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-green-100">
+                        <span className="text-3xl lg:text-4xl">🌿</span>
+                      </div>
+                    )}
                     {isSelected && (
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                         <svg

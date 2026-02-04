@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, Heart, Zap } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 
@@ -55,6 +56,8 @@ export default function HomeProductCard({
   onBuyNow,
   onAddToWishlist,
 }: HomeProductCardProps) {
+  const router = useRouter();
+
   const finalPrice = product.discount
     ? Math.round(product.price * (1 - product.discount / 100))
     : product.price;
@@ -63,7 +66,10 @@ export default function HomeProductCard({
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group border border-gray-100">
+    <div
+      onClick={() => router.push(`/product/${product.id}`)}
+      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group border border-gray-100 cursor-pointer"
+    >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden">
         {imageUrl ? (
