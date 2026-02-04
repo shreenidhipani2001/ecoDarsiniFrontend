@@ -8,19 +8,21 @@ import SVGComponent from './Logo';
 import Image from 'next/image';
 
 interface HomeHeaderProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
   cartCount?: number;
   wishlistCount?: number;
-  onLoginClick: () => void;
+  onLoginClick?: () => void;
+  hideSearch?: boolean;
 }
 
 export default function HomeHeader({
-  searchQuery,
-  onSearchChange,
+  searchQuery = '',
+  onSearchChange = () => {},
   cartCount = 0,
   wishlistCount = 0,
-  onLoginClick,
+  onLoginClick = () => {},
+  hideSearch = false,
 }: HomeHeaderProps) {
   const router = useRouter();
   const { user, isAuthenticated, clearUser } = useAuthStore();
@@ -91,23 +93,22 @@ export default function HomeHeader({
             </div>
 
             {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  placeholder="Search for eco-friendly products..."
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                   className="w-full pl-4 pr-17 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent hover:ring-1 hover:ring-green-500 hover:border-green-500 hover:bg-white-0 "     />
-
-
-
-            
-<div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pl-3 border-l border-gray-300">
-                  <Search className="h-5 w-5 text-green-600" />
+            {!hideSearch && (
+              <div className="hidden md:flex flex-1 max-w-xl mx-8">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Search for eco-friendly products..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="w-full pl-4 pr-17 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent hover:ring-1 hover:ring-green-500 hover:border-green-500 hover:bg-white-0"
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pl-3 border-l border-gray-300">
+                    <Search className="h-5 w-5 text-green-600" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Right Side Actions */}
             <div className="flex flex-row items-end gap-4 lg:gap-6">
@@ -201,20 +202,22 @@ export default function HomeHeader({
           </div>
 
           {/* Mobile Search Bar */}
-          <div className="md:hidden pb-4">
-            <div className="relative flex">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-4 pr-4 py-2.5 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
-              />
-              <button className="px-4 bg-green-600 hover:bg-green-700 text-white rounded-r-lg transition-colors">
-                <Search className="h-5 w-5" />
-              </button>
+          {!hideSearch && (
+            <div className="md:hidden pb-4">
+              <div className="relative flex">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-4 pr-4 py-2.5 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
+                />
+                <button className="px-4 bg-green-600 hover:bg-green-700 text-white rounded-r-lg transition-colors">
+                  <Search className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (

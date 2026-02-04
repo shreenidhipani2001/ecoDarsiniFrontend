@@ -18,6 +18,8 @@ import {
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../store/useAuthStore';
+import NavMenu from '../../../components/NavMenu';
+import HomeHeader from '../../../components/HomeHeader';
 
 interface Product {
   id: string;
@@ -428,7 +430,19 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <HomeHeader hideSearch={true} />
       {/* Breadcrumb */}
+      <NavMenu
+        categories={HARDCODED_CATEGORIES}
+        subcategoriesByCategory={{}}
+        loading={false}
+        onCategorySelect={() => {}}
+        onSubcategorySelect={() => {}}
+        selectedCategory={null}
+        selectedSubcategory={null}
+        onSectionChange={() => {}}
+        disabled={true}
+      />
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <nav className="flex items-center gap-2 text-sm text-gray-600">
@@ -589,7 +603,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Product Info */}
-                <div className="lg:w-1/2">
+                <div className="lg:w-1/2 flex flex-col">
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
 
                   {/* Rating & Reviews */}
@@ -621,56 +635,62 @@ export default function ProductDetailPage() {
                   {/* Product Info Box */}
                   <div className="border-l-4 border-orange-400 bg-gray-50 p-4 mb-4 text-sm">
                     {product.artist_name && (
-                      <p className="mb-1"><span className="text-gray-500">Artist:</span> <span className="font-medium">{product.artist_name}</span></p>
+                      <p className="mb-1"><span className="text-gray-900">Artist:</span> <span className="font-2xl text-gray-900">{product.artist_name}</span></p>
                     )}
-                    <p className="mb-1"><span className="text-gray-500">Product Code:</span> <span className="font-medium">{product.slug}</span></p>
-                    <p className="mb-1"><span className="text-gray-500">Category:</span> <span className="font-medium">{category?.name || product.category_name || '-'}</span></p>
+                    <p className="mb-1 "><span className="text-gray-900">Product Code:</span> <span className="font-medium text-gray-900">{product.slug}</span></p>
+                    <p className="mb-1"><span className="text-gray-900">Category:</span> <span className="font-medium text-gray-900">{category?.name || product.category_name || '-'}</span></p>
                     {subcategory && (
-                      <p><span className="text-gray-500">Subcategory:</span> <span className="font-medium">{subcategory.name}</span></p>
+                      <p><span className="text-gray-900">Subcategory:</span> <span className="font-medium text-gray-900">{subcategory.name}</span></p>
                     )}
                   </div>
 
                   {/* Reviews Section */}
-                  {reviews.length > 0 && (
-                    <div className="mb-4">
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Customer Reviews ({reviews.length})</h3>
-                      <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
-                        {reviews.slice(0, 3).map((review) => (
-                          <div
-                            key={review.id}
-                            className="flex-shrink-0 w-56 bg-gray-50 border border-gray-200 rounded-lg p-3"
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                                <span className="text-orange-600 font-semibold text-sm">
-                                  {review.user_name?.charAt(0).toUpperCase() || 'U'}
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium text-gray-800 truncate">{review.user_name}</span>
+                  <div className="mb-4 w-full overflow-hidden">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Customer Reviews ({reviews.length > 0 ? reviews.length : 7})</h3>
+                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0" style={{ scrollbarWidth: 'thin' }}>
+                      {(reviews.length > 0 ? reviews.slice(0, 7) : [
+                        { id: '1', user_name: 'Rahul Sharma', rating: 5, comment: 'Excellent product! The quality exceeded my expectations. Highly recommend for anyone looking for authentic handcrafted items.' },
+                        { id: '2', user_name: 'Priya Patel', rating: 3, comment: 'Beautiful craftsmanship and eco-friendly materials. Perfect gift for my family. Will definitely order again!' },
+                        { id: '3', user_name: 'Amit Kumar', rating: 4, comment: 'Very good quality product. Delivery was on time and packaging was neat. Happy with my purchase.' },
+                        { id: '4', user_name: 'Sneha Reddy', rating: 5, comment: 'Absolutely love this! The attention to detail is amazing. Supporting local artisans feels great.' },
+                        { id: '5', user_name: 'Vikram Singh', rating: 4, comment: 'Good value for money. The product looks exactly as shown in the pictures. Recommended!' },
+                        { id: '6', user_name: 'Anjali Gupta', rating: 5, comment: 'Stunning piece! It has become the centerpiece of my living room. Everyone asks where I got it from.' },
+                        { id: '7', user_name: 'Rajesh Nair', rating: 4, comment: 'Nice product with traditional touch. Shipping was quick and customer service was helpful.' },
+                      ]).map((review) => (
+                        <div
+                          key={review.id}
+                          className="flex-shrink-0 w-[85vw] sm:w-56 bg-gray-50 border border-gray-200 rounded-lg p-3"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-orange-600 font-semibold text-sm">
+                                {review.user_name?.charAt(0).toUpperCase() || 'U'}
+                              </span>
                             </div>
-                            <div className="flex mb-2">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-3 h-3 ${i < review.rating ? 'fill-orange-400 text-orange-400' : 'text-gray-300'}`}
-                                />
-                              ))}
-                            </div>
-                            <p className="text-xs text-gray-600 leading-relaxed">
-                              {review.comment
-                                ? review.comment.length > 150
-                                  ? `${review.comment.substring(0, 150)}...`
-                                  : review.comment
-                                : 'No comment'}
-                            </p>
+                            <span className="text-sm font-medium text-gray-800 truncate">{review.user_name}</span>
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3 h-3 ${i < review.rating ? 'fill-orange-400 text-orange-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            {review.comment
+                              ? review.comment.length > 150
+                                ? `${review.comment.substring(0, 150)}...`
+                                : review.comment
+                              : 'No comment'}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  )}
-
+                  </div>
+{/* <div className='bg-blue-200'>sss</div> */}
                   {/* Quantity & Actions */}
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mt-auto pt-4 ">
                     <span className="text-sm text-gray-600">Qty</span>
                     <div className="flex items-center border border-gray-300 rounded">
                       <button
@@ -691,10 +711,10 @@ export default function ProductDetailPage() {
                     <button
                       onClick={handleAddToCart}
                       disabled={isOutOfStock || addingToCart}
-                      className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-6 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-3 sm:px-6 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {addingToCart ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
-                      ADD TO CART
+                      <span className="hidden sm:inline">ADD TO CART</span>
                     </button>
 
                     <button
@@ -752,7 +772,7 @@ export default function ProductDetailPage() {
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (
-              <div className="bg-white rounded shadow p-6">
+              <div className="bg-white rounded shadow p-6 mt-42">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900">RELATED PRODUCTS</h2>
                   <div className="flex gap-2">

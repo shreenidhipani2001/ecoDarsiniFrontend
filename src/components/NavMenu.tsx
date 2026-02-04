@@ -33,6 +33,7 @@ interface NavMenuProps {
   selectedCategory: string | null;
   selectedSubcategory: string | null;
   onSectionChange: (section: SectionType) => void;
+  disabled?: boolean;
 }
 
 export default function NavMenu({
@@ -43,7 +44,8 @@ export default function NavMenu({
   onSubcategorySelect,
   selectedCategory,
   selectedSubcategory,
-  onSectionChange
+  onSectionChange,
+  disabled = false
 }: NavMenuProps) {
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -373,10 +375,11 @@ export default function NavMenu({
           {/* MENU BUTTON */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={toggleMenu}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium hover:bg-gray-200 rounded-lg transition-colors ${
-                menuOpen ? 'bg-gray-300' : ''
-              }`}
+              onClick={disabled ? undefined : toggleMenu}
+              disabled={disabled}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                disabled ? 'cursor-default opacity-70' : 'hover:bg-gray-200'
+              } ${menuOpen ? 'bg-gray-300' : ''}`}
               title="Menu"
             >
               <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -384,33 +387,33 @@ export default function NavMenu({
             </button>
 
             {/* Dropdown - Mobile or Desktop */}
-            {menuOpen && (isMobile ? renderMobileDropdown() : renderDesktopDropdown())}
+            {!disabled && menuOpen && (isMobile ? renderMobileDropdown() : renderDesktopDropdown())}
           </div>
 
           {/* DESKTOP STATIC NAV ITEMS - Hidden on mobile, visible on sm+ */}
           <div className="hidden sm:flex items-center gap-1">
-            <button onClick={() => onSectionChange('about')} className="navBtn" title="About Us">
+            <button onClick={disabled ? undefined : () => onSectionChange('about')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="About Us">
               {/* <Home className="h-4 w-4" /> */}
               <span>About Us</span>
             </button>
-            <button onClick={() => onSectionChange('products')} className="navBtn" title="Products">
+            <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
               {/* <Package className="h-4 w-4" /> */}
               <span>Products</span>
             </button>
-            <button onClick={() => onSectionChange('events')} className="navBtn" title="Events">
+            <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
               {/* <CalendarDays className="h-4 w-4" /> */}
               <span>Events</span>
             </button>
-            
-            <button onClick={() => onSectionChange('ecatalogue')} className="navBtn" title="Ecatalogue">
+
+            <button onClick={disabled ? undefined : () => onSectionChange('ecatalogue')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Ecatalogue">
               {/* <Book className="h-4 w-4" /> */}
               <span>Ecatalogue</span>
             </button>
-            <button onClick={() => onSectionChange('blogs')} className="navBtn" title="Blogs">
+            <button onClick={disabled ? undefined : () => onSectionChange('blogs')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Blogs">
               {/* <Clipboard className="h-4 w-4" /> */}
               <span>Blogs</span>
             </button>
-            <button onClick={() => onSectionChange('contact')} className="navBtn" title="Contact Us">
+            <button onClick={disabled ? undefined : () => onSectionChange('contact')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Contact Us">
               {/* <Phone className="h-4 w-4" /> */}
               <span>Contact Us</span>
             </button>
