@@ -15,6 +15,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'ecodarshinibackend-1.onrender.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'ecodarshinibackend2.onrender.com',
         pathname: '/**',
       },
