@@ -592,70 +592,172 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
       </div>
 
       {/* corousel section */}
-      <div className="w-full sm:w-[80] md:w-[80] h-[250px] sm:h-[300px] md:h-[400px] relative bg-gray-100 overflow-hidden">
-  {/* Left Arrow */}
-  <button
-    onClick={() =>
-      document.getElementById('product-slider')?.scrollBy({ left: -400, behavior: 'smooth' })
-    }
-    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
-  >
-    ‹
-  </button>
+      {/* <div className="w-full sm:w-[80%] md:w-[80%] lg:w-[100%] h-[250px] sm:h-[300px] md:h-[400px] relative bg-gray-100 overflow-hidden">
+            
+          <button
+            onClick={() =>
+              document.getElementById('product-slider')?.scrollBy({ left: -400, behavior: 'smooth' })
+            }
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
+          >
+            ‹
+          </button>
 
-  {/* Right Arrow */}
-  <button
-    onClick={() =>
-      document.getElementById('product-slider')?.scrollBy({ left: 400, behavior: 'smooth' })
-    }
-    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
-  >
-    ›
-  </button>
+          
+          <button
+            onClick={() =>
+              document.getElementById('product-slider')?.scrollBy({ left: 400, behavior: 'smooth' })
+            }
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
+          >
+            ›
+          </button>
 
-  {/* Slider */}
-  <div
-    id="product-slider"
-    className="flex gap-4 h-full overflow-x-auto scroll-smooth scrollbar-hide px-6 items-center"
-  >
-    {products.slice(0, 8).map((product) => (
-      <div
-        key={product.id}
-        className="min-w-[85vw] sm:min-w-[300px] md:min-w-[380px] h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-        onClick={() => router.push(`/product/${product.slug}`)}
-      >
-        <div className="w-full h-[75%] bg-gray-200">
-          {product.images?.[0] ? (
-            <img
-              src={product.images[0].card || product.images[0].url}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : null}
-        </div>
+          
+          <div
+            id="product-slider"
+            className="flex gap-4 h-full overflow-x-auto scroll-smooth scrollbar-hide px-6 items-center"
+          >
+            {products.slice(0, 8).map((product) => (
+              <div
+                key={product.id}
+                className="min-w-[85vw] sm:min-w-[300px] md:min-w-[380px] h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
+                onClick={() => router.push(`/product/${product.slug}`)}
+              >
+                <div className="w-full h-[75%] bg-gray-200">
+                  {product.images?.[0] ? (
+                    <img
+                      src={product.images[0].card || product.images[0].url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                </div>
 
-        <div className="p-4 h-[25%] flex flex-col justify-center">
-          <h3 className="text-base font-medium text-gray-900 line-clamp-1">
-            {product.name}
-          </h3>
-          <p className="text-green-700 font-bold mt-1">
-            ₹{product.price}
-          </p>
+                <div className="p-4 h-[25%] flex flex-col justify-center">
+                  <h3 className="text-base font-medium text-gray-900 line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-green-700 font-bold mt-1">
+                    ₹{product.price}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          
+          <style jsx>{`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+      </div> */}
+      {/* Carousel Section - Responsive & Centered */}
+      <div className="w-full py-6 md:py-8 bg-gray-50 overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Optional title */}
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
+            Featured Products
+          </h2>
+
+          {/* Carousel Container */}
+          <div className="relative">
+            {/* Left Arrow */}
+            <button
+              onClick={() =>
+                document.getElementById('product-slider')?.scrollBy({
+                  left: -340,
+                  behavior: 'smooth',
+                })
+              }
+              className="hidden sm:flex absolute -left-2 lg:-left-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-700 hover:text-black transition-all duration-200"
+            >
+              ‹
+            </button>
+
+            {/* Right Arrow */}
+            <button
+              onClick={() =>
+                document.getElementById('product-slider')?.scrollBy({
+                  left: 340,
+                  behavior: 'smooth',
+                })
+              }
+              className="hidden sm:flex absolute -right-2 lg:-right-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-700 hover:text-black transition-all duration-200"
+            >
+              ›
+            </button>
+
+            {/* Slider */}
+            <div
+              id="product-slider"
+              className="flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory px-1 sm:px-2 pb-4 -mx-1 sm:-mx-2"
+            >
+              {/* Left padding / fake centering helper */}
+              <div className="shrink-0 w-4 sm:w-8 lg:w-16 hidden sm:block" aria-hidden />
+
+              {products.slice(0, 8).map((product) => (
+                <div
+                  key={product.id}
+                  className={`
+                    flex-shrink-0 snap-start
+                    w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]
+                    h-[280px] sm:h-[340px] md:h-[380px]
+                    bg-white rounded-xl overflow-hidden
+                    shadow-sm hover:shadow-xl transition-all duration-300
+                    cursor-pointer border border-gray-200
+                  `}
+                  onClick={() => router.push(`/product/${product.slug}`)}
+                >
+                  {/* Image container */}
+                  <div className="w-full h-[72%] bg-gray-100 relative">
+                    {product.images?.[0] ? (
+                      <img
+                        src={product.images[0].card || product.images[0].url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-green-700 font-bold mt-1 text-base sm:text-lg">
+                      ₹{product.price.toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Right padding / fake centering helper */}
+              <div className="shrink-0 w-4 sm:w-8 lg:w-16 hidden sm:block" aria-hidden />
+            </div>
+
+            {/* Scrollbar hiding */}
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
+          </div>
         </div>
       </div>
-    ))}
-  </div>
-
-  {/* Hide scrollbar */}
-  <style jsx>{`
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-  `}</style>
-</div>
 
 
-    <section ref={productGridRef} className="bg-white py-12">
+      <section ref={productGridRef} className="bg-white py-12">
      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">

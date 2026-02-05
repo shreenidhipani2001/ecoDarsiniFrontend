@@ -220,13 +220,13 @@ export default async function CategoryPage({
             {/* Pagination (simple) */}
             {data.totalPages > 1 && (
               <div className="mt-10 flex justify-center gap-4">
-                <button className="px-4 py-2 border rounded disabled:opacity-50">
+                <button className="px-4 py-2 border bg-green-600  rounded disabled:opacity-50">
                   Previous
                 </button>
-                <span className="px-4 py-2">
+                <span className="px-4 py-2 bg-green-600 ">
                   Page {data.page} of {data.totalPages}
                 </span>
-                <button className="px-4 py-2 border rounded disabled:opacity-50">
+                <button className="px-4 py-2 border bg-green-600  rounded disabled:opacity-50">
                   Next
                 </button>
               </div>
