@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 interface Category {
   id: string;
   name: string;
@@ -57,7 +57,7 @@ export default function CategoryFilter({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
-
+  const router = useRouter();
   const checkScrollButtons = () => {
     const container = scrollContainerRef.current;
     if (container) {
@@ -86,12 +86,22 @@ export default function CategoryFilter({
     }
   };
 
+  // Handle category click + navigation
+  const handleCategoryClick = (categoryId: string | null) => {
+    onCategorySelect(categoryId);           // keep your existing logic
+    if (categoryId) {
+      router.push(`/category/${categoryId}`); // navigate to category page
+    } else {
+      router.push(`/`);
+    }
+  };
+
   if (loading) {
     return (
       <section className="bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Top Categories</h2>
+            <h2 className="text-xl font-bold text-gray-900">Shop By Category</h2>
           </div>
           <div className="flex gap-6 overflow-hidden">
             {[...Array(10)].map((_, i) => (
@@ -111,7 +121,7 @@ export default function CategoryFilter({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Top Categories</h2>
+          <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Shop By Category</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => scroll('left')}
@@ -148,7 +158,7 @@ export default function CategoryFilter({
           >
             {/* All Products */}
             <button
-              onClick={() => onCategorySelect(null)}
+              onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
               <div
@@ -181,7 +191,7 @@ export default function CategoryFilter({
               return (
                 <button
                   key={category.id}
-                  onClick={() => onCategorySelect(category.id)}
+                  onClick={() => handleCategoryClick(category.id)}
                   className="flex flex-col items-center gap-3 flex-shrink-0 group"
                 >
                   <div
@@ -233,7 +243,7 @@ export default function CategoryFilter({
 
             {/* View More */}
             <button
-              onClick={() => onCategorySelect(null)}
+              onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
               <div className="relative w-20 h-20 lg:w-24 lg:h-24 rounded-full border-2 border-dashed border-green-300 flex items-center justify-center transition-all hover:border-green-500 hover:bg-green-50">

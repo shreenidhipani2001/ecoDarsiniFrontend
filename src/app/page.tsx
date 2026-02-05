@@ -22,7 +22,6 @@ import BlogsSection from '../components/BlogsSection';
 import EcatalogueBookFlip from '../components/EcatalogueBookFlip';
 import ProductsCatalouge from '../app/admin/ProductsCatalogue';
 import EventsSection from '../components/EventsSection';
-import HomeProductDetailModal from '../components/HomeProductDetailModal';
 import WhatsAppChat from '../components/WhatsAppChat';
 import ShopBot from '../components/ShopBot';
 
@@ -113,7 +112,6 @@ export default function HomePage() {
   const [wishlistCount, setWishlistCount] = useState(0);
 
   const [imageError, setImageError] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -485,7 +483,180 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onCategorySelect={handleCategorySelect}
         loading={categoriesLoading}
       />
+
+      {/* Best Sellers Section */}
+      <div className="w-full flex flex-col lg:flex-row gap-4 px-4 py-4 bg-gray-50">
+
+        {/* Left - Today's Deals (stacks full-width on mobile, 25% on desktop) */}
+        <div className="w-full lg:w-[25%] h-[400px] lg:h-[600px] bg-white rounded-lg shadow-sm p-4 flex flex-col">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Today&apos;s Deals</h3>
+          <div className="flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
+            <div className="grid grid-cols-2 gap-3">
+              {products.slice(0, 10).map((product) => (
+                <div
+                  key={`deal-${product.id}`}
+                  onClick={() => router.push(`/product/${product.id}`)}
+                  className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <div className="w-full aspect-square">
+                    {product.images?.[0] ? (
+                      <img
+                        src={product.images[0].card || product.images[0].url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No Image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <h4 className="text-xs font-medium text-gray-900 line-clamp-2">{product.name}</h4>
+                    <p className="text-sm font-bold text-green-700 mt-1">₹{product.price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right - Best Sellers (stacks full-width on mobile, 75% on desktop) */}
+        <div className="w-full lg:w-[75%] h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm p-4 flex flex-col">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-3 gap-2">
+            <h2 className="text-xl font-bold text-gray-900">BEST SELLER</h2>
+            <div className="flex gap-4 sm:gap-6 text-sm font-medium overflow-x-auto">
+              <button className="text-orange-500 border-b-2 border-orange-500 pb-1 whitespace-nowrap">
+                Accessories
+              </button>
+              <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                Fashion
+              </button>
+              <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
+                Electronics
+              </button>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          <div className="mt-4 flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+              {products.slice(0, 80).map((product, i) => (
+                <div
+                  key={`best-${product.id}`}
+                  onClick={() => router.push(`/product/${product.id}`)}
+                  className="group bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
+                >
+                  <div className="relative aspect-square bg-gray-200">
+                    {product.images?.[0] ? (
+                      <img
+                        src={product.images[0].card || product.images[0].url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No Image</span>
+                      </div>
+                    )}
+                    {i % 5 === 0 && (
+                      <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                        NEW
+                      </span>
+                    )}
+                    {i % 7 === 0 && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                        -7%
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-2 sm:p-3">
+                    <div className="flex text-orange-400 text-[10px] sm:text-xs mb-1">★★★★★</div>
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-1 group-hover:text-green-700">
+                      {product.name}
+                    </h3>
+                    <div className="mt-1 flex items-center gap-1 sm:gap-2">
+                      <span className="text-red-600 font-bold text-sm">₹{product.price}</span>
+                      <span className="text-gray-400 line-through text-[10px] sm:text-xs">
+                        ₹{Math.round(product.price * 1.1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* corousel section */}
+      <div className="w-full sm:w-[80] md:w-[80] h-[250px] sm:h-[300px] md:h-[400px] relative bg-gray-100 overflow-hidden">
+  {/* Left Arrow */}
+  <button
+    onClick={() =>
+      document.getElementById('product-slider')?.scrollBy({ left: -400, behavior: 'smooth' })
+    }
+    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
+  >
+    ‹
+  </button>
+
+  {/* Right Arrow */}
+  <button
+    onClick={() =>
+      document.getElementById('product-slider')?.scrollBy({ left: 400, behavior: 'smooth' })
+    }
+    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
+  >
+    ›
+  </button>
+
+  {/* Slider */}
+  <div
+    id="product-slider"
+    className="flex gap-4 h-full overflow-x-auto scroll-smooth scrollbar-hide px-6 items-center"
+  >
+    {products.slice(0, 8).map((product) => (
+      <div
+        key={product.id}
+        className="min-w-[85vw] sm:min-w-[300px] md:min-w-[380px] h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
+        onClick={() => router.push(`/product/${product.slug}`)}
+      >
+        <div className="w-full h-[75%] bg-gray-200">
+          {product.images?.[0] ? (
+            <img
+              src={product.images[0].card || product.images[0].url}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          ) : null}
+        </div>
+
+        <div className="p-4 h-[25%] flex flex-col justify-center">
+          <h3 className="text-base font-medium text-gray-900 line-clamp-1">
+            {product.name}
+          </h3>
+          <p className="text-green-700 font-bold mt-1">
+            ₹{product.price}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {/* Hide scrollbar */}
+  <style jsx>{`
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+  `}</style>
+</div>
+
+
     <section ref={productGridRef} className="bg-white py-12">
+     
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
@@ -541,18 +712,13 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <div
+                <HomeProductCard
                   key={product.id}
-                  onClick={() => setSelectedProduct(product)}
-                  className="cursor-pointer"
-                >
-                  <HomeProductCard
-                    product={product}
-                    onAddToCart={() => handleProductAction(product, 'cart')}
-                    onBuyNow={() => router.push(`/product/${product.id}`)}
-                    onAddToWishlist={() => handleProductAction(product, 'wishlist')}
-                  />
-                </div>
+                  product={product}
+                  onAddToCart={() => handleProductAction(product, 'cart')}
+                  onBuyNow={() => router.push(`/product/${product.id}`)}
+                  onAddToWishlist={() => handleProductAction(product, 'wishlist')}
+                />
               ))}
             </div>
 
@@ -623,7 +789,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
 
 
       {/* Home Product Detail Modal */}
-      {selectedProduct && (
+      {/* {selectedProduct && (
         <HomeProductDetailModal
           product={selectedProduct}
           imageUrl={
@@ -639,7 +805,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
             handleProductAction(product, 'wishlist');
           }}
         />
-      )}
+      )} */}
     </div>
   );
 }
