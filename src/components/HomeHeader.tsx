@@ -54,11 +54,12 @@ export default function HomeHeader({
   };
 
   return (
-    <header className="sticky top-0 z-500">
-      {/* Top Promotional Bar */}
+    <header className="sticky top-0 z-50">
+      {/* Top Promotional Bar - unchanged */}
       <div className="bg-green-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-10 text-sm">
+            {/* ... promotional bar content unchanged ... */}
             <div className="flex items-center gap-6">
               <span className="font-medium">Get 20% Off On Your First Order!</span>
               <div className="hidden md:flex items-center gap-4 text-green-100">
@@ -83,7 +84,8 @@ export default function HomeHeader({
       {/* Main Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          {/* Desktop layout - completely unchanged */}
+          <div className="hidden md:flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
               <SVGComponent
@@ -94,14 +96,14 @@ export default function HomeHeader({
 
             {/* Search Bar - Desktop */}
             {!hideSearch && (
-              <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <div className="flex-1 max-w-xl mx-8">
                 <div className="relative w-full">
                   <input
                     type="text"
                     placeholder="Search for eco-friendly products..."
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full pl-4 pr-17 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent hover:ring-1 hover:ring-green-500 hover:border-green-500 hover:bg-white-0"
+                    className="w-full pl-4 pr-17 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent hover:ring-1 hover:ring-green-500 hover:border-green-500 hover:bg-white"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pl-3 border-l border-gray-300">
                     <Search className="h-5 w-5 text-green-600" />
@@ -110,9 +112,9 @@ export default function HomeHeader({
               </div>
             )}
 
-            {/* Right Side Actions */}
+            {/* Right Side Actions - Desktop - unchanged */}
             <div className="flex flex-row items-end gap-4 lg:gap-6">
-              {/* Wishlist - Desktop */}
+              {/* ... wishlist, profile, cart, mobile toggle unchanged ... */}
               <button
                 onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
                 className="hidden sm:inline-flex flex-col items-center justify-end p-2 text-gray-600 hover:text-green-600 transition-colors"
@@ -190,8 +192,6 @@ export default function HomeHeader({
                 </div>
                 <span className="text-xs hidden lg:block">My Cart</span>
               </button>
-
-              {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 text-gray-600 hover:text-green-600"
@@ -201,71 +201,94 @@ export default function HomeHeader({
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
-          {!hideSearch && (
-            <div className="md:hidden pb-4">
-              <div className="relative flex">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-4 pr-4 py-2.5 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-500"
-                />
-                <button className="px-4 bg-green-600 hover:bg-green-700 text-white rounded-r-lg transition-colors">
-                  <Search className="h-5 w-5" />
-                </button>
-              </div>
+          {/* ─────────────────────────────────────────────── */}
+          {/* MOBILE LAYOUT - CHANGED */}
+          <div className="md:hidden">
+            {/* Logo - centered */}
+            <div className="flex justify-center py-3">
+              <SVGComponent
+                className="h-9 w-auto cursor-pointer transition-transform hover:scale-105"
+                onClick={() => router.push("/")}
+              />
             </div>
-          )}
 
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-100 py-4">
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
-                  className="flex items-center gap-3 text-gray-600 py-2"
-                >
-                  <Heart className="h-5 w-5" />
-                  <span>Wishlist ({wishlistCount})</span>
-                </button>
-                <button
-                  onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
-                  className="flex items-center gap-3 text-gray-600 py-2"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span>Cart ({cartCount})</span>
-                </button>
-                {isAuthenticated ? (
-                  <>
+            {/* Hamburger + Short Search Bar row */}
+            <div className="flex items-center justify-between pb-4">
+              {/* Left: Hamburger */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-gray-700 hover:text-green-600"
+              >
+                {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+              </button>
+
+              {/* Right: Shortened search bar */}
+              {!hideSearch && (
+                <div className="flex-1 max-w-[65%]">
+                  <div className="relative flex">
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchQuery}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      className="w-full pl-3 pr-9 py-2.5 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-green-500 bg-gray-50 text-gray-900 placeholder-gray-500 text-sm"
+                    />
+                    <button className="px-3 bg-green-600 hover:bg-green-700 text-white rounded-r-lg transition-colors">
+                      <Search className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Dropdown - unchanged */}
+            {mobileMenuOpen && (
+              <div className="border-t border-gray-100 py-4">
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                    className="flex items-center gap-3 text-gray-600 py-2"
+                  >
+                    <Heart className="h-5 w-5" />
+                    <span>Wishlist ({wishlistCount})</span>
+                  </button>
+                  <button
+                    onClick={isAuthenticated ? handleDashboardClick : onLoginClick}
+                    className="flex items-center gap-3 text-gray-600 py-2"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    <span>Cart ({cartCount})</span>
+                  </button>
+                  {isAuthenticated ? (
+                    <>
+                      <button
+                        onClick={handleDashboardClick}
+                        className="flex items-center gap-3 text-gray-600 py-2"
+                      >
+                        <User className="h-5 w-5" />
+                        <span>Dashboard</span>
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 text-red-600 py-2"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        <span>Logout</span>
+                      </button>
+                    </>
+                  ) : (
                     <button
-                      onClick={handleDashboardClick}
-                      className="flex items-center gap-3 text-gray-600 py-2"
+                      onClick={onLoginClick}
+                      className="flex items-center gap-3 text-green-600 font-medium py-2"
                     >
                       <User className="h-5 w-5" />
-                      <span>Dashboard</span>
+                      <span>Login / Sign Up</span>
                     </button>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 text-red-600 py-2"
-                    >
-                      <LogOut className="h-5 w-5" />
-                      <span>Logout</span>
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={onLoginClick}
-                    className="flex items-center gap-3 text-green-600 font-medium py-2"
-                  >
-                    <User className="h-5 w-5" />
-                    <span>Login / Sign Up</span>
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

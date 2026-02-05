@@ -55,7 +55,7 @@ export default function NavMenu({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Check if mobile
+  // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
     checkMobile();
@@ -134,23 +134,14 @@ export default function NavMenu({
 
   /* ---------------- NAV ITEMS CONFIG ---------------- */
 
-  // const navItems = [
-  //   { id: 'categories', label: 'Categories', icon: Grid3X3, isCategories: true },
-  //   { id: 'about', label: 'About Us', icon: Home, section: 'about' as SectionType },
-  //   { id: 'products', label: 'Products', icon: Package, section: 'products' as SectionType },
-  //   { id: 'events', label: 'Events', icon: CalendarDays, section: 'events' as SectionType },
-  //   { id: 'contact', label: 'Contact Us', icon: Phone, section: 'contact' as SectionType },
-  //   { id: 'ecatalogue', label: 'Ecatalogue', icon: Book, section: 'ecatalogue' as SectionType },
-  //   { id: 'blogs', label: 'Blogs', icon: Clipboard, section: 'blogs' as SectionType },
-  // ];
   const navItems = [
     { id: 'categories', label: 'Categories', isCategories: true },
-    { id: 'about', label: 'About Us',  section: 'about' as SectionType },
+    { id: 'about', label: 'About Us', section: 'about' as SectionType },
     { id: 'products', label: 'Products', section: 'products' as SectionType },
-    { id: 'events', label: 'Events',  section: 'events' as SectionType },
-    { id: 'contact', label: 'Contact Us',  section: 'contact' as SectionType },
-    { id: 'ecatalogue', label: 'Ecatalogue',  section: 'ecatalogue' as SectionType },
-    { id: 'blogs', label: 'Blogs',  section: 'blogs' as SectionType },
+    { id: 'events', label: 'Events', section: 'events' as SectionType },
+    { id: 'contact', label: 'Contact Us', section: 'contact' as SectionType },
+    { id: 'ecatalogue', label: 'Ecatalogue', section: 'ecatalogue' as SectionType },
+    { id: 'blogs', label: 'Blogs', section: 'blogs' as SectionType },
   ];
 
   // Get current active category for subcategories (desktop)
@@ -162,7 +153,6 @@ export default function NavMenu({
   const renderMobileDropdown = () => (
     <div className="absolute top-full left-0 w-[280px] bg-white text-gray-800 shadow-xl rounded-b-lg border z-50 max-h-[70vh] overflow-y-auto">
       {navItems.map((item) => {
-         
 
         if (item.isCategories) {
           return (
@@ -175,7 +165,6 @@ export default function NavMenu({
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  {/* <Icon className="h-4 w-4" /> */}
                   {item.label}
                 </span>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
@@ -248,7 +237,6 @@ export default function NavMenu({
             onClick={() => handleSectionClick(item.section!)}
             className="w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center gap-2 border-b border-gray-100"
           >
-            {/* <Icon className="h-4 w-4" /> */}
             {item.label}
           </button>
         );
@@ -263,8 +251,6 @@ export default function NavMenu({
       {/* Main Menu Dropdown */}
       <div className="absolute top-full left-0 min-w-[240px] bg-white text-gray-800 shadow-xl rounded-b-lg border py-2 z-50 max-h-[280px] overflow-y-auto">
         {navItems.map((item) => {
-          // const Icon = item.icon;
-
           if (item.isCategories) {
             return (
               <div key={item.id} className="relative group">
@@ -276,7 +262,6 @@ export default function NavMenu({
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    {/* <Icon className="h-4 w-4" /> */}
                     {item.label}
                   </span>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -291,7 +276,6 @@ export default function NavMenu({
               onClick={() => handleSectionClick(item.section!)}
               className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2"
             >
-              {/* <Icon className="h-4 w-4" /> */}
               {item.label}
             </button>
           );
@@ -377,13 +361,20 @@ export default function NavMenu({
             <button
               onClick={disabled ? undefined : toggleMenu}
               disabled={disabled}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                 disabled ? 'cursor-default opacity-70' : 'hover:bg-gray-200'
               } ${menuOpen ? 'bg-gray-300' : ''}`}
               title="Menu"
             >
-              <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Menu</span>
+              {isMobile ? (
+                <span className="bg-gray-300 text-black font-bold px-3 py-1 rounded-full">  All Categories</span>   
+
+           ) : (
+                <>
+                  <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Menu</span>
+                </>
+              )}
             </button>
 
             {/* Dropdown - Mobile or Desktop */}
@@ -393,28 +384,22 @@ export default function NavMenu({
           {/* DESKTOP STATIC NAV ITEMS - Hidden on mobile, visible on sm+ */}
           <div className="hidden sm:flex items-center gap-1">
             <button onClick={disabled ? undefined : () => onSectionChange('about')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="About Us">
-              {/* <Home className="h-4 w-4" /> */}
               <span>About Us</span>
             </button>
             <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
-              {/* <Package className="h-4 w-4" /> */}
               <span>Products</span>
             </button>
             <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
-              {/* <CalendarDays className="h-4 w-4" /> */}
               <span>Events</span>
             </button>
 
             <button onClick={disabled ? undefined : () => onSectionChange('ecatalogue')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Ecatalogue">
-              {/* <Book className="h-4 w-4" /> */}
               <span>Ecatalogue</span>
             </button>
             <button onClick={disabled ? undefined : () => onSectionChange('blogs')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Blogs">
-              {/* <Clipboard className="h-4 w-4" /> */}
               <span>Blogs</span>
             </button>
             <button onClick={disabled ? undefined : () => onSectionChange('contact')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Contact Us">
-              {/* <Phone className="h-4 w-4" /> */}
               <span>Contact Us</span>
             </button>
           </div>

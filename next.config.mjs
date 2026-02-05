@@ -13,6 +13,11 @@ const nextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ecodarshinibackend2.onrender.com',
+        pathname: '/**',
+      },
     ],
   },
 };
