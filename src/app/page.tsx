@@ -24,6 +24,9 @@ import ProductsCatalouge from '../app/admin/ProductsCatalogue';
 import EventsSection from '../components/EventsSection';
 import WhatsAppChat from '../components/WhatsAppChat';
 import ShopBot from '../components/ShopBot';
+import Testimonials from '../components/Testimonials';
+ 
+
 
 interface ProductImage {
   id: string;
@@ -100,7 +103,8 @@ export default function HomePage() {
 
   const PRODUCTS_PER_PAGE = 20;
 
-  
+ 
+
 
   // Modal states
   const [activeModal, setActiveModal] = useState<ModalType>('none');
@@ -423,12 +427,20 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         }}
       >
         {!imageError ? (
-          <img
-            src="/image/catalog/banners/id2-banner1.jpg"
-            alt="banner"
-            onError={() => setImageError(true)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          // <img
+          //   src="/image/catalog/banners/id2-banner1.jpg"
+          //   alt="c"
+          //   onError={() => setImageError(true)}
+          //   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          // />
+          <div className={`w-full h-full ${imageError ? 'bg-red-700' : ''}`}>
+  <img
+    src="/image/catalog/banners/id2-banner1.jpg"
+    alt="banner"
+    onError={() => setImageError(true)}
+    className="w-full h-full object-cover"
+  />
+</div>
         ) : (
             <div
               className="marquee"
@@ -469,9 +481,21 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         </div>
       )}
       {activeSection === 'blogs' && (
+        // <div ref={blogsRef}>
+        //   <BlogsSection />
+        // </div>
         <div ref={blogsRef}>
-          <BlogsSection />
-        </div>
+    {/* Instead of showing BlogsSection, navigate away */}
+    <div className="py-8 text-center">
+      <p className="text-lg mb-4">Taking you to the full Blog page...</p>
+      <button
+        onClick={() => window.location.href = '/blog'}
+        className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+      >
+        Go to Blogs →
+      </button>
+    </div>
+  </div>
       )}
 
 
@@ -853,6 +877,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         )}
       </div>
       </section>
+      <Testimonials />
         
         </>
   

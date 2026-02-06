@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../store/useAuthStore';
 import NavMenu from '../../../components/NavMenu';
 import HomeHeader from '../../../components/HomeHeader';
+import HomeFooter from '../../../components/HomeFooter';
 
 interface Product {
   id: string;
@@ -659,7 +660,7 @@ export default function ProductDetailPage() {
                       ]).map((review) => (
                         <div
                           key={review.id}
-                          className="flex-shrink-0 w-[85vw] sm:w-56 bg-gray-50 border border-gray-200 rounded-lg p-3"
+                          className="flex-shrink-0 w-[85vw] sm:w-56 bg-gray-50 border border-gray-200 rounded-lg p-3"   
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
@@ -688,8 +689,7 @@ export default function ProductDetailPage() {
                       ))}
                     </div>
                   </div>
-{/* <div className='bg-blue-200'>sss</div> */}
-                  {/* Quantity & Actions */}
+ 
                   <div className="flex items-center gap-3 mt-auto pt-4 ">
                     <span className="text-sm text-gray-600">Qty</span>
                     <div className="flex items-center border border-gray-300 rounded">
@@ -849,6 +849,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      <HomeFooter />
     </div>
   );
 }

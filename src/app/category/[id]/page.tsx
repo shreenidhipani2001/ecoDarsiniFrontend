@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import HomeHeader from '../../../components/HomeHeader';
+import HomeFooter from '../../../components/HomeFooter';
 
 // Type based on your sample response
 interface Product {
@@ -118,7 +119,7 @@ export default async function CategoryPage({
 
                   <div className="p-4">
                     <h3 className="text-lg font-medium text-gray-900 line-clamp-2 hover:text-green-700">
-                      <Link href={`/product/${product.slug}`}>{product.name}</Link>
+                      <Link href={`/product/${product.id}`}>{product.name}</Link>
                     </h3>
 
                     <div className="mt-2 flex items-center gap-3">
@@ -232,8 +233,10 @@ export default async function CategoryPage({
               </div>
             )}
           </div>
+        
         </div>
       </div>
+      <HomeFooter />
     </div>
   );
 }

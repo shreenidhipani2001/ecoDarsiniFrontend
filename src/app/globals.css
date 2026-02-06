@@ -132,3 +132,210 @@ body {
     background: #9ca3af;
   }
 }
+
+.comingSoonContainer {
+  width: 80%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Glass Effect */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  /* 3D Feel */
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.25),
+    inset 0 0 20px rgba(255,255,255,0.15);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Moving multicolor shine layer */
+.comingSoonContainer::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    120deg,
+    #ff0080,
+    #7928ca,
+    #00f0ff,
+    #00ff85,
+    #ffd000,
+    #ff0080
+  );
+  opacity: 0.15;
+  animation: glassMove 8s linear infinite alternate;
+}
+
+@keyframes glassMove {
+  0% { transform: translateX(-25%) translateY(-10%) rotate(0deg); }
+  100% { transform: translateX(25%) translateY(10%) rotate(360deg); }
+}
+
+.comingSoonText {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-align: center;
+  z-index: 2;
+
+  /* Multicolor Gradient Text */
+  background: linear-gradient(
+    90deg,
+    #ff0080,
+    #ff8c00,
+    #40e0d0,
+    #7fff00,
+    #ff0080
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Animation left-right random feel */
+  animation: gradientShift 5s ease-in-out infinite alternate;
+
+  /* 3D depth */
+  text-shadow:
+    2px 2px 0 rgba(255,255,255,0.15),
+    4px 4px 10px rgba(0,0,0,0.35);
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 20% 50%; }
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .comingSoonContainer {
+    width: 95%;
+    height: 220px;
+    border-radius: 18px;
+  }
+
+  .comingSoonText {
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+  }
+}
+
+
+.comingSoonContainer {
+  width: 80%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  /* Glass */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  /* 3D depth */
+  box-shadow:
+    0 25px 45px rgba(0, 0, 0, 0.35),
+    inset 0 0 25px rgba(255, 255, 255, 0.15);
+}
+
+/* Animated colorful glass shine */
+.comingSoonContainer::before {
+  content: "";
+  position: absolute;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(
+    120deg,
+    #ff0080,
+    #7928ca,
+    #00f0ff,
+    #00ff85,
+    #ffd000,
+    #ff0080
+  );
+  opacity: 0.12;
+  animation: glassMove 9s linear infinite alternate;
+}
+
+@keyframes glassMove {
+  0% {
+    transform: translateX(-30%) translateY(-15%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(30%) translateY(15%) rotate(360deg);
+  }
+}
+
+.comingSoonText {
+  z-index: 2;
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-align: center;
+
+  /* Multicolor gradient text */
+  background: linear-gradient(
+    90deg,
+    #ff0080,
+    #ff8c00,
+    #40e0d0,
+    #7fff00,
+    #00c3ff,
+    #ff0080
+  );
+  background-size: 350% 350%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Animations */
+  animation:
+    gradientShift 6s ease-in-out infinite alternate,
+    zoomPulse 3s ease-in-out infinite;
+
+  /* 3D text feel */
+  text-shadow:
+    2px 2px 0 rgba(255,255,255,0.2),
+    6px 6px 18px rgba(0,0,0,0.45);
+}
+
+/* Gradient traveling left ↔ right */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 20% 50%; }
+}
+
+/* Zoom in / out */
+@keyframes zoomPulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .comingSoonContainer {
+    width: 95%;
+    height: 220px;
+    border-radius: 20px;
+  }
+
+  .comingSoonText {
+    font-size: 2.2rem;
+    letter-spacing: 1.5px;
+  }
+}
