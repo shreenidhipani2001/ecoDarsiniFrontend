@@ -135,6 +135,7 @@ export default function BlogsSection() {
                   <div className="flex justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-green-600" />
                   </div>
+                  
                 ) : latestProducts.length === 0 ? (
                   <p className="text-gray-500 text-center py-4">No products found</p>
                 ) : (
