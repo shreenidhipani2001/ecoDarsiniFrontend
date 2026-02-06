@@ -24,6 +24,7 @@ import ProductsCatalouge from '../app/admin/ProductsCatalogue';
 import EventsSection from '../components/EventsSection';
 import WhatsAppChat from '../components/WhatsAppChat';
 import ShopBot from '../components/ShopBot';
+import Testimonials from '../components/Testimonials';
  
 
 
@@ -426,12 +427,20 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         }}
       >
         {!imageError ? (
-          <img
-            src="/image/catalog/banners/id2-banner1.jpg"
-            alt="banner"
-            onError={() => setImageError(true)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          // <img
+          //   src="/image/catalog/banners/id2-banner1.jpg"
+          //   alt="c"
+          //   onError={() => setImageError(true)}
+          //   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          // />
+          <div className={`w-full h-full ${imageError ? 'bg-red-700' : ''}`}>
+  <img
+    src="/image/catalog/banners/id2-banner1.jpg"
+    alt="banner"
+    onError={() => setImageError(true)}
+    className="w-full h-full object-cover"
+  />
+</div>
         ) : (
             <div
               className="marquee"
@@ -868,6 +877,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         )}
       </div>
       </section>
+      <Testimonials />
         
         </>
   

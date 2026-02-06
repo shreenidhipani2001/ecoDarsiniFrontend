@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Clipboard, Package, CalendarDays, Menu, Book, Phone, Home, Grid3X3 } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 interface Category {
   id: string;
   name: string;
@@ -52,7 +52,7 @@ export default function NavMenu({
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [activeNestedId, setActiveNestedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Detect mobile screen size
@@ -389,9 +389,17 @@ export default function NavMenu({
             <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
               <span>Products</span>
             </button>
-            <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
+            {/* <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
               <span>Events</span>
-            </button>
+            </button> */}
+            <button
+  onClick={disabled ? undefined : () => router.push('/events')}
+  disabled={disabled}
+  className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`}
+  title="Events"
+>
+  <span>Events</span>
+</button>
 
             <button onClick={disabled ? undefined : () => onSectionChange('ecatalogue')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Ecatalogue">
               <span>Ecatalogue</span>

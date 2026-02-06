@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import HomeHeader from '../../components/HomeHeader';
 import HomeFooter from '../../components/HomeFooter';
-
+ 
+ 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type ProductImage = {
@@ -62,6 +63,15 @@ export default function BlogsSection() {
   const toggleBlogExpand = (blogId: string) => {
     setExpandedBlogId((prev) => (prev === blogId ? null : blogId));
   };
+  const galleryImages = [
+    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
+    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+    'https://images.unsplash.com/photo-1548345233-4557b8809829?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE0fHx8ZW58MHx8fHx8&ixlib=rb-4.1.0&q=60&w=3000',
+    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+   
+  ];
 
   // Fetch latest products (unchanged)
   useEffect(() => {
@@ -182,8 +192,8 @@ export default function BlogsSection() {
             {/* Sidebar Banner */}
             <div className="hidden lg:block rounded-2xl overflow-hidden shadow-lg">
               <img
-                src="/image/catalog/banners/banner-sidebar.jpg"
-                alt="Sidebar Banner"
+                src={galleryImages[4]}
+                alt="3xl-black"
                 className="w-full h-auto object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
@@ -194,7 +204,7 @@ export default function BlogsSection() {
 
           {/* Main Blog Content */}
           <div className="lg:col-span-9">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">Our Blog</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-8">Our Blogs</h1>
 
             {/* Blog Grid */}
             {blogsLoading ? (
@@ -224,13 +234,19 @@ export default function BlogsSection() {
                         <div className="relative">
                           {blog.image ? (
                             <img
-                              src={blog.image}
+                            // src={blog.image}
+                              src={galleryImages[4]}
                               alt={blog.name}
                               className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
                             <div className="w-full h-56 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                              <span className="text-green-600 text-6xl">📄</span>
+                               <img
+                            // src={blog.image}
+                              src={galleryImages[4]}
+                              alt={blog.name}
+                              className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
                             </div>
                           )}
                           <div className="absolute bottom-4 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
