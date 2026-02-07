@@ -21,16 +21,17 @@ export default function EventsPage() {
     'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
   ];
 
-  const CHANNEL_ID = 'UCxxxxxxxxxxxxxxxxxxxxxx';
+  const CHANNEL_ID = '@ecodarshini2621';
   const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
   const PROXY_URL = 'https://api.allorigins.win/raw?url=';
 
   useEffect(() => {
     const fetchVideos = async () => {
+      console.log('dddd')
       try {
         setLoading(true);
         const response = await fetch(PROXY_URL + encodeURIComponent(RSS_URL));
-        if (!response.ok) throw new Error('Failed to fetch RSS');
+        if (!response.ok){console.log('Failed to fetch RSS')}
 
         const xmlText = await response.text();
         const parser = new DOMParser();
@@ -55,7 +56,7 @@ export default function EventsPage() {
       }
     };
 
-    if (CHANNEL_ID !== 'UCxxxxxxxxxxxxxxxxxxxxxx') fetchVideos();
+    if (CHANNEL_ID !== '@ecodarshini2621') fetchVideos();
     else {
       setError('Update CHANNEL_ID with real ID.');
       setLoading(false);
@@ -77,7 +78,7 @@ export default function EventsPage() {
        <div className="max-w-7xl mx-auto">
            {/**This is to be added when youtube is ready.... */}
          {/* Header */}
-         {/* <div className="text-center mb-10">
+         <div className="text-center mb-10">
            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
              Events & Live Moments
            </h2>
@@ -94,12 +95,12 @@ export default function EventsPage() {
              <Video className="h-5 w-5" />
              Visit Our YouTube Channel
            </a>
-         </div> */}
+         </div>
  
          {/* Video Section */}
-         {/* <div className="mb-16">
+         <div className="mb-16">
            <h3 className="text-2xl font-semibold mb-6 text-center md:text-left flex items-center gap-2">
-             <Play className="h-6 w-6 text-green-600" />
+             <Play className="h-6 w-6 text-black" />
              Recent Video Highlights
            </h3>
  
@@ -144,7 +145,7 @@ export default function EventsPage() {
                ))}
              </div>
            )}
-         </div> */}
+         </div>
              
              {/**This is to be added when youtube is ready.... */}
  

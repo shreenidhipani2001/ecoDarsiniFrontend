@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import HomeHeader from '../components/HomeHeader';
@@ -538,6 +538,28 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                   <div className="p-2">
                     <h4 className="text-xs font-medium text-gray-900 line-clamp-2">{product.name}</h4>
                     <p className="text-sm font-bold text-green-700 mt-1">₹{product.price}</p>
+                    <div className="flex gap-1.5 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'cart');
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
+                      >
+                        <ShoppingCart className="h-3 w-3" />
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'wishlist');
+                        }}
+                        className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
+                        title="Add to Wishlist"
+                      >
+                        <Heart className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -605,6 +627,28 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                       <span className="text-gray-400 line-through text-[10px] sm:text-xs">
                         ₹{Math.round(product.price * 1.1)}
                       </span>
+                    </div>
+                    <div className="flex gap-1.5 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'cart');
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
+                      >
+                        <ShoppingCart className="h-3 w-3" />
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'wishlist');
+                        }}
+                        className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
+                        title="Add to Wishlist"
+                      >
+                        <Heart className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -727,12 +771,12 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                   className={`
                     flex-shrink-0 snap-start
                     w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]
-                    h-[280px] sm:h-[340px] md:h-[380px]
+                    h-[340px] sm:h-[400px] md:h-[440px]
                     bg-white rounded-xl overflow-hidden
                     shadow-sm hover:shadow-xl transition-all duration-300
                     cursor-pointer border border-gray-200
                   `}
-                  onClick={() => router.push(`/product/${product.slug}`)}
+                  onClick={() => router.push(`/product/${product.id}`)}
                 >
                   {/* Image container */}
                   <div className="w-full h-[72%] bg-gray-100 relative">
@@ -758,6 +802,28 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                     <p className="text-green-700 font-bold mt-1 text-base sm:text-lg">
                       ₹{product.price.toLocaleString('en-IN')}
                     </p>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'cart');
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProductAction(product, 'wishlist');
+                        }}
+                        className="flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
+                        title="Add to Wishlist"
+                      >
+                        <Heart className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -842,7 +908,6 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                   key={product.id}
                   product={product}
                   onAddToCart={() => handleProductAction(product, 'cart')}
-                  onBuyNow={() => router.push(`/product/${product.id}`)}
                   onAddToWishlist={() => handleProductAction(product, 'wishlist')}
                 />
               ))}

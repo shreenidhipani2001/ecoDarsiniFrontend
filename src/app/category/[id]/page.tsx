@@ -194,7 +194,7 @@ export default async function CategoryPage({
 
                   <div className="p-4">
                     <h3 className="text-base font-medium text-gray-900 line-clamp-2 min-h-[2.5rem] group-hover:text-green-700">
-                      <Link href={`/product/${product.slug}`}>
+                      <Link href={`/product/${product.id}`}>
                         {product.name}
                       </Link>
                     </h3>
