@@ -164,6 +164,7 @@ export default function EventsSection() {
               ))}
             </div>
           )}
+            
         </div> */}
             
             {/**This is to be added when youtube is ready.... */}
