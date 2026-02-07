@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, Heart, Zap } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import type { StaticImageData } from 'next/image';
 
 interface ProductImage {
@@ -36,7 +36,6 @@ interface Product {
 interface HomeProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
-  onBuyNow: (product: Product) => void;
   onAddToWishlist: (product: Product) => void;
 }
 
@@ -53,7 +52,6 @@ function getProductImageUrl(product: Product): string {
 export default function HomeProductCard({
   product,
   onAddToCart,
-  onBuyNow,
   onAddToWishlist,
 }: HomeProductCardProps) {
   const router = useRouter();
@@ -157,13 +155,12 @@ export default function HomeProductCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onBuyNow(product);
+              onAddToWishlist(product);
             }}
-            disabled={isOutOfStock}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-11 h-11 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
+            title="Add to Wishlist"
           >
-            <Zap className="h-4 w-4" />
-            Buy Now
+            <Heart className="h-5 w-5" />
           </button>
         </div>
       </div>

@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Loader2, ChevronDown, ChevronUp, ShoppingCart, Heart } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../../store/useAuthStore';
 import HomeHeader from '../../components/HomeHeader';
 import HomeFooter from '../../components/HomeFooter';
+import AuthPromptModal from '../../components/AuthPromptModal';
+import LoginModal from '../../components/LoginModal';
+import RegisterModal from '../../components/RegisterModal';
  
  
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -52,13 +58,62 @@ const formatDate = (dateString: string): string => {
   return `${day} ${month}`;
 };
 
+type ModalType = 'none' | 'authPrompt' | 'login' | 'register';
+type ActionType = 'cart' | 'wishlist';
+
 export default function BlogsSection() {
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+
   const [latestProducts, setLatestProducts] = useState<Product[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [blogsLoading, setBlogsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedBlogId, setExpandedBlogId] = useState<string | null>(null);
+
+  // Auth modal states
+  const [activeModal, setActiveModal] = useState<ModalType>('none');
+  const [pendingAction, setPendingAction] = useState<{ type: ActionType; product: Product } | null>(null);
+
+  const handleProductAction = async (product: Product, actionType: ActionType) => {
+    if (!isAuthenticated) {
+      setPendingAction({ type: actionType, product });
+      setActiveModal('authPrompt');
+      return;
+    }
+    await performAction(product, actionType);
+  };
+
+  const performAction = async (product: Product, actionType: ActionType) => {
+    if (!API_URL || !user?.id) return;
+    try {
+      if (actionType === 'cart') {
+        const res = await fetch(`${API_URL}/api/cart/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ user_id: user.id, product_id: product.id, quantity: 1 }),
+        });
+        if (!res.ok) throw new Error('Cart add failed');
+        toast.success('Added to cart!');
+      } else if (actionType === 'wishlist') {
+        const res = await fetch(`${API_URL}/api/wishes/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ user_id: user.id, product_id: product.id }),
+        });
+        if (!res.ok) throw new Error('Wishlist add failed');
+        toast.success('Added to wishlist!');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to ${actionType === 'wishlist' ? 'add to wishlist' : 'add to cart'}`);
+    }
+  };
+
+  const closeAllModals = () => { setActiveModal('none'); setPendingAction(null); };
 
   const toggleBlogExpand = (blogId: string) => {
     setExpandedBlogId((prev) => (prev === blogId ? null : blogId));
@@ -180,6 +235,22 @@ export default function BlogsSection() {
                             <span className="text-green-600 font-semibold">
                               ₹{product.price.toLocaleString()}
                             </span>
+                          </div>
+                          <div className="flex gap-1.5 mt-2">
+                            <button
+                              onClick={() => handleProductAction(product, 'cart')}
+                              className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
+                            >
+                              <ShoppingCart className="h-3 w-3" />
+                              Add to Cart
+                            </button>
+                            <button
+                              onClick={() => handleProductAction(product, 'wishlist')}
+                              className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
+                              title="Add to Wishlist"
+                            >
+                              <Heart className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -306,6 +377,31 @@ export default function BlogsSection() {
        
       </main>
       <HomeFooter />
+
+      <AuthPromptModal
+        isOpen={activeModal === 'authPrompt'}
+        onClose={closeAllModals}
+        onLoginClick={() => setActiveModal('login')}
+        onSignUpClick={() => setActiveModal('register')}
+        actionType={pendingAction?.type}
+      />
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={closeAllModals}
+        onBackToPrompt={pendingAction ? () => setActiveModal('authPrompt') : undefined}
+        onSwitchToRegister={() => setActiveModal('register')}
+        onLoginSuccess={() => {
+          if (pendingAction) {
+            performAction(pendingAction.product, pendingAction.type);
+          }
+        }}
+      />
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={closeAllModals}
+        onBackToPrompt={pendingAction ? () => setActiveModal('authPrompt') : undefined}
+        onSwitchToLogin={() => setActiveModal('login')}
+      />
     </div>
   );
 }

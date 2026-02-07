@@ -10,6 +10,7 @@ interface LoginModalProps {
   onClose: () => void;
   onBackToPrompt?: () => void;
   onSwitchToRegister?: () => void;
+  onLoginSuccess?: () => void;
 }
 
 export default function LoginModal({
@@ -17,6 +18,7 @@ export default function LoginModal({
   onClose,
   onBackToPrompt,
   onSwitchToRegister,
+  onLoginSuccess,
 }: LoginModalProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -39,8 +41,9 @@ export default function LoginModal({
         return;
       }
 
-      // Redirect based on role
-      if (data.role === 'ADMIN') {
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else if (data.role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push('/dashboard');

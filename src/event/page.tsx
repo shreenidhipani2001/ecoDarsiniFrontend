@@ -12,7 +12,7 @@ export default function EventsPage() {
   const [error, setError] = useState<string | null>(null);
 
   // === Replace with your real YouTube Channel ID ===
-  const CHANNEL_ID = 'UCxxxxxxxxxxxxxxxxxxxxxx'; // ← MUST CHANGE THIS
+  const CHANNEL_ID = '@ecodarshini2621'; // ← MUST CHANGE THIS
 
   const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
   const PROXY_URL = 'https://api.allorigins.win/raw?url='; // public CORS proxy (for dev)
@@ -52,7 +52,7 @@ export default function EventsPage() {
       }
     };
 
-    if (CHANNEL_ID !== 'UCxxxxxxxxxxxxxxxxxxxxxx') {
+    if (CHANNEL_ID !== '@ecodarshini2621') {
       fetchVideos();
     } else {
       setError('YouTube Channel ID is not configured yet.');
