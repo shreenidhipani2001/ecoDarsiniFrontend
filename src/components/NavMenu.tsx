@@ -352,7 +352,7 @@ export default function NavMenu({
   /* ---------------- UI ---------------- */
 
   return (
-    <nav className="bg-black-600 text-black">
+    <nav className="hidden md:block bg-black-600 text-black">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center h-12 gap-2">
 

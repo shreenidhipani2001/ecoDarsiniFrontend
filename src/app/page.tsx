@@ -388,6 +388,13 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         cartCount={cartCount}
         wishlistCount={wishlistCount}
         onLoginClick={openLoginModal}
+        categories={categories}
+        subcategoriesByCategory={subcategoriesByCategory}
+        onCategorySelect={handleCategorySelect}
+        onSubcategorySelect={handleSubcategorySelect}
+        selectedCategory={selectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        onSectionChange={handleSectionChange}
       />
 
       {/* <NavMenu
@@ -768,18 +775,11 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
               {products.slice(0, 8).map((product) => (
                 <div
                   key={product.id}
-                  className={`
-                    flex-shrink-0 snap-start
-                    w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[360px] xl:w-[380px]
-                    h-[340px] sm:h-[400px] md:h-[440px]
-                    bg-white rounded-xl overflow-hidden
-                    shadow-sm hover:shadow-xl transition-all duration-300
-                    cursor-pointer border border-gray-200
-                  `}
+                  className="flex-shrink-0 snap-start w-[70vw] sm:w-[300px] md:w-[320px] lg:w-[340px] xl:w-[360px] bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 flex flex-col"
                   onClick={() => router.push(`/product/${product.id}`)}
                 >
                   {/* Image container */}
-                  <div className="w-full h-[72%] bg-gray-100 relative">
+                  <div className="w-full aspect-[4/3] bg-gray-100 relative flex items-center justify-center">
                     {product.images?.[0] ? (
                       <img
                         src={product.images[0].card || product.images[0].url}
@@ -788,27 +788,25 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
+                      <span className="text-gray-400">No Image</span>
                     )}
                   </div>
 
                   {/* Info */}
-                  <div className="p-3 sm:p-4">
+                  <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
                     <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1">
                       {product.name}
                     </h3>
                     <p className="text-green-700 font-bold mt-1 text-base sm:text-lg">
                       ₹{product.price.toLocaleString('en-IN')}
                     </p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-auto pt-3">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleProductAction(product, 'cart');
                         }}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg text-sm font-medium transition-colors"
                       >
                         <ShoppingCart className="h-4 w-4" />
                         Add to Cart
@@ -818,10 +816,10 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                           e.stopPropagation();
                           handleProductAction(product, 'wishlist');
                         }}
-                        className="flex items-center justify-center w-10 h-10 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
+                        className="flex items-center justify-center w-11 h-11 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
                         title="Add to Wishlist"
                       >
-                        <Heart className="h-4 w-4" />
+                        <Heart className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -967,6 +965,9 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onClose={closeAllModals}
         onBackToPrompt={pendingAction ? handleBackToPrompt : undefined}
         onSwitchToRegister={handleSwitchToRegister}
+        onLoginSuccess={pendingAction ? () => {
+          performAction(pendingAction.product, pendingAction.type);
+        } : undefined}
       />
 
       <RegisterModal
