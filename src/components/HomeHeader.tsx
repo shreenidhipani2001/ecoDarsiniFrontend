@@ -327,23 +327,17 @@ export default function HomeHeader({
 
               {/* Single Account Menu Button */}
               <div className="relative flex-shrink-0">
-                <button
+               <button
                   onClick={() => {
                     setMobileProfileOpen(!mobileProfileOpen);
                     setMobileMenuOpen(false);
                     setMobileCategoriesOpen(false);
                     setMobileActiveNestedId(null);
                   }}
-                  className="p-2 text-gray-700 hover:text-green-600 transition-colors relative"
+                  className="relative p-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center"
                   aria-label="Account and cart menu"
                 >
-                  {/* <User className="h-6 w-6" />
-                  {(cartCount > 0 || wishlistCount > 0) && (
-                    <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                      {cartCount + wishlistCount > 9 ? '9+' : cartCount + wishlistCount}
-                    </span>
-                  )} */}
-                  <User className="h-6 w-6 bg-green-600 text-white  rounded" />
+                  <User className="h-6 w-6" />
                 </button>
 
                 {/* Account Dropdown Menu */}
