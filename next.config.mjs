@@ -23,6 +23,11 @@ const nextConfig = {
         hostname: 'ecodarshinibackend2.onrender.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        pathname: '/**',
+      },
     ],
   },
 };

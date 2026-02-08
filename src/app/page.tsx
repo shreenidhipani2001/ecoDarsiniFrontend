@@ -17,7 +17,6 @@ import AuthPromptModal from '../components/AuthPromptModal';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import Contact from '../components/Contact';
-import AboutSection from '../components/AboutSection';
 import BlogsSection from '../components/BlogsSection';
 import EcatalogueBookFlip from '../components/EcatalogueBookFlip';
 import ProductsCatalouge from '../app/admin/ProductsCatalogue';
@@ -78,7 +77,6 @@ export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const productGridRef = useRef<HTMLDivElement>(null);
-  const aboutRef = useRef<HTMLDivElement>(null);
   const eventsRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLDivElement>(null);
   const ecatalogueRef = useRef<HTMLDivElement>(null);
@@ -241,8 +239,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           productGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
         case 'about':
-          aboutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          break;
+          router.push('/about');
+          return;
         case 'events':
           eventsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
@@ -250,11 +248,11 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           contactRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
         case 'ecatalogue':
-          ecatalogueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          break;
+          router.push('/ecatalogue');
+          return;
         case 'blogs':
-          blogsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          break;
+          router.push('/blog');
+          return;
         default:
           window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -433,13 +431,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           overflow: 'hidden',
         }}
       >
-        {!imageError ? (
-          // <img
-          //   src="/image/catalog/banners/id2-banner1.jpg"
-          //   alt="c"
-          //   onError={() => setImageError(true)}
-          //   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          // />
+        {/* {!imageError ? (
+         
           <div className={`w-full h-full ${imageError ? 'bg-red-700' : ''}`}>
   <img
     src="/image/catalog/banners/id2-banner1.jpg"
@@ -461,16 +454,90 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
             <span className="marquee-text">Welcome To The World Of Nature</span>
             <span className="marquee-text">Welcome To The World Of Nature</span>
           </div>
-        )}
+        )}*/}
+
+<div className="w-full h-full bannerHover3">
+        <div className="bannerInner">
+          <span className="bannerText">Welcome To The World Of Nature</span>
+        </div>
+      
+        <style jsx>{`
+          .bannerHover3 {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            cursor: pointer;
+      
+            display: flex;
+            align-items: center;
+            justify-content: center;
+      
+            /* Gradient Background */
+            background: linear-gradient(
+              135deg,
+              #065f46 0%,
+              #047857 30%,
+              #10b981 65%,
+              #34d399 100%
+            );
+      
+            transition: transform 0.3s ease;
+          }
+      
+          .bannerInner {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+            color: white;
+          }
+      
+          .bannerText {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+      
+          /* Shine Sweep Overlay */
+          .bannerHover3::before {
+            content: '';
+            position: absolute;
+            top: -150%;
+            left: -60%;
+            width: 220%;
+            height: 300%;
+            background: linear-gradient(
+              120deg,
+              transparent 30%,
+              rgba(255, 255, 255, 0.25),
+              transparent 70%
+            );
+            transform: rotate(25deg);
+            transition: all 0.8s ease;
+            pointer-events: none;
+          }
+      
+          /* Hover Effect */
+          .bannerHover3:hover::before {
+            top: 120%;
+            left: 120%;
+          }
+      
+          .bannerHover3:hover {
+            transform: scale(1.02);
+          }
+        `}</style>
       </div>
+      </div>  
 
       
 
-      {activeSection === 'about' && (
-        <div ref={aboutRef}>
-          <AboutSection />
-        </div>
-      )}
+      
+
+      {/* About section is now on its own /about page */}
       {activeSection === 'events' && (
         <div ref={eventsRef}>
           <EventsSection />
@@ -523,7 +590,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           <h3 className="text-lg font-bold text-gray-900 mb-3">Today&apos;s Deals</h3>
           <div className="flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
             <div className="grid grid-cols-2 gap-3">
-              {products.slice(0, 10).map((product) => (
+              {products.slice(0, 4).map((product) => (
+              // {products.slice(0, 10).map((product) => (
                 <div
                   key={`deal-${product.id}`}
                   onClick={() => router.push(`/product/${product.id}`)}
@@ -580,20 +648,20 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-3 gap-2">
             <h2 className="text-xl font-bold text-gray-900">BEST SELLER</h2>
             <div className="flex gap-4 sm:gap-6 text-sm font-medium overflow-x-auto">
-              <button className="text-orange-500 border-b-2 border-orange-500 pb-1 whitespace-nowrap">
+              {/* <button className="text-orange-500 border-b-2 border-orange-500 pb-1 whitespace-nowrap">
                 Accessories
-              </button>
-              <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
+              </button> */}
+              {/* <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
                 Fashion
               </button>
               <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
                 Electronics
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* Product Grid */}
-          <div className="mt-4 flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
+          {/* <div className="mt-4 flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {products.slice(0, 80).map((product, i) => (
                 <div
@@ -661,7 +729,93 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
                 </div>
               ))}
             </div>
+          </div> */}
+          <div
+  className="mt-4 flex-1 overflow-x-auto overflow-y-hidden pr-1"
+  style={{ scrollbarWidth: 'none' }}
+>
+  <div className="flex gap-3 sm:gap-4 flex-nowrap">
+    {products.slice(0, 80).map((product, i) => (
+      <div
+        key={`best-${product.id}`}
+        onClick={() => router.push(`/product/${product.id}`)}
+        className="group bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer min-w-[160px] sm:min-w-[180px] md:min-w-[200px]"
+      >
+        <div className="relative aspect-square bg-gray-200">
+          {product.images?.[0] ? (
+            <img
+              src={product.images[0].card || product.images[0].url}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <span className="text-gray-400 text-xs">No Image</span>
+            </div>
+          )}
+
+          {i % 5 === 0 && (
+            <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+              NEW
+            </span>
+          )}
+
+          {i % 7 === 0 && (
+            <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+              -7%
+            </span>
+          )}
+        </div>
+
+        <div className="p-2 sm:p-3">
+          <div className="flex text-orange-400 text-[10px] sm:text-xs mb-1">
+            ★★★★★
           </div>
+
+          <h3 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-1 group-hover:text-green-700">
+            {product.name}
+          </h3>
+
+          <div className="mt-1 flex items-center gap-1 sm:gap-2">
+            <span className="text-red-600 font-bold text-sm">
+              ₹{product.price}
+            </span>
+            <span className="text-gray-400 line-through text-[10px] sm:text-xs">
+              ₹{Math.round(product.price * 1.1)}
+            </span>
+          </div>
+
+          <div className="flex gap-1.5 mt-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProductAction(product, 'cart');
+              }}
+              className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
+            >
+              <ShoppingCart className="h-3 w-3" />
+              Add to Cart
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProductAction(product, 'wishlist');
+              }}
+              className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
+              title="Add to Wishlist"
+            >
+              <Heart className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+        
+      </div>
+    ))}
+  </div>
+   
+</div>
+
         </div>
 
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ChevronDown, ChevronUp, ShoppingCart, Heart } from 'lucide-react';
+import { Loader2, ChevronDown, ShoppingCart, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/useAuthStore';
 import HomeHeader from '../../components/HomeHeader';
@@ -70,7 +70,6 @@ export default function BlogsSection() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [blogsLoading, setBlogsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedBlogId, setExpandedBlogId] = useState<string | null>(null);
 
   // Auth modal states
   const [activeModal, setActiveModal] = useState<ModalType>('none');
@@ -115,9 +114,6 @@ export default function BlogsSection() {
 
   const closeAllModals = () => { setActiveModal('none'); setPendingAction(null); };
 
-  const toggleBlogExpand = (blogId: string) => {
-    setExpandedBlogId((prev) => (prev === blogId ? null : blogId));
-  };
   const galleryImages = [
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
     'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
@@ -293,33 +289,18 @@ export default function BlogsSection() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 
-                  {blogs.map((blog) => {
-                    const isExpanded = expandedBlogId === blog.id;
-            
-                    return (
+                  {blogs.map((blog) => (
                       <article
                         key={blog.id}
-                        className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
+                        onClick={() => router.push(`/blog/${blog.id}`)}
+                        className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col cursor-pointer"
                       >
-                        <div className="relative">
-                          {blog.image ? (
-                            <img
-                            // src={blog.image}
-                              src={galleryImages[4]}
-                              alt={blog.name}
-                              className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-56 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                               <img
-                            // src={blog.image}
-                              src={galleryImages[4]}
-                              alt={blog.name}
-                              className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                            </div>
-                          )}
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={galleryImages[4]}
+                            alt={blog.name}
+                            className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
                           <div className="absolute bottom-4 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full">
                             {formatDate(blog.created_at)}
                           </div>
@@ -339,37 +320,17 @@ export default function BlogsSection() {
                             </span>
                           </div>
 
-                          {/* Changed: using max-height transition instead of line-clamp */}
-                          {isExpanded?( <div
-                            className="text-gray-600 mb-4 overflow-hidden transition-all duration-500 ease-in-out"
-                            style={{
-                              maxHeight: isExpanded ? '1000px' : '4.5em', // ≈ 3-4 lines at normal font size
-                            }}
-                          >
+                          <p className="text-gray-600 mb-4 line-clamp-3">
                             {blog.description}
-                          </div>):( <div
-                            
-                          >
-                            
-                          </div>)}
-                        
+                          </p>
 
-                          {/* Toggle Button */}
-                          <button
-                            onClick={() => toggleBlogExpand(blog.id)}
-                            className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-800 transition mt-auto self-start"
-                          >
-                            {isExpanded ? 'Show Less' : 'Read More'}
-                            {isExpanded ? (
-                              <ChevronUp className="w-5 h-5 transition-transform" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5 transition-transform" />
-                            )}
-                          </button>
+                          <span className="inline-flex items-center gap-2 text-green-600 font-medium group-hover:text-green-800 transition mt-auto self-start">
+                            Read More
+                            <ChevronDown className="w-4 h-4 -rotate-90" />
+                          </span>
                         </div>
                       </article>
-                    );
-                  })}
+                  ))}
               </div>
             )}
           </div>

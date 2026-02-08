@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Clipboard, Package, CalendarDays, Menu, Book, Phone, Home, Grid3X3 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Clipboard, Package, CalendarDays, Menu, Book, Phone, Home, Grid3X3, Calendar, Play, Info, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 interface Category {
   id: string;
@@ -52,8 +52,12 @@ export default function NavMenu({
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [activeNestedId, setActiveNestedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const eventsDropdownRef = useRef<HTMLDivElement>(null);
+  const aboutDropdownRef = useRef<HTMLDivElement>(null);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -84,6 +88,8 @@ export default function NavMenu({
     setMenuOpen(false);
     setCategoriesOpen(false);
     setActiveNestedId(null);
+    setEventsDropdownOpen(false);
+    setAboutDropdownOpen(false);
   };
 
   /* ---------------- OUTSIDE CLICK ---------------- */
@@ -91,7 +97,15 @@ export default function NavMenu({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        closeAll();
+        setMenuOpen(false);
+        setCategoriesOpen(false);
+        setActiveNestedId(null);
+      }
+      if (eventsDropdownRef.current && !eventsDropdownRef.current.contains(event.target as Node)) {
+        setEventsDropdownOpen(false);
+      }
+      if (aboutDropdownRef.current && !aboutDropdownRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -231,6 +245,81 @@ export default function NavMenu({
           );
         }
 
+        if (item.id === 'about') {
+          return (
+            <div key={item.id}>
+              <button
+                onClick={() => setAboutDropdownOpen(prev => !prev)}
+                className={`w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center justify-between border-b ${
+                  aboutDropdownOpen ? 'bg-green-50 text-green-600' : ''
+                }`}
+              >
+                <span>About Us</span>
+                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {aboutDropdownOpen && (
+                <div className="bg-gray-50 border-l-2 border-green-500 ml-4">
+                  <button
+                    onClick={() => { router.push('/about'); closeAll(); }}
+                    className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                  >
+                    <Info className="h-4 w-4" />
+                    About Us
+                  </button>
+                  <button
+                    onClick={() => { router.push('/faqs'); closeAll(); }}
+                    className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    FAQs
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        if (item.id === 'events') {
+          return (
+            <div key={item.id}>
+              <button
+                onClick={() => setEventsDropdownOpen(prev => !prev)}
+                className={`w-full px-4 py-3 text-left text-sm hover:bg-green-50 flex items-center justify-between border-b ${
+                  eventsDropdownOpen ? 'bg-green-50 text-green-600' : ''
+                }`}
+              >
+                <span>Events</span>
+                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${eventsDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {eventsDropdownOpen && (
+                <div className="bg-gray-50 border-l-2 border-green-500 ml-4">
+                  <button
+                    onClick={() => { router.push('/events/gallery'); closeAll(); }}
+                    className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Gallery
+                  </button>
+                  <button
+                    onClick={() => { router.push('/events/videos'); closeAll(); }}
+                    className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                  >
+                    <Play className="h-4 w-4" />
+                    Videos
+                  </button>
+                  <button
+                    onClick={() => { router.push('/events/upcoming'); closeAll(); }}
+                    className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    Upcoming Events
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        }
+
         return (
           <button
             key={item.id}
@@ -270,6 +359,40 @@ export default function NavMenu({
             );
           }
 
+          if (item.id === 'about') {
+            return (
+              <div key={item.id} className="relative group">
+                <button
+                  onMouseEnter={() => setAboutDropdownOpen(true)}
+                  onClick={() => setAboutDropdownOpen(prev => !prev)}
+                  className={`w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between ${
+                    aboutDropdownOpen ? 'bg-green-50 text-green-600' : ''
+                  }`}
+                >
+                  <span>About Us</span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+            );
+          }
+
+          if (item.id === 'events') {
+            return (
+              <div key={item.id} className="relative group">
+                <button
+                  onMouseEnter={() => setEventsDropdownOpen(true)}
+                  onClick={() => setEventsDropdownOpen(prev => !prev)}
+                  className={`w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center justify-between ${
+                    eventsDropdownOpen ? 'bg-green-50 text-green-600' : ''
+                  }`}
+                >
+                  <span>Events</span>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+            );
+          }
+
           return (
             <button
               key={item.id}
@@ -281,6 +404,59 @@ export default function NavMenu({
           );
         })}
       </div>
+
+      {/* About Us Flyout */}
+      {aboutDropdownOpen && (
+        <div
+          className="absolute top-full left-[240px] min-w-[200px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50"
+          onMouseLeave={() => setAboutDropdownOpen(false)}
+        >
+          <button
+            onClick={() => { router.push('/about'); closeAll(); }}
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600"
+          >
+            <Info className="h-4 w-4" />
+            About Us
+          </button>
+          <button
+            onClick={() => { router.push('/faqs'); closeAll(); }}
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600"
+          >
+            <HelpCircle className="h-4 w-4" />
+            FAQs
+          </button>
+        </div>
+      )}
+
+      {/* Events Flyout */}
+      {eventsDropdownOpen && (
+        <div
+          className="absolute top-full left-[240px] min-w-[200px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50"
+          onMouseLeave={() => setEventsDropdownOpen(false)}
+        >
+          <button
+            onClick={() => { router.push('/events/gallery'); closeAll(); }}
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600"
+          >
+            <Calendar className="h-4 w-4" />
+            Gallery
+          </button>
+          <button
+            onClick={() => { router.push('/events/videos'); closeAll(); }}
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600"
+          >
+            <Play className="h-4 w-4" />
+            Videos
+          </button>
+          <button
+            onClick={() => { router.push('/events/upcoming'); closeAll(); }}
+            className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600"
+          >
+            <CalendarDays className="h-4 w-4" />
+            Upcoming Events
+          </button>
+        </div>
+      )}
 
       {/* Categories Flyout */}
       {categoriesOpen && (
@@ -383,23 +559,79 @@ export default function NavMenu({
 
           {/* DESKTOP STATIC NAV ITEMS - Hidden on mobile, visible on sm+ */}
           <div className="hidden sm:flex items-center gap-1">
-            <button onClick={disabled ? undefined : () => onSectionChange('about')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="About Us">
-              <span>About Us</span>
-            </button>
+            {/* About Us Dropdown */}
+            <div className="relative" ref={aboutDropdownRef}>
+              <button
+                onClick={disabled ? undefined : () => setAboutDropdownOpen(prev => !prev)}
+                disabled={disabled}
+                className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''} ${aboutDropdownOpen ? 'bg-gray-200' : ''}`}
+                title="About Us"
+              >
+                <span>About Us</span>
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {!disabled && aboutDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 min-w-[200px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50">
+                  <button
+                    onClick={() => { router.push('/about'); setAboutDropdownOpen(false); }}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors"
+                  >
+                    <Info className="h-4 w-4" />
+                    About Us
+                  </button>
+                  <button
+                    onClick={() => { router.push('/faqs'); setAboutDropdownOpen(false); }}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    FAQs
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
               <span>Products</span>
             </button>
-            {/* <button onClick={disabled ? undefined : () => onSectionChange('events')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Events">
-              <span>Events</span>
-            </button> */}
-            <button
-  onClick={disabled ? undefined : () => router.push('/events')}
-  disabled={disabled}
-  className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`}
-  title="Events"
->
-  <span>Events</span>
-</button>
+            {/* Events Dropdown */}
+            <div className="relative" ref={eventsDropdownRef}>
+              <button
+                onClick={disabled ? undefined : () => setEventsDropdownOpen(prev => !prev)}
+                disabled={disabled}
+                className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''} ${eventsDropdownOpen ? 'bg-gray-200' : ''}`}
+                title="Events"
+              >
+                <span>Events</span>
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${eventsDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {!disabled && eventsDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 min-w-[200px] bg-white text-gray-800 shadow-xl rounded-lg border py-2 z-50">
+                  <button
+                    onClick={() => { router.push('/events/gallery'); setEventsDropdownOpen(false); }}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Gallery
+                  </button>
+                  <button
+                    onClick={() => { router.push('/events/videos'); setEventsDropdownOpen(false); }}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors"
+                  >
+                    <Play className="h-4 w-4" />
+                    Videos
+                  </button>
+                  <button
+                    onClick={() => { router.push('/events/upcoming'); setEventsDropdownOpen(false); }}
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    Upcoming Events
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button onClick={disabled ? undefined : () => onSectionChange('ecatalogue')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Ecatalogue">
               <span>Ecatalogue</span>

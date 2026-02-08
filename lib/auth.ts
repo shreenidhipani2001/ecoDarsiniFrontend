@@ -11,7 +11,7 @@ export async function login(email: string, password: string) {
     `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
     {
       method: "POST",
-      credentials: "include", // ✅ cookie
+      credentials: "include",  
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     }
