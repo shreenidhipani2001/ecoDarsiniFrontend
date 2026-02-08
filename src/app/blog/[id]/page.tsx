@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2, ChevronLeft, Clock, User, Calendar, Tag, Eye, Heart } from 'lucide-react';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
+import { fetchBlogByIdCached } from '../../../../lib/cachedFetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CMS_IMAGE_BASE = process.env.NEXT_PUBLIC_CMS_IMAGE_URL || `${API_URL}/api/cms/images`;
@@ -56,9 +57,7 @@ export default function BlogDetailPage() {
     const fetchBlog = async () => {
       if (!API_URL || !id) return;
       try {
-        const res = await fetch(`${API_URL}/api/blogs/${id}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await fetchBlogByIdCached(id) as Blog;
         setBlog(data);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to load blog';

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, ChevronDown, ShoppingCart, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/useAuthStore';
+import { fetchLatestProductsCached, fetchBlogsCached } from '../../../lib/cachedFetch';
 import HomeHeader from '../../components/HomeHeader';
 import HomeFooter from '../../components/HomeFooter';
 import AuthPromptModal from '../../components/AuthPromptModal';
@@ -124,22 +125,16 @@ export default function BlogsSection() {
    
   ];
 
-  // Fetch latest products (unchanged)
+  // Fetch latest products (cached for 5 min)
   useEffect(() => {
     const fetchLatestProducts = async () => {
       try {
         if (!API_URL) throw new Error('API URL not configured');
-
-        const res = await fetch(`${API_URL}/api/products/five-latest`, {
-          cache: 'no-store',
-        });
-
-        if (!res.ok) throw new Error(`Products: HTTP ${res.status}`);
-
-        const data = await res.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = await fetchLatestProductsCached();
         const productsList = data.products || data || [];
         setLatestProducts(productsList.slice(0, 5));
-      } catch (err: any) {
+      } catch (err) {
         console.error('Failed to fetch latest products:', err);
       } finally {
         setProductsLoading(false);
@@ -149,25 +144,19 @@ export default function BlogsSection() {
     fetchLatestProducts();
   }, []);
 
-  // Fetch blogs (still using /api/blogs endpoint)
+  // Fetch blogs (cached for 10 min)
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         if (!API_URL) throw new Error('API URL not configured');
-
-        const res = await fetch(`${API_URL}/api/blogs`, {
-          cache: 'no-store',
-        });
-
-        if (!res.ok) throw new Error(`Blogs: HTTP ${res.status}`);
-
-        const data = await res.json();
-        // API returns { blogs: [...], ... } or directly array — handle both
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = await fetchBlogsCached();
         const blogList = Array.isArray(data) ? data : data.blogs || [];
         setBlogs(blogList);
-      } catch (err: any) {
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load blogs';
         console.error('Failed to fetch blogs:', err);
-        setError(err.message || 'Failed to load blogs');
+        setError(message);
       } finally {
         setBlogsLoading(false);
       }

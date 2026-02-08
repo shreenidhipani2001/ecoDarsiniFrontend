@@ -5,13 +5,24 @@ import { apiFetch } from "./api";
 // import { useAuthStore } from "../../ecoDarsiniFrontend/src/store/useAuthStore";
 // import { useAu thStore } from "../store/useAuthStore";
 
+/* ================= COOKIE HELPERS ================= */
+/** Set a marker cookie on the frontend domain so Next.js middleware can verify auth */
+function setAuthCookie() {
+  document.cookie = "accessToken=authenticated; path=/; max-age=604800; SameSite=Lax"; // 7 days
+}
+
+/** Clear the auth cookie on logout */
+export function clearAuthCookie() {
+  document.cookie = "accessToken=; path=/; max-age=0; SameSite=Lax";
+}
+
 /* ================= LOGIN ================= */
 export async function login(email: string, password: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
     {
       method: "POST",
-      credentials: "include",  
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     }
@@ -23,6 +34,9 @@ export async function login(email: string, password: string) {
 
   const loginData = await res.json();
   console.log("Login Response Data:", loginData);
+
+  // Set auth cookie on frontend domain for middleware
+  setAuthCookie();
 
   // Fetch full user profile after successful login
   if (loginData.userId) {
@@ -110,5 +124,6 @@ export async function logout() {
     credentials: "include",
   });
 
+  clearAuthCookie();
   useAuthStore.getState().clearUser();
 }

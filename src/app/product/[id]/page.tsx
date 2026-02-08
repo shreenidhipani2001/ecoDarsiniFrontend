@@ -18,6 +18,7 @@ import {
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { fetchProductByIdCached, fetchProductsCached, cachedFetch } from '../../../../lib/cachedFetch';
 import NavMenu from '../../../components/NavMenu';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
@@ -143,16 +144,14 @@ export default function ProductDetailPage() {
     return `${cmsUrl}/api/cms/images/${cmsImageId}`;
   }, [cmsUrl]);
 
-  // Fetch all products
+  // Fetch all products (cached for 3 min — used for related products)
   useEffect(() => {
     const fetchAllProducts = async () => {
       if (!apiUrl) return;
       try {
-        const res = await fetch(`${apiUrl}/api/products?limit=200`, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          setAllProducts(data.products || data.docs || []);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = await fetchProductsCached('limit=200');
+        setAllProducts(data.products || data.docs || []);
       } catch (err) {
         console.error('Failed to fetch all products', err);
       }
@@ -160,7 +159,7 @@ export default function ProductDetailPage() {
     fetchAllProducts();
   }, [apiUrl]);
 
-  // Fetch product details
+  // Fetch product details (cached for 10 min)
   useEffect(() => {
     const fetchProductDetails = async () => {
       if (!apiUrl || !productId) {
@@ -170,15 +169,8 @@ export default function ProductDetailPage() {
       }
 
       try {
-        const productRes = await fetch(`${apiUrl}/api/products/${productId}`, {
-          cache: 'no-store',
-        });
-
-        if (!productRes.ok) {
-          throw new Error('Product not found');
-        }
-
-        const productData = await productRes.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const productData: any = await fetchProductByIdCached(productId);
         setProduct(productData);
 
         // Build image URLs
@@ -192,29 +184,27 @@ export default function ProductDetailPage() {
           setImageUrls(urls);
         }
 
-        // Fetch category
+        // Fetch category (cached for 30 min)
         if (productData.category_id) {
           try {
-            const categoryRes = await fetch(`${apiUrl}/api/categories/${productData.category_id}`, {
-              cache: 'no-store',
-            });
-            if (categoryRes.ok) {
-              setCategory(await categoryRes.json());
-            }
+            const categoryData = await cachedFetch(
+              `${apiUrl}/api/categories/${productData.category_id}`,
+              { ttl: 30 * 60 * 1000 }
+            );
+            setCategory(categoryData as typeof category);
           } catch (err) {
             console.error('Failed to fetch category', err);
           }
         }
 
-        // Fetch subcategory
+        // Fetch subcategory (cached for 30 min)
         if (productData.sub_category_id) {
           try {
-            const subcategoryRes = await fetch(`${apiUrl}/api/subcategories/${productData.sub_category_id}`, {
-              cache: 'no-store',
-            });
-            if (subcategoryRes.ok) {
-              setSubcategory(await subcategoryRes.json());
-            }
+            const subcategoryData = await cachedFetch(
+              `${apiUrl}/api/subcategories/${productData.sub_category_id}`,
+              { ttl: 30 * 60 * 1000 }
+            );
+            setSubcategory(subcategoryData as typeof subcategory);
           } catch (err) {
             console.error('Failed to fetch subcategory', err);
           }
