@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
+import { fetchCategoriesCached, fetchSubcategoriesCached, fetchProductsCached } from '../../lib/cachedFetch';
+import { useDebounce } from '../../lib/useDebounce';
 import HomeHeader from '../components/HomeHeader';
 import NavMenu from '../components/NavMenu';
 import HeroBanner from '../components/HeroBanner';
@@ -101,8 +103,8 @@ export default function HomePage() {
 
   const PRODUCTS_PER_PAGE = 20;
 
- 
-
+  // Debounce search to avoid hitting API on every keystroke (400ms delay)
+  const debouncedSearch = useDebounce(searchQuery, 400);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<ModalType>('none');
@@ -127,7 +129,7 @@ export default function HomePage() {
 
 const [activeSection, setActiveSection] = useState<SectionType>('products');
 
-  // Fetch paginated products
+  // Fetch paginated products (uses debounced search + SWR cache)
   useEffect(() => {
     const fetchProducts = async () => {
       if (!apiUrl) {
@@ -143,8 +145,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           limit: PRODUCTS_PER_PAGE.toString(),
         });
 
-        if (searchQuery.trim()) {
-          params.append('search', searchQuery.trim());
+        if (debouncedSearch.trim()) {
+          params.append('search', debouncedSearch.trim());
         }
         if (selectedCategory) {
           params.append('category_id', selectedCategory);
@@ -153,15 +155,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           params.append('sub_category_id', selectedSubcategory);
         }
 
-        const res = await fetch(`${apiUrl}/api/products?${params.toString()}`, {
-          cache: 'no-store',
-        });
-
-        if (!res.ok) {
-          throw new Error(`HTTP error ${res.status}`);
-        }
-
-        const data = await res.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = await fetchProductsCached(params.toString());
 
         setProducts(data.products || data.docs || []);
         setTotalProducts(data.total || 0);
@@ -176,23 +171,23 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
     };
 
     fetchProducts();
-  }, [currentPage, searchQuery, selectedCategory, selectedSubcategory, apiUrl]);
+  }, [currentPage, debouncedSearch, selectedCategory, selectedSubcategory, apiUrl]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, selectedSubcategory]);
+  }, [debouncedSearch, selectedCategory, selectedSubcategory]);
 
-  // Fetch categories
+  // Fetch categories (cached for 30 min — rarely changes)
   useEffect(() => {
     const fetchCategories = async () => {
       if (!apiUrl) return;
       setCategoriesLoading(true);
       try {
-        const res = await fetch(`${apiUrl}/api/categories/`, { cache: 'no-store' });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setCategories(Array.isArray(data) ? data : data.categories || data.data || []);
+        const data = await fetchCategoriesCached();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const d = data as any;
+        setCategories(Array.isArray(d) ? d : d.categories || d.data || []);
       } catch (err) {
         console.error('Categories fetch failed', err);
       } finally {
@@ -202,16 +197,16 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
     fetchCategories();
   }, [apiUrl]);
 
-  // Fetch subcategories
+  // Fetch subcategories (cached for 30 min — rarely changes)
   useEffect(() => {
     const fetchSubcategories = async () => {
       if (!apiUrl) return;
       setSubcategoriesLoading(true);
       try {
-        const res = await fetch(`${apiUrl}/api/subcategories`, { cache: 'no-store' });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setSubcategories(Array.isArray(data) ? data : data.subcategories || []);
+        const data = await fetchSubcategoriesCached();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const d = data as any;
+        setSubcategories(Array.isArray(d) ? d : d.subcategories || []);
       } catch (err) {
         console.error('Subcategories fetch failed', err);
       } finally {
