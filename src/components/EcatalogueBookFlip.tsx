@@ -371,16 +371,25 @@ BackCover.displayName = 'BackCover';
 interface LeftPageProps {
   product: Product;
   pageNumber: number;
+  onNavigate?: (productId: string) => void;
 }
 
  
 const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
-  ({ product, pageNumber }, ref) => {
+  ({ product, pageNumber, onNavigate }, ref) => {
     const [imgError, setImgError] = React.useState(false);
 
     return (
       <div className="page product-page single-page" ref={ref}>
         <div className="page-inner flex flex-col items-center justify-between">
+
+          {/* View Details Button */}
+          <button
+            className="view-details-btn text-white bg-green-600 p-2 pr-4 pl-4 rounded-full font-bold"
+            onClick={() => onNavigate?.(product.id)}
+          >
+            View Details
+          </button>
 
           {/* Title */}
           <div className="w-full text-center mt-4">
@@ -414,6 +423,9 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
             </span>
             <div className="text-lg font-semibold text-black">
               {product?.artist_name || 'Artisan'}
+            </div>
+            <div className="text-sm text-black">
+              {product?.description || 'Artisan'}
             </div>
           </div>
 
@@ -760,6 +772,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
         key={`product-${product.id}`}
         product={product}
         pageNumber={index + 1}
+        onNavigate={(id) => router.push(`/product/${id}`)}
       />
     );
   });
@@ -838,7 +851,11 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
                 }}
               >
                 {/* Product Image */}
-                <div className="mobile-card-img-wrapper">
+                <div
+                  className="mobile-card-img-wrapper"
+                  onClick={() => router.push(`/product/${currentMobileProduct.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   {getProductImageUrl(currentMobileProduct) ? (
                     <img
                       src={getProductImageUrl(currentMobileProduct)}
@@ -1442,6 +1459,34 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
 
         .wishlist-btn:hover {
           background: #fef2f2;
+        }
+
+        /* View Details Button */
+        .view-details-btn {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 5;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 8px;
+          font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+          transition: all 0.2s ease;
+          letter-spacing: 0.3px;
+        }
+
+        .view-details-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .view-details-btn:active {
+          transform: scale(0.96);
         }
 
         /* Page Numbers */
