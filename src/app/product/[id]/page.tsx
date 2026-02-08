@@ -21,6 +21,9 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import NavMenu from '../../../components/NavMenu';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
+import AuthPromptModal from '../../../components/AuthPromptModal';
+import LoginModal from '../../../components/LoginModal';
+import RegisterModal from '../../../components/RegisterModal';
 
 interface Product {
   id: string;
@@ -63,6 +66,9 @@ interface Review {
   created_at: string;
   user_name: string;
 }
+
+type ModalType = 'none' | 'authPrompt' | 'login' | 'register';
+type ActionType = 'cart' | 'wishlist';
 
 // Hardcoded categories list
 const HARDCODED_CATEGORIES = [
@@ -120,6 +126,10 @@ export default function ProductDetailPage() {
 
   // Reviews state
   const [reviews, setReviews] = useState<Review[]>([]);
+
+  // Auth modal state
+  const [activeModal, setActiveModal] = useState<ModalType>('none');
+  const [pendingAction, setPendingAction] = useState<{ type: ActionType } | null>(null);
 
   // Related products scroll ref
   const relatedScrollRef = useRef<HTMLDivElement>(null);
@@ -279,69 +289,83 @@ export default function ProductDetailPage() {
     return allProducts.slice(0, 4);
   };
 
-  // Handle Add to Cart
-  const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
-      router.push('/login');
-      return;
-    }
+  // Perform cart/wishlist action (called directly or after login)
+  const performAction = async (actionType: ActionType) => {
+    if (!product || !apiUrl || !user?.id) return;
 
-    if (!product || !user?.id) return;
-
-    setAddingToCart(true);
-    try {
-      const res = await fetch(`${apiUrl}/api/cart/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: quantity,
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to add to cart');
-      toast.success(`Added ${quantity} item(s) to cart!`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to add to cart');
-    } finally {
-      setAddingToCart(false);
+    if (actionType === 'cart') {
+      setAddingToCart(true);
+      try {
+        const res = await fetch(`${apiUrl}/api/cart/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            user_id: user.id,
+            product_id: product.id,
+            quantity: quantity,
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to add to cart');
+        toast.success(`Added ${quantity} item(s) to cart!`);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to add to cart');
+      } finally {
+        setAddingToCart(false);
+      }
+    } else if (actionType === 'wishlist') {
+      setAddingToWishlist(true);
+      try {
+        const res = await fetch(`${apiUrl}/api/wishes/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            user_id: user.id,
+            product_id: product.id,
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to add to wishlist');
+        toast.success('Added to wishlist!');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to add to wishlist');
+      } finally {
+        setAddingToWishlist(false);
+      }
     }
   };
 
-  // Handle Add to Wishlist
-  const handleAddToWishlist = async () => {
+  // Handle Add to Cart
+  const handleAddToCart = () => {
     if (!isAuthenticated) {
-      toast.error('Please login to add items to wishlist');
-      router.push('/login');
+      setPendingAction({ type: 'cart' });
+      setActiveModal('authPrompt');
       return;
     }
+    performAction('cart');
+  };
 
-    if (!product || !user?.id) return;
-
-    setAddingToWishlist(true);
-    try {
-      const res = await fetch(`${apiUrl}/api/wishes/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          user_id: user.id,
-          product_id: product.id,
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to add to wishlist');
-      toast.success('Added to wishlist!');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to add to wishlist');
-    } finally {
-      setAddingToWishlist(false);
+  // Handle Add to Wishlist
+  const handleAddToWishlist = () => {
+    if (!isAuthenticated) {
+      setPendingAction({ type: 'wishlist' });
+      setActiveModal('authPrompt');
+      return;
     }
+    performAction('wishlist');
+  };
+
+  // Modal controls
+  const handleAuthPromptLogin = () => setActiveModal('login');
+  const handleAuthPromptSignUp = () => setActiveModal('register');
+  const handleBackToPrompt = () => setActiveModal('authPrompt');
+  const handleSwitchToRegister = () => setActiveModal('register');
+  const handleSwitchToLogin = () => setActiveModal('login');
+  const closeAllModals = () => {
+    setActiveModal('none');
+    setPendingAction(null);
   };
 
   // Calculate final price
@@ -441,8 +465,19 @@ export default function ProductDetailPage() {
         onSubcategorySelect={() => {}}
         selectedCategory={null}
         selectedSubcategory={null}
-        onSectionChange={() => {}}
-        disabled={true}
+        onSectionChange={(section) => {
+          const routes: Record<string, string> = {
+            ecatalogue: '/ecatalogue',
+            blogs: '/blog',
+            events: '/events',
+          };
+          if (routes[section]) {
+            router.push(routes[section]);
+          } else {
+            router.push('/');
+          }
+        }}
+        disabled={false}
       />
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -850,6 +885,31 @@ export default function ProductDetailPage() {
         </div>
       </div>
       <HomeFooter />
+
+      <AuthPromptModal
+        isOpen={activeModal === 'authPrompt'}
+        onClose={closeAllModals}
+        onLoginClick={handleAuthPromptLogin}
+        onSignUpClick={handleAuthPromptSignUp}
+        actionType={pendingAction?.type}
+      />
+
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={closeAllModals}
+        onBackToPrompt={pendingAction ? handleBackToPrompt : undefined}
+        onSwitchToRegister={handleSwitchToRegister}
+        onLoginSuccess={pendingAction ? () => {
+          performAction(pendingAction.type);
+        } : undefined}
+      />
+
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={closeAllModals}
+        onBackToPrompt={pendingAction ? handleBackToPrompt : undefined}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
     </div>
   );
 }

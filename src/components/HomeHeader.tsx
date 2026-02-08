@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingCart, Heart, User, LogOut, Menu, X, Mail, Phone, ChevronDown, Home } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, LogOut, Menu, X, Mail, Phone, ChevronDown, Home, Calendar, Play, CalendarDays } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import SVGComponent from './Logo';
 
@@ -62,6 +62,7 @@ export default function HomeHeader({
   // Mobile nav menu states
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [mobileActiveNestedId, setMobileActiveNestedId] = useState<string | null>(null);
+  const [mobileEventsOpen, setMobileEventsOpen] = useState(false);
 
   const navItems = [
     { id: 'categories', label: 'Categories', isCategories: true },
@@ -77,6 +78,7 @@ export default function HomeHeader({
     setMobileMenuOpen(false);
     setMobileCategoriesOpen(false);
     setMobileActiveNestedId(null);
+    setMobileEventsOpen(false);
   };
 
   const handleMobileSectionClick = (section: SectionType) => {
@@ -486,6 +488,47 @@ export default function HomeHeader({
                             ) : (
                               <div className="px-6 py-3 text-sm text-gray-400">No categories available</div>
                             )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (item.id === 'events') {
+                    return (
+                      <div key={item.id}>
+                        <button
+                          onClick={() => setMobileEventsOpen(!mobileEventsOpen)}
+                          className={`w-full px-4 py-3 text-left text-sm font-medium hover:bg-green-50 flex items-center justify-between border-b border-gray-100 ${
+                            mobileEventsOpen ? 'bg-green-50 text-green-600' : 'text-gray-700'
+                          }`}
+                        >
+                          <span>Events</span>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${mobileEventsOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {mobileEventsOpen && (
+                          <div className="bg-gray-50 border-l-2 border-green-500 ml-4">
+                            <button
+                              onClick={() => { router.push('/events/gallery'); closeMobileMenu(); }}
+                              className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                            >
+                              <Calendar className="h-4 w-4" />
+                              Gallery
+                            </button>
+                            <button
+                              onClick={() => { router.push('/events/videos'); closeMobileMenu(); }}
+                              className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                            >
+                              <Play className="h-4 w-4" />
+                              Videos
+                            </button>
+                            <button
+                              onClick={() => { router.push('/events/upcoming'); closeMobileMenu(); }}
+                              className="w-full px-6 py-2.5 text-left text-sm hover:bg-green-50 flex items-center gap-2 text-gray-700"
+                            >
+                              <CalendarDays className="h-4 w-4" />
+                              Upcoming Events
+                            </button>
                           </div>
                         )}
                       </div>
