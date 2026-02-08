@@ -192,7 +192,7 @@ export default function DashboardPage() {
         setWishlistProductsLoading(false);
       }
     } catch (err) {
-      console.error('Failed to fetch wishlist:', err);
+      console.log('Failed to fetch wishlist:', err);
       toast.error('Failed to load wishlist');
     } finally {
       setWishlistLoading(false);

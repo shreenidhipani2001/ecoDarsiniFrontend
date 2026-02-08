@@ -3,29 +3,39 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Leaf, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
-import { login } from '../../../lib/auth';
+import { login, clearAuthCookie } from '../../../lib/auth';
 import { useAuthStore } from '../../store/useAuthStore';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, clearUser } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
+  // If we land on the login page but Zustand thinks we're authenticated,
+  // it means the accessToken cookie expired or was cleared (middleware redirected here).
+  // Clear the stale Zustand state so the user can log in fresh.
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'ADMIN') {
-        router.push('/admin');
+      const hasCookie = document.cookie.split(';').some((c) => c.trim().startsWith('accessToken='));
+      if (hasCookie) {
+        // Cookie exists — actually authenticated, redirect to dashboard
+        if (user.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
-        router.push('/dashboard');
+        // Cookie is gone but Zustand still has auth — stale state, clear it
+        clearAuthCookie();
+        clearUser();
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, clearUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

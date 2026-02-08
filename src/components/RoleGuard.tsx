@@ -34,7 +34,8 @@ export default function RoleGuard({ children, allowedRole }: RoleGuardProps) {
             }
           } else {
             // Not authenticated, redirect to login
-            router.push('/login');
+            router.push('/');
+            // router.push('/login');
           }
         } else {
           // User exists in store, check role
@@ -49,7 +50,8 @@ export default function RoleGuard({ children, allowedRole }: RoleGuardProps) {
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        router.push('/login');
+        // router.push('/login');
+        router.push('/');
       }
     };
 

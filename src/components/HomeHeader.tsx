@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Heart, User, LogOut, Menu, X, Mail, Phone, ChevronDown, Home, Calendar, Play, CalendarDays } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { clearAuthCookie } from '../../lib/auth';
 import SVGComponent from './Logo';
 
 interface Category {
@@ -111,6 +112,7 @@ export default function HomeHeader({
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      clearAuthCookie();
       clearUser();
       setProfileDropdownOpen(false);
       setMobileProfileOpen(false);
