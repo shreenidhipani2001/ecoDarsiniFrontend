@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart, MoveLeft, ArrowBigLeft, ArrowBigRight, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart, MoveLeft, ArrowBigLeft, ArrowBigRight, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { fetchCategoriesCached, fetchSubcategoriesCached, fetchProductsCached } from '../../lib/cachedFetch';
@@ -135,6 +135,7 @@ export default function HomePage() {
   const [wishlistCount, setWishlistCount] = useState(0);
 
   const [imageError, setImageError] = useState(false);
+  const [showGoToTop, setShowGoToTop] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -256,6 +257,19 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 const format = (num: number): string => String(num).padStart(2, '0');
+  // Show/hide "Go to Top" button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowGoToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Fetch paginated products (uses debounced search + SWR cache)
   useEffect(() => {
     const fetchProducts = async () => {
@@ -1157,24 +1171,16 @@ const format = (num: number): string => String(num).padStart(2, '0');
 {/* <WhatsAppChat phoneNumber="+919876543210" message="Hello! I need support." /> */}
 
 
-      {/* Home Product Detail Modal */}
-      {/* {selectedProduct && (
-        <HomeProductDetailModal
-          product={selectedProduct}
-          imageUrl={
-            selectedProduct.images && selectedProduct.images.length > 0
-              ? selectedProduct.images[0].card || selectedProduct.images[0].url || ''
-              : ''
-          }
-          onClose={() => setSelectedProduct(null)}
-          onAddToCart={(product) => {
-            handleProductAction(product, 'cart');
-          }}
-          onAddToWishlist={(product) => {
-            handleProductAction(product, 'wishlist');
-          }}
-        />
-      )} */}
+      {/* Go to Top Button */}
+      {showGoToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+          aria-label="Go to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }
