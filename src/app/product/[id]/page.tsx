@@ -19,6 +19,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { fetchProductByIdCached, fetchProductsCached, cachedFetch } from '../../../../lib/cachedFetch';
+import { attachImagesToProductFrontend, attachImagesToProductsFrontend } from '../../../../lib/imageResolver';
 import NavMenu from '../../../components/NavMenu';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
@@ -151,7 +152,8 @@ export default function ProductDetailPage() {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await fetchProductsCached('limit=200');
-        setAllProducts(data.products || data.docs || []);
+        const resolvedAll = await attachImagesToProductsFrontend(data.products || data.docs || []);
+        setAllProducts(resolvedAll as unknown as Product[]);
       } catch (err) {
         console.error('Failed to fetch all products', err);
       }
@@ -171,16 +173,14 @@ export default function ProductDetailPage() {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const productData: any = await fetchProductByIdCached(productId);
-        setProduct(productData);
+        const resolved = await attachImagesToProductFrontend(productData);
+        setProduct(resolved as Product);
 
-        // Build image URLs
-        if (productData.images && productData.images.length > 0) {
-          const urls = productData.images.map((img: { full?: string; card?: string; url: string }) =>
+        // Build image URLs from resolved images
+        if (resolved.images && resolved.images.length > 0) {
+          const urls = resolved.images.map((img: { full?: string; card?: string; url: string }) =>
             img.full || img.card || img.url
           );
-          setImageUrls(urls);
-        } else if (productData.cms_image_ids && productData.cms_image_ids.length > 0) {
-          const urls = productData.cms_image_ids.map((id: string) => buildImageUrl(id));
           setImageUrls(urls);
         }
 
@@ -384,13 +384,10 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Get product image URL helper
+  // Get product image URL helper (images already resolved by frontend resolver)
   const getProductImageUrl = (p: Product): string => {
     if (p.images && p.images.length > 0) {
       return p.images[0].card || p.images[0].url || '';
-    }
-    if (p.cms_image_ids && p.cms_image_ids.length > 0) {
-      return buildImageUrl(p.cms_image_ids[0]);
     }
     return '';
   };

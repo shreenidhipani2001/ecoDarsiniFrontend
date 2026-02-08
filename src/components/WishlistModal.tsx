@@ -68,7 +68,8 @@ interface WishlistModalProps {
 
 // Helper to get product image URL by matching product_id
 function getImageForWishlistItem(wishlistItem: WishlistItem, products: Product[]): string {
-  const product = products.find((p) => p.id === wishlistItem.product_id);
+  console.log('products:-',products)
+  const product = products.find((p) => p.id === wishlistItem?.product_id);
   if (product && product.images && product.images.length > 0) {
     return product.images[0].url || product.images[0].card || '';
   }
@@ -265,7 +266,7 @@ const handleAddToCart = async () => {
           <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
             <Image
               src={itemImage}
-              alt={item.name}
+              alt={item?.name}
               fill
               className="object-cover rounded-xl"
               sizes="(max-width: 768px) 256px, 320px"
@@ -276,9 +277,9 @@ const handleAddToCart = async () => {
           {/* Details + actions */}
           <div className="flex-1 flex flex-col justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{item?.name}</h2>
               <p className="text-green-600 font-bold text-xl mt-4">
-                ₹{item.price.toLocaleString('en-IN')}
+                ₹{item?.price.toLocaleString('en-IN')}
               </p>
             </div>
 

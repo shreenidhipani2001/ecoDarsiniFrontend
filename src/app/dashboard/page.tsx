@@ -10,6 +10,7 @@ import TrackOrderModal from '../../components/TrackOrderModal';
 import RoleGuard from '../../components/RoleGuard';
 import { getCart } from '../../../lib/cartApi';
 import { getWishlist } from '../../../lib/wishlistApi';
+import { attachImagesToProductsFrontend } from '../../../lib/imageResolver';
 import toast from 'react-hot-toast';
 import OrdersModal from '../../components/OrdersModal';
 
@@ -125,7 +126,9 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
-      return data.products || [];
+      const raw = data.products || [];
+      const resolved = await attachImagesToProductsFrontend(raw);
+      return resolved as Product[];
     } catch (err) {
       console.error('Failed to fetch products by IDs:', err);
       return [];

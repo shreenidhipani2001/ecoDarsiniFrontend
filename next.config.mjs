@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // CMS already provides pre-sized variants (thumbnail, card, full).
+    // Skip Next.js re-optimization to avoid upstream proxy timeouts on Render free tier.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',

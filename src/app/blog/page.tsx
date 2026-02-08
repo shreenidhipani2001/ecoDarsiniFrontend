@@ -6,6 +6,7 @@ import { Loader2, ChevronDown, ShoppingCart, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/useAuthStore';
 import { fetchLatestProductsCached, fetchBlogsCached } from '../../../lib/cachedFetch';
+import { attachImagesToProductsFrontend } from '../../../lib/imageResolver';
 import HomeHeader from '../../components/HomeHeader';
 import HomeFooter from '../../components/HomeFooter';
 import AuthPromptModal from '../../components/AuthPromptModal';
@@ -133,7 +134,8 @@ export default function BlogsSection() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await fetchLatestProductsCached();
         const productsList = data.products || data || [];
-        setLatestProducts(productsList.slice(0, 5));
+        const resolved = await attachImagesToProductsFrontend(productsList.slice(0, 5));
+        setLatestProducts(resolved as Product[]);
       } catch (err) {
         console.error('Failed to fetch latest products:', err);
       } finally {

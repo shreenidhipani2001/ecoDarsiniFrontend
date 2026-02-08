@@ -302,100 +302,229 @@ export default function CartModal({
     }, 0)
   : 0;
 
+  // return (
+  //   <Wrapper>
+  //     <div className="flex flex-col gap-6">
+  //       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+  //         {/* Left - Product Image */}
+  //         <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
+  //           <img
+  //             src={itemImage}
+  //             alt={item?.name}
+  //             className="w-full h-full object-cover rounded-xl"
+  //             onError={(e) => {
+  //               (e.target as HTMLImageElement).style.display = 'none';
+  //             }}
+  //           />
+  //         </div>
+
+  //         {/* Right - Product Details */}
+  //         <div className="flex-1 flex flex-col justify-between gap-4">
+  //           <div>
+  //             <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+  //             <p className="text-gray-500 text-sm mt-1">Unit Price: ₹{parseFloat(item.price).toLocaleString()}</p>
+  //             <p className="text-gray-600 mt-2">Quantity: {item.quantity}</p>
+  //             <p className="text-green-600 font-bold text-xl mt-2">₹{parseFloat(item.total_price).toLocaleString()}</p>
+  //           </div>
+
+  //           {/* Action Buttons */}
+  //           <div className="flex gap-3 mt-4">
+  //             <button
+  //               onClick={handleBuyNow}
+  //               disabled={processing}
+  //               className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
+  //             >
+  //               <ShoppingBag size={18} />
+  //               {processing ? 'Processing...' : 'Buy Now'}
+  //             </button>
+  //             <button
+  //               onClick={handleRemoveItem}
+  //               disabled={removing}
+  //               className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+  //             >
+  //               <Trash2 size={18} />
+  //               {removing ? 'Removing...' : 'Remove'}
+  //             </button>
+  //           </div>
+
+  //           {/* Pagination Buttons */}
+  //           {items.length > 1 && (
+  //             <>
+  //               <div className="flex items-center gap-4 mt-4">
+  //                 <button
+  //                   onClick={() => {
+  //                     const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+  //                     handleIndexChange(newIndex);
+  //                   }}
+  //                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+  //                   disabled={currentIndex === 0}
+  //                 >
+  //                   Previous
+  //                 </button>
+  //                 <button
+  //                   onClick={() => {
+  //                     const newIndex = currentIndex < items.length - 1 ? currentIndex + 1 : currentIndex;
+  //                     handleIndexChange(newIndex);
+  //                   }}
+  //                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+  //                   disabled={currentIndex === items.length - 1}
+  //                 >
+  //                   Next
+  //                 </button>
+  //               </div>
+
+  //               <p className="text-gray-500 text-sm text-center">
+  //                 {currentIndex + 1} / {items.length}
+  //               </p>
+  //             </>
+  //           )}
+  //         </div>
+  //       </div>
+
+  //       {/* Cart Summary */}
+  //       <div className="border-t pt-4 mt-4">
+  //         <div className="flex justify-between items-center text-lg font-semibold">
+  //           <span className="text-gray-700">Total ({items.length} items):</span>
+  //           <span className="text-green-600">₹{totalAmount.toLocaleString()}</span>
+  //         </div>
+  //       </div>
+  //     </div>
+
+  //     {/* Full-screen Loading Spinner */}
+  //     {(removing || processing) && (
+  //       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+  //         <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
+  //       </div>
+  //     )}
+  //   </Wrapper>
+  // );
+
   return (
     <Wrapper>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-          {/* Left - Product Image */}
-          <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
-            <img
-              src={itemImage}
-              alt={item?.name}
-              className="w-full h-full object-cover rounded-xl"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+  <div className="flex flex-col gap-6">
+
+    {/* ---------------- PRODUCT GRID ---------------- */}
+    <div
+      className="
+        grid
+        grid-cols-2
+        sm:grid-cols-3
+        md:grid-cols-5
+        gap-4
+        max-h-[520px]
+        overflow-y-auto
+        pr-1
+      "
+    >
+      {items.map((cartItem) => {
+        const image = getImageForCartItem(cartItem, products);
+
+        return (
+          <div
+            key={cartItem.id}
+            className="w-full bg-white border rounded-xl p-3 shadow-sm hover:shadow-md transition flex flex-col"
+          >
+            {/* IMAGE */}
+            <div className="w-full aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={image}
+                alt={cartItem.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+
+            {/* INFO */}
+            <div className="mt-2 flex flex-col gap-1">
+              <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                {cartItem.name}
+              </h3>
+
+              <p className="text-xs text-gray-500">
+                Qty: {cartItem.quantity}
+              </p>
+
+              <p className="text-green-600 font-bold text-sm">
+                ₹{parseFloat(cartItem.total_price).toLocaleString()}
+              </p>
+            </div>
+
+            {/* REMOVE */}
+            <button
+              onClick={async () => {
+                setRemoving(true);
+                try {
+                  await removeFromCart(cartItem.id, user?.id);
+                  toast.success('Item removed');
+                  onItemRemoved(cartItem.id);
+                } catch {
+                  toast.error('Failed to remove item');
+                } finally {
+                  setRemoving(false);
+                }
               }}
-            />
+              className="mt-2 text-red-600 text-xs hover:underline flex items-center gap-1"
+            >
+              <Trash2 size={14} /> Remove
+            </button>
           </div>
+        );
+      })}
+    </div>
 
-          {/* Right - Product Details */}
-          <div className="flex-1 flex flex-col justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
-              <p className="text-gray-500 text-sm mt-1">Unit Price: ₹{parseFloat(item.price).toLocaleString()}</p>
-              <p className="text-gray-600 mt-2">Quantity: {item.quantity}</p>
-              <p className="text-green-600 font-bold text-xl mt-2">₹{parseFloat(item.total_price).toLocaleString()}</p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={handleBuyNow}
-                disabled={processing}
-                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
-              >
-                <ShoppingBag size={18} />
-                {processing ? 'Processing...' : 'Buy Now'}
-              </button>
-              <button
-                onClick={handleRemoveItem}
-                disabled={removing}
-                className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Trash2 size={18} />
-                {removing ? 'Removing...' : 'Remove'}
-              </button>
-            </div>
-
-            {/* Pagination Buttons */}
-            {items.length > 1 && (
-              <>
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={() => {
-                      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
-                      handleIndexChange(newIndex);
-                    }}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
-                    disabled={currentIndex === 0}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => {
-                      const newIndex = currentIndex < items.length - 1 ? currentIndex + 1 : currentIndex;
-                      handleIndexChange(newIndex);
-                    }}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
-                    disabled={currentIndex === items.length - 1}
-                  >
-                    Next
-                  </button>
-                </div>
-
-                <p className="text-gray-500 text-sm text-center">
-                  {currentIndex + 1} / {items.length}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Cart Summary */}
-        <div className="border-t pt-4 mt-4">
-          <div className="flex justify-between items-center text-lg font-semibold">
-            <span className="text-gray-700">Total ({items.length} items):</span>
-            <span className="text-green-600">₹{totalAmount.toLocaleString()}</span>
-          </div>
-        </div>
+    {/* ---------------- SUMMARY + UNIVERSAL BUY ---------------- */}
+    <div className="border-t pt-4 flex flex-col gap-4">
+      <div className="flex justify-between text-lg font-semibold">
+        <span className="text-gray-700">
+          Total ({items.length} items):
+        </span>
+        <span className="text-green-600">
+          ₹{totalAmount.toLocaleString()}
+        </span>
       </div>
 
-      {/* Full-screen Loading Spinner */}
-      {(removing || processing) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-          <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
-    </Wrapper>
+      <div className="flex justify-center">
+        <button
+          onClick={handleBuyNow}
+          disabled={processing}
+          className="
+            w-full
+            sm:w-[40%]
+            px-4
+            py-3
+            bg-green-600
+            text-white
+            rounded-lg
+            hover:bg-green-700
+            transition
+            flex
+            items-center
+            justify-center
+            gap-2
+            font-semibold
+            disabled:opacity-50
+          "
+        >
+          {processing ? 'Processing...' : 'Check Out'}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  {/* LOADING OVERLAY */}
+  {(removing || processing) && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+      <div className="w-16 h-16 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  )}
+</Wrapper>
+
   );
+  
 }
+
+
+ 

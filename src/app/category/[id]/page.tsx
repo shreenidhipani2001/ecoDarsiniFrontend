@@ -12,6 +12,7 @@ import HomeFooter from '../../../components/HomeFooter';
 import AuthPromptModal from '../../../components/AuthPromptModal';
 import LoginModal from '../../../components/LoginModal';
 import RegisterModal from '../../../components/RegisterModal';
+import { attachImagesToProductsFrontend } from '../../../../lib/imageResolver';
 
 interface Product {
   id: string;
@@ -20,6 +21,7 @@ interface Product {
   description?: string;
   price: string;
   stock?: number;
+  cms_image_ids?: string[];
   images: Array<{
     id: string;
     url: string;
@@ -75,7 +77,8 @@ export default function CategoryPage() {
         );
         if (!res.ok) throw new Error('Failed to fetch products');
         const json: ApiResponse = await res.json();
-        setData(json);
+        const resolved = await attachImagesToProductsFrontend(json.products || []);
+        setData({ ...json, products: resolved as Product[] });
       } catch (err) {
         console.error(err);
         setError('Failed to load products');

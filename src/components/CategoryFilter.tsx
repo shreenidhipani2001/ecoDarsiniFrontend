@@ -157,7 +157,7 @@ export default function CategoryFilter({
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* All Products */}
-            <button
+            {/* <button
               onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
@@ -168,7 +168,14 @@ export default function CategoryFilter({
                     : 'bg-gray-100 hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
                 }`}
               >
-                <Grid3X3
+              {/* <div
+  className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden transition-all ${
+    selectedCategory === null
+      ? 'ring-2 ring-green-600 ring-offset-2'
+      : 'group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
+  } bg-green-50 flex items-center justify-center`}
+> */}
+                {/* <Grid3X3
                   className={`h-8 w-8 lg:h-10 lg:w-10 ${
                     selectedCategory === null ? 'text-white' : 'text-green-600'
                   }`}
@@ -181,7 +188,7 @@ export default function CategoryFilter({
               >
                 All Products
               </span>
-            </button>
+            </button>  */}
 
             {/* Category Items */}
             {categories.map((category) => {
@@ -202,11 +209,17 @@ export default function CategoryFilter({
                     } bg-green-50`}
                   >
                     {imageUrl ? (
+                      // <img
+                      //   src={imageUrl}
+                      //   alt={category.name}
+                      //   className="w-full h-full object-cover object-center p-2"
+                      // />
                       <img
                         src={imageUrl}
                         alt={category.name}
-                        className="w-full h-full object-cover object-center p-2"
+                        className="w-full h-full object-cover rounded-full"
                       />
+
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-green-100">
                         <span className="text-3xl lg:text-4xl">🌿</span>
@@ -242,7 +255,7 @@ export default function CategoryFilter({
             })}
 
             {/* View More */}
-            <button
+            {/* <button
               onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
@@ -252,7 +265,7 @@ export default function CategoryFilter({
               <span className="text-sm font-medium text-green-600 hover:underline">
                 Browse All
               </span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

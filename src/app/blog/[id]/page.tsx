@@ -6,9 +6,9 @@ import { Loader2, ChevronLeft, Clock, User, Calendar, Tag, Eye, Heart } from 'lu
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
 import { fetchBlogByIdCached } from '../../../../lib/cachedFetch';
+import { resolveImages, type ResolvedImage } from '../../../../lib/imageResolver';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const CMS_IMAGE_BASE = process.env.NEXT_PUBLIC_CMS_IMAGE_URL || `${API_URL}/api/cms/images`;
 
 type Blog = {
   id: string;
@@ -50,6 +50,7 @@ export default function BlogDetailPage() {
   const id = params.id as string;
 
   const [blog, setBlog] = useState<Blog | null>(null);
+  const [blogImages, setBlogImages] = useState<ResolvedImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +60,12 @@ export default function BlogDetailPage() {
       try {
         const data = await fetchBlogByIdCached(id) as Blog;
         setBlog(data);
+
+        // Resolve CMS images directly from Payload CMS
+        if (data.cms_image_ids && data.cms_image_ids.length > 0) {
+          const resolved = await resolveImages(data.cms_image_ids);
+          setBlogImages(resolved);
+        }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to load blog';
         console.error('Blog fetch error:', err);
@@ -70,10 +77,10 @@ export default function BlogDetailPage() {
     fetchBlog();
   }, [id]);
 
-  // Get hero image: first cms_image_id or fallback
+  // Get hero image: first resolved image or fallback
   const getHeroImage = (): string | null => {
-    if (blog?.cms_image_ids && blog.cms_image_ids.length > 0) {
-      return `${CMS_IMAGE_BASE}/${blog.cms_image_ids[0]}`;
+    if (blogImages.length > 0) {
+      return blogImages[0].full || blogImages[0].url;
     }
     return blog?.image || null;
   };
@@ -185,13 +192,13 @@ export default function BlogDetailPage() {
           </div>
 
           {/* Additional images */}
-          {blog.cms_image_ids && blog.cms_image_ids.length > 1 && (
+          {blogImages.length > 1 && (
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {blog.cms_image_ids.slice(1).map((imgId) => (
-                <div key={imgId} className="rounded-xl overflow-hidden shadow-sm">
+              {blogImages.slice(1).map((img) => (
+                <div key={img.id} className="rounded-xl overflow-hidden shadow-sm">
                   <img
-                    src={`${CMS_IMAGE_BASE}/${imgId}`}
-                    alt="Blog image"
+                    src={img.card || img.url}
+                    alt={img.alt || 'Blog image'}
                     className="w-full h-64 object-cover"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';

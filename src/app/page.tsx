@@ -7,6 +7,7 @@ import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-
 
 import { useAuthStore } from '../store/useAuthStore';
 import { fetchCategoriesCached, fetchSubcategoriesCached, fetchProductsCached } from '../../lib/cachedFetch';
+import { attachImagesToProductsFrontend } from '../../lib/imageResolver';
 import { useDebounce } from '../../lib/useDebounce';
 import HomeHeader from '../components/HomeHeader';
 import NavMenu from '../components/NavMenu';
@@ -158,7 +159,9 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = await fetchProductsCached(params.toString());
 
-        setProducts(data.products || data.docs || []);
+        const rawProducts = data.products || data.docs || [];
+        const resolved = await attachImagesToProductsFrontend(rawProducts);
+        setProducts(resolved as Product[]);
         setTotalProducts(data.total || 0);
         setTotalPages(data.totalPages || Math.ceil((data.total || 0) / PRODUCTS_PER_PAGE));
       } catch (err) {
@@ -414,7 +417,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
 
       <FeatureBenefits />
 
-      <div
+      {/* <div
         className="banners banners1"
         style={{
           width: '100%',
@@ -425,7 +428,21 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           background: '#f5f5f5',
           overflow: 'hidden',
         }}
-      >
+      > */}
+      <div
+  className="banners banners1"
+  style={{
+    width: '100vw',
+    height: '80px',
+    marginLeft: 'calc(50% - 50vw)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#f5f5f5',
+    overflow: 'hidden',
+  }}
+>
+
         {/* {!imageError ? (
          
           <div className={`w-full h-full ${imageError ? 'bg-red-700' : ''}`}>
@@ -459,11 +476,9 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         <style jsx>{`
           .bannerHover3 {
             position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            cursor: pointer;
+  width: 100%;
+  height: 100%;
+  min-height: 80px;
       
             display: flex;
             align-items: center;
@@ -526,6 +541,7 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           }
         `}</style>
       </div>
+      
       </div>  
 
       
