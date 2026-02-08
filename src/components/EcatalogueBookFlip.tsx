@@ -2052,6 +2052,15 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [bookDimensions, setBookDimensions] = useState({ width: 550, height: 700 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mobile swipe card state
+  const [mobileCardIndex, setMobileCardIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchDeltaRef = useRef(0);
+  const [dragOffset, setDragOffset] = useState(0);
 
   const flipBookRef = useRef<FlipBookRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -2062,6 +2071,8 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
     const calculateDimensions = () => {
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
+
+      setIsMobile(screenWidth < 768);
 
       let width: number;
       let height: number;
@@ -2213,6 +2224,81 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
     }
   };
 
+  /* ========== MOBILE SWIPE HANDLERS ========== */
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isAnimating) return;
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchDeltaRef.current = 0;
+    setDragOffset(0);
+  }, [isAnimating]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || isAnimating) return;
+    const deltaX = e.touches[0].clientX - touchStartRef.current.x;
+    touchDeltaRef.current = deltaX;
+    setDragOffset(deltaX);
+  }, [isAnimating]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStartRef.current || isAnimating) return;
+    const delta = touchDeltaRef.current;
+    const threshold = 60;
+
+    if (Math.abs(delta) > threshold) {
+      if (delta < 0 && mobileCardIndex < products.length) {
+        // Swipe left → next card
+        setSwipeDirection('left');
+        setIsAnimating(true);
+        setTimeout(() => {
+          setMobileCardIndex((prev) => prev + 1);
+          setSwipeDirection(null);
+          setIsAnimating(false);
+          setDragOffset(0);
+        }, 300);
+      } else if (delta > 0 && mobileCardIndex > 0) {
+        // Swipe right → previous card
+        setSwipeDirection('right');
+        setIsAnimating(true);
+        setTimeout(() => {
+          setMobileCardIndex((prev) => prev - 1);
+          setSwipeDirection(null);
+          setIsAnimating(false);
+          setDragOffset(0);
+        }, 300);
+      } else {
+        setDragOffset(0);
+      }
+    } else {
+      setDragOffset(0);
+    }
+    touchStartRef.current = null;
+    touchDeltaRef.current = 0;
+  }, [isAnimating, mobileCardIndex, products.length]);
+
+  const goNextMobile = useCallback(() => {
+    if (isAnimating || mobileCardIndex >= products.length) return;
+    setSwipeDirection('left');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setMobileCardIndex((prev) => prev + 1);
+      setSwipeDirection(null);
+      setIsAnimating(false);
+      setDragOffset(0);
+    }, 300);
+  }, [isAnimating, mobileCardIndex, products.length]);
+
+  const goPrevMobile = useCallback(() => {
+    if (isAnimating || mobileCardIndex <= 0) return;
+    setSwipeDirection('right');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setMobileCardIndex((prev) => prev - 1);
+      setSwipeDirection(null);
+      setIsAnimating(false);
+      setDragOffset(0);
+    }, 300);
+  }, [isAnimating, mobileCardIndex]);
+
   /* ========== LOADING / EMPTY STATES ========== */
   if (loading) {
     return (
@@ -2274,123 +2360,184 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
   const currentProductIndex = Math.max(0, Math.floor((currentPage - 1) / 2));
 
   /* ================= RENDER ================= */
+  const isEndCard = mobileCardIndex >= products.length;
+  const currentMobileProduct = !isEndCard ? products[mobileCardIndex] : null;
+
+  const getCardTransform = () => {
+    if (swipeDirection === 'left') return 'translateX(-120%) rotate(-8deg)';
+    if (swipeDirection === 'right') return 'translateX(120%) rotate(8deg)';
+    if (dragOffset !== 0) {
+      const rotate = dragOffset * 0.04;
+      return `translateX(${dragOffset}px) rotate(${rotate}deg)`;
+    }
+    return 'translateX(0) rotate(0deg)';
+  };
+
   return (
     <>
-    <HomeHeader  />
-      <div className="ecatalogue-wrapper" ref={containerRef}>
-    
+    <HomeHeader />
 
-        {/* Book Container */}
-        <div className="book-container">
-          {/* Prev Button */}
-          
-
-          {/* The Book */}
-          <div className="book-wrapper">
-            <div className="book-shadow"></div>
-            {/* <HTMLFlipBook
-              width={bookDimensions.width}
-              height={bookDimensions.height}
-              size="fixed"
-              minWidth={bookDimensions.width}
-              maxWidth={bookDimensions.width}
-              minHeight={bookDimensions.height}
-              maxHeight={bookDimensions.height}
-              maxShadowOpacity={.9}
-              showCover={true}
-              mobileScrollSupport={true}
-              onFlip={onFlip}
-              onInit={handleInit}
-              className="catalogue-book"
-              ref={flipBookRef}
-              drawShadow={true}
-              flippingTime={800}
-              usePortrait={false}
-              startZIndex={0}
-              autoSize={true}
-              clickEventForward={true}
-              useMouseEvents={true}
-              swipeDistance={30}
-              showPageCorners={true}
-              disableFlipByClick={false}
-            >
-              {pages}
-            </HTMLFlipBook> */}
-            {/* <HTMLFlipBook
-                          width={bookDimensions.width}
-                          height={bookDimensions.height}
-                          size="fixed"
-                          minWidth={280}
-                          maxWidth={600}
-                          minHeight={380}
-                          maxHeight={800}
-                          maxShadowOpacity={0.4}
-                          showCover={true}
-                          mobileScrollSupport={true}
-                          onFlip={onFlip}
-                          onInit={handleInit}
-                          className="catalogue-book"
-                          ref={flipBookRef}
-                          drawShadow={true}
-                          flippingTime={800}
-                          usePortrait={false}
-                          startZIndex={0}
-                          autoSize={false}
-                          clickEventForward={true}
-                          useMouseEvents={true}
-                          swipeDistance={45}
-                          showPageCorners={false}
-                          disableFlipByClick={false}
-                        >
-                          {pages}
-                        </HTMLFlipBook> */}
-                        <HTMLFlipBook
-  width={bookDimensions.width}
-  height={bookDimensions.height}
-  size="fixed"
-  minWidth={280}
-  maxWidth={600}
-  minHeight={380}
-  maxHeight={800}
-
-  /* REQUIRED FOR TYPESCRIPT */
-  style={{}}        // can stay empty
-  startPage={0}      // first page
-
-  maxShadowOpacity={0.4}
-  showCover={true}
-  mobileScrollSupport={true}
-  onFlip={onFlip}
-  onInit={handleInit}
-  className="catalogue-book"
-  ref={flipBookRef}
-  drawShadow={true}
-  flippingTime={800}
-  usePortrait={false}
-  startZIndex={0}
-  autoSize={false}
-  clickEventForward={true}
-  useMouseEvents={true}
-  swipeDistance={45}
-  showPageCorners={false}
-  disableFlipByClick={false}
->
-  {pages}
-</HTMLFlipBook>
-
+      {/* ===== MOBILE SWIPEABLE CARDS ===== */}
+      {isMobile ? (
+        <div className="mobile-catalogue-wrapper">
+          {/* Counter */}
+          <div className="mobile-counter">
+            <span>{isEndCard ? products.length : mobileCardIndex + 1}</span>
+            <span className="mobile-counter-sep">/</span>
+            <span>{products.length}</span>
           </div>
 
-          {/* Next Button */}
-          
-        </div>
+          {/* Card area */}
+          <div
+            className="mobile-card-area"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {isEndCard ? (
+              /* END CARD */
+              <div className="mobile-card mobile-end-card">
+                <div className="end-card-content">
+                  <div className="end-card-icon">🌿</div>
+                  <h2 className="end-card-title">End of Products</h2>
+                  <p className="end-card-sub">You have viewed all products in the catalogue.</p>
+                  <button
+                    className="end-card-btn"
+                    onClick={() => setMobileCardIndex(0)}
+                  >
+                    Back to Start
+                  </button>
+                </div>
+              </div>
+            ) : currentMobileProduct ? (
+              /* PRODUCT CARD */
+              <div
+                className="mobile-card"
+                style={{
+                  transform: getCardTransform(),
+                  transition: swipeDirection ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : 'transform 0.1s ease-out',
+                  opacity: swipeDirection ? 0.6 : 1,
+                }}
+              >
+                {/* Product Image */}
+                <div className="mobile-card-img-wrapper">
+                  {getProductImageUrl(currentMobileProduct) ? (
+                    <img
+                      src={getProductImageUrl(currentMobileProduct)}
+                      alt={currentMobileProduct.name}
+                      className="mobile-card-img"
+                    />
+                  ) : (
+                    <div className="mobile-card-img-placeholder">
+                      <span>🌿</span>
+                    </div>
+                  )}
+                </div>
 
-        {/* Footer Hint */}
-        {/* <div className="ecatalogue-footer">
-          <span className="hint-text">
-            💡 Drag corners or use ← → keys to flip pages
-          </span>
-        </div> */}
-      </div>
+                {/* Product Details */}
+                <div className="mobile-card-details">
+                  <h2 className="mobile-card-name">{currentMobileProduct.name}</h2>
+
+                  {/* Price */}
+                  <div className="mobile-card-price">
+                    <span className="mobile-price-symbol">₹</span>
+                    <span className="mobile-price-value">{formatPrice(currentMobileProduct.price)}</span>
+                  </div>
+
+                  {/* Category & Status row */}
+                  <div className="mobile-card-tags">
+                    <span className="mobile-tag mobile-tag-category">
+                      {currentMobileProduct.category_name || 'Eco Product'}
+                    </span>
+                    <span className={`mobile-tag ${currentMobileProduct.is_active ? 'mobile-tag-available' : 'mobile-tag-oos'}`}>
+                      {currentMobileProduct.is_active ? 'Available' : 'Out of Stock'}
+                    </span>
+                    {currentMobileProduct.stock > 0 && (
+                      <span className="mobile-tag mobile-tag-stock">
+                        {currentMobileProduct.stock} in stock
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Artist */}
+                  {currentMobileProduct.artist_name && (
+                    <p className="mobile-card-artist">
+                      Crafted by <strong>{currentMobileProduct.artist_name}</strong>
+                    </p>
+                  )}
+
+                  {/* Description */}
+                  <div className="mobile-card-desc-section">
+                    <h3 className="mobile-card-desc-heading">Description</h3>
+                    <p className="mobile-card-desc-text">
+                      {currentMobileProduct.description ||
+                        'A beautifully handcrafted eco-friendly product made with sustainable materials.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Navigation arrows */}
+          <div className="mobile-nav-row">
+            <button
+              className={`mobile-nav-btn ${mobileCardIndex <= 0 ? 'disabled' : ''}`}
+              onClick={goPrevMobile}
+              disabled={mobileCardIndex <= 0}
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <span className="mobile-swipe-hint">Swipe to browse</span>
+            <button
+              className={`mobile-nav-btn ${isEndCard ? 'disabled' : ''}`}
+              onClick={goNextMobile}
+              disabled={isEndCard}
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ===== DESKTOP BOOK FLIP ===== */
+        <div className="ecatalogue-wrapper" ref={containerRef}>
+          <div className="book-container">
+            <div className="book-wrapper">
+              <div className="book-shadow"></div>
+              <HTMLFlipBook
+                width={bookDimensions.width}
+                height={bookDimensions.height}
+                size="fixed"
+                minWidth={280}
+                maxWidth={600}
+                minHeight={380}
+                maxHeight={800}
+                style={{}}
+                startPage={0}
+                maxShadowOpacity={0.4}
+                showCover={true}
+                mobileScrollSupport={true}
+                onFlip={onFlip}
+                onInit={handleInit}
+                className="catalogue-book"
+                ref={flipBookRef}
+                drawShadow={true}
+                flippingTime={800}
+                usePortrait={false}
+                startZIndex={0}
+                autoSize={false}
+                clickEventForward={true}
+                useMouseEvents={true}
+                swipeDistance={45}
+                showPageCorners={false}
+                disableFlipByClick={false}
+              >
+                {pages}
+              </HTMLFlipBook>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= STYLES ================= */}
       <style jsx global>{`
@@ -3045,6 +3192,268 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
           }
         }
       `}</style>
+
+      {/* ========== MOBILE CARD STYLES ========== */}
+      <style jsx>{`
+        .mobile-catalogue-wrapper {
+          min-height: calc(100vh - 60px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+          padding: 12px 16px;
+          overflow: hidden;
+        }
+
+        .mobile-counter {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #065f46;
+          background: white;
+          padding: 6px 16px;
+          border-radius: 20px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          margin-bottom: 12px;
+        }
+
+        .mobile-counter-sep {
+          color: #9ca3af;
+          margin: 0 2px;
+        }
+
+        .mobile-card-area {
+          flex: 1;
+          width: 100%;
+          max-width: 380px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          touch-action: pan-y;
+          min-height: 0;
+        }
+
+        .mobile-card {
+          width: 100%;
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100vh - 200px);
+          overflow-y: auto;
+        }
+
+        .mobile-card-img-wrapper {
+          width: 100%;
+          aspect-ratio: 1;
+          max-height: 280px;
+          background: #f0fdf4;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .mobile-card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          padding: 12px;
+        }
+
+        .mobile-card-img-placeholder {
+          font-size: 4rem;
+          opacity: 0.3;
+        }
+
+        .mobile-card-details {
+          padding: 16px 20px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .mobile-card-name {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #111827;
+          margin: 0;
+          line-height: 1.3;
+        }
+
+        .mobile-card-price {
+          display: flex;
+          align-items: baseline;
+          gap: 2px;
+        }
+
+        .mobile-price-symbol {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #065f46;
+        }
+
+        .mobile-price-value {
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: #065f46;
+        }
+
+        .mobile-card-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .mobile-tag {
+          font-size: 0.72rem;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .mobile-tag-category {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .mobile-tag-available {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .mobile-tag-oos {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .mobile-tag-stock {
+          background: #f3f4f6;
+          color: #374151;
+        }
+
+        .mobile-card-artist {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin: 0;
+        }
+
+        .mobile-card-desc-section {
+          border-top: 1px solid #f3f4f6;
+          padding-top: 10px;
+        }
+
+        .mobile-card-desc-heading {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 6px 0;
+        }
+
+        .mobile-card-desc-text {
+          font-size: 0.85rem;
+          color: #6b7280;
+          line-height: 1.55;
+          margin: 0;
+        }
+
+        /* END CARD */
+        .mobile-end-card {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 400px;
+        }
+
+        .end-card-content {
+          text-align: center;
+          padding: 40px 24px;
+        }
+
+        .end-card-icon {
+          font-size: 3rem;
+          margin-bottom: 16px;
+        }
+
+        .end-card-title {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #111827;
+          margin: 0 0 8px 0;
+        }
+
+        .end-card-sub {
+          font-size: 0.9rem;
+          color: #6b7280;
+          margin: 0 0 24px 0;
+        }
+
+        .end-card-btn {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          padding: 12px 28px;
+          border-radius: 12px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        /* NAVIGATION ROW */
+        .mobile-nav-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          padding: 14px 0 8px;
+          width: 100%;
+          max-width: 380px;
+        }
+
+        .mobile-nav-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: none;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .mobile-nav-btn:active:not(.disabled) {
+          transform: scale(0.92);
+        }
+
+        .mobile-nav-btn.disabled {
+          background: #d1d5db;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .mobile-swipe-hint {
+          font-size: 0.8rem;
+          color: #9ca3af;
+          font-weight: 500;
+        }
+      `}</style>
+
       <HomeFooter />
     </>
   );

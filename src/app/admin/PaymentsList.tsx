@@ -83,7 +83,7 @@ export default function PaymentsList() {
 
   const getUserName = (userId: string): string => {
     const user = users.find((u) => u.id === userId);
-    return user?.name || `${userId.slice(0, 8)}...`;
+    return user?.name || `${userId?.slice(0, 8) ?? "Unknown"}...`;
   };
 
   const formatDate = (dateString: string) => {
@@ -97,7 +97,7 @@ export default function PaymentsList() {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toUpperCase()) {
+    switch (status?.toUpperCase()) {
       case 'SUCCESS':
       case 'COMPLETED':
         return <CheckCircle size={18} className="text-green-400" />;
@@ -109,7 +109,7 @@ export default function PaymentsList() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
+    switch (status?.toUpperCase()) {
       case 'SUCCESS':
       case 'COMPLETED':
         return 'bg-green-900/50 text-green-400 border-green-700';

@@ -18,7 +18,8 @@ export async function getWishlist(userId: string) {
 
     const data = await res.json();
     console.log('Wishlist data fetched:', data);
-    return data;
+    // Backend returns { message: "..." } instead of [] when empty
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Failed to fetch wishlist:', error);
     throw error;
