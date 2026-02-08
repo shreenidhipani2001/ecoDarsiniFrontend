@@ -99,7 +99,8 @@ export default function CategoryFilter({
   if (loading) {
     return (
       <section className="bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+        {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Shop By Category</h2>
           </div>
@@ -118,7 +119,8 @@ export default function CategoryFilter({
 
   return (
     <section className="bg-white py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Shop By Category</h2>
@@ -205,7 +207,8 @@ export default function CategoryFilter({
                       <img
                         src={imageUrl}
                         alt={category.name}
-                        className="w-full h-full object-cover object-center p-2"
+                        className="w-full h-full object-cover rounded-full"
+                        // className="w-full h-full object-cover object-center p-2"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-green-100">
@@ -242,7 +245,7 @@ export default function CategoryFilter({
             })}
 
             {/* View More */}
-            <button
+            {/* <button
               onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
@@ -252,7 +255,7 @@ export default function CategoryFilter({
               <span className="text-sm font-medium text-green-600 hover:underline">
                 Browse All
               </span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

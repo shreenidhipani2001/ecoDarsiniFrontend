@@ -40,7 +40,8 @@ export async function getCart(userId: string) {
 
     const data = await res.json();
     console.log('Cart data fetched:', data);
-    return data;
+    // Ensure we always return an array even if backend returns an object
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Failed to fetch cart:', error);
     throw error;

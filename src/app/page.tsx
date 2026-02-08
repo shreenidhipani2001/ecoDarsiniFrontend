@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, ShoppingCart, Heart, MoveLeft, ArrowBigLeft, ArrowBigRight, ArrowLeft, ArrowRight } from 'lucide-react';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { fetchCategoriesCached, fetchSubcategoriesCached, fetchProductsCached } from '../../lib/cachedFetch';
@@ -26,6 +26,8 @@ import EventsSection from '../components/EventsSection';
 import WhatsAppChat from '../components/WhatsAppChat';
 import ShopBot from '../components/ShopBot';
 import Testimonials from '../components/Testimonials';
+import ProductShowcaseSection from '../components/ProductShowcaseSection';
+import LatestBlogs from '../components/LatestBlogs';
  
 
 
@@ -71,11 +73,24 @@ interface Subcategory {
   slug?: string;
   category_id: string;
 }
+type Blog = {
+  id: string;
+  name: string;           // ← title in UI
+  description: string;    // ← content / body
+  image: string | null;   // ← image path or null
+  added_by: string;
+  edited_by: string | null;
+  created_at: string;
+  updated_at: string;
+  added_by_name?: string;
+};
+
 
 type ModalType = 'none' | 'authPrompt' | 'login' | 'register';
 type ActionType = 'cart' | 'wishlist' | 'buy';
 
 export default function HomePage() {
+  
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const productGridRef = useRef<HTMLDivElement>(null);
@@ -83,7 +98,11 @@ export default function HomePage() {
   const contactRef = useRef<HTMLDivElement>(null);
   const ecatalogueRef = useRef<HTMLDivElement>(null);
   const blogsRef = useRef<HTMLDivElement>(null);
+  const [dealIndex, setDealIndex] = useState(0);
+  const [latestBlogs, setLatestBlogs] = useState<Blog[]>([]);
 
+
+  
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -92,7 +111,7 @@ export default function HomePage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [subcategoriesLoading, setSubcategoriesLoading] = useState(true);
-
+  const [timeLeft, setTimeLeft] = useState({ day: 0, hour: 0, min: 0, sec: 0 });
   // Filter & pagination
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -128,7 +147,115 @@ export default function HomePage() {
   | 'blogs';
 
 const [activeSection, setActiveSection] = useState<SectionType>('products');
+const CATEGORY_IDS = {
+  furnishing: "562a9b4b-34bc-4f94-b885-a7ffa7e1dc67",
+  books: "a2cfc7e8-eae7-48ca-833a-ced0aeeca981",
+  cuisine: "f1e978a2-8d61-4470-9c6c-0778eba2d744",
+};
+//if you want to change the best seller catergory please change here
+const [bestSellerData, setBestSellerData] = useState<{
+  furnishing: Product[];
+  books: Product[];
+  cuisine: Product[];
+}>({
+  furnishing: [],
+  books: [],
+  cuisine: [],
+});
+const [activeTab, setActiveTab] = useState<'furnishing' | 'books' | 'cuisine'>('furnishing');
+const [loadingBest, setLoadingBest] = useState(false);
+const loadCategory = async (key: 'furnishing' | 'books' | 'cuisine', id: string) => {
+  setLoadingBest(true);
+  const products = await fetchCategoryProducts(id);
 
+  setBestSellerData(prev => ({
+    ...prev,
+    [key]: products
+  }));
+
+  setLoadingBest(false);
+};
+
+const fetchCategoryProducts = async (id: string): Promise<Product[]> => {
+  console.log('id:-',id)
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/category-query?id=${id}&limit=20`);
+  const data = await res.json();
+  return data.products || [];
+};
+const [loadingBlogs,setLoadingBlogs] = useState(false);
+useEffect(() => {
+  const fetchBlogs = async () => {
+    setLoadingBlogs(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs`);
+      if (!res.ok) throw new Error('Failed to fetch blogs');
+
+      const data = await res.json();
+
+      // take only 10
+      setLatestBlogs(data.slice(0, 10));
+    } catch (err) {
+      console.error('Blogs fetch error:', err);
+    } finally {
+      setLoadingBlogs(false)
+    }
+  };
+
+  fetchBlogs();
+}, []);
+
+
+useEffect(() => {
+  const load = async () => {
+    const [f, b, c] = await Promise.all([
+      fetchCategoryProducts(CATEGORY_IDS.furnishing),
+      fetchCategoryProducts(CATEGORY_IDS.books),
+      fetchCategoryProducts(CATEGORY_IDS.cuisine),
+    ]);
+
+    setBestSellerData({
+      furnishing: f,
+      books: b,
+      cuisine: c,
+    });
+  };
+
+  load();
+}, []);
+const currentProducts = bestSellerData[activeTab] || [];
+const bestProducts = bestSellerData.furnishing;
+const newProducts = bestSellerData.books;
+const ratingProducts = bestSellerData.cuisine;
+useEffect(() => {
+  // Target date → 100 years from now
+  const targetDate = new Date();
+  targetDate.setFullYear(targetDate.getFullYear() + 100);
+
+  const interval = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = targetDate.getTime() - now;
+
+    if (distance <= 0) {
+      clearInterval(interval);
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((distance / (1000 * 60)) % 60);
+    const seconds = Math.floor((distance / 1000) % 60);
+
+    setTimeLeft({
+      day: days,
+      hour: hours,
+      min: minutes,
+      sec: seconds,
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+const format = (num: number): string => String(num).padStart(2, '0');
   // Fetch paginated products (uses debounced search + SWR cache)
   useEffect(() => {
     const fetchProducts = async () => {
@@ -368,6 +495,9 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
   const handleBackToPrompt = () => setActiveModal('authPrompt');
   const handleSwitchToRegister = () => setActiveModal('register');
   const handleSwitchToLogin = () => setActiveModal('login');
+  const deals = useMemo(() => products.slice(0, 10), [products]);
+  const deal = deals.length > 0 ? deals[dealIndex] : null;
+  console.log('deals:-',deals);
   const closeAllModals = () => {
     setActiveModal('none');
     setPendingAction(null);
@@ -390,7 +520,8 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onSectionChange={handleSectionChange}
       />
 
-      {/* <NavMenu
+       
+      <NavMenu
         categories={categories}
         subcategoriesByCategory={subcategoriesByCategory}
         loading={categoriesLoading || subcategoriesLoading}
@@ -398,60 +529,31 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         onSubcategorySelect={handleSubcategorySelect}
         selectedCategory={selectedCategory}
         selectedSubcategory={selectedSubcategory}
-      /> */}
-      <NavMenu
-  categories={categories}
-  subcategoriesByCategory={subcategoriesByCategory}
-  loading={categoriesLoading || subcategoriesLoading}
-  onCategorySelect={handleCategorySelect}
-  onSubcategorySelect={handleSubcategorySelect}
-  selectedCategory={selectedCategory}
-  selectedSubcategory={selectedSubcategory}
-  onSectionChange={handleSectionChange}   // NEW
-/>
+        onSectionChange={handleSectionChange}   // NEW
+      />
 
       <HeroBanner onShopNowClick={scrollToProducts} />
 
       <FeatureBenefits />
 
+   
       <div
-        className="banners banners1"
-        style={{
-          width: '100%',
-          height: '70px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#f5f5f5',
-          overflow: 'hidden',
-        }}
+            className="banners banners1"
+            style={{
+              width: '100vw',
+              height: '120px',
+              marginLeft: 'calc(50% - 50vw)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f5f5f5',
+              overflow: 'hidden',
+            }}
       >
-        {/* {!imageError ? (
-         
-          <div className={`w-full h-full ${imageError ? 'bg-red-700' : ''}`}>
-  <img
-    src="/image/catalog/banners/id2-banner1.jpg"
-    alt="banner"
-    onError={() => setImageError(true)}
-    className="w-full h-full object-cover"
-  />
-</div>
-        ) : (
-            <div
-              className="marquee"
-              style={{
-                backgroundImage: "url('/banner.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-            <span className="marquee-text">Welcome To The World Of Nature</span>
-            <span className="marquee-text">Welcome To The World Of Nature</span>
-            <span className="marquee-text">Welcome To The World Of Nature</span>
-          </div>
-        )}*/}
 
-<div className="w-full h-full bannerHover3">
+     
+
+      <div className="w-full h-full bannerHover3">
         <div className="bannerInner">
           <span className="bannerText">Welcome To The World Of Nature</span>
         </div>
@@ -459,11 +561,9 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
         <style jsx>{`
           .bannerHover3 {
             position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 12px;
-            cursor: pointer;
+  width: 95%;
+  height: 100%;
+  min-height: 120px;
       
             display: flex;
             align-items: center;
@@ -580,421 +680,344 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
       {/* Best Sellers Section */}
       <div className="w-full flex flex-col lg:flex-row gap-4 px-4 py-4 bg-gray-50">
 
-        {/* Left - Today's Deals (stacks full-width on mobile, 25% on desktop) */}
-        <div className="w-full lg:w-[25%] h-[400px] lg:h-[600px] bg-white rounded-lg shadow-sm p-4 flex flex-col">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Today&apos;s Deals</h3>
-          <div className="flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
-            <div className="grid grid-cols-2 gap-3">
-              {products.slice(0, 4).map((product) => (
-              // {products.slice(0, 10).map((product) => (
-                <div
-                  key={`deal-${product.id}`}
-                  onClick={() => router.push(`/product/${product.id}`)}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <div className="w-full aspect-square">
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0].card || product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No Image</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-2">
-                    <h4 className="text-xs font-medium text-gray-900 line-clamp-2">{product.name}</h4>
-                    <p className="text-sm font-bold text-green-700 mt-1">₹{product.price}</p>
-                    <div className="flex gap-1.5 mt-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'cart');
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
-                      >
-                        <ShoppingCart className="h-3 w-3" />
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'wishlist');
-                        }}
-                        className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
-                        title="Add to Wishlist"
-                      >
-                        <Heart className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right - Best Sellers (stacks full-width on mobile, 75% on desktop) */}
-        <div className="w-full lg:w-[75%] h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm p-4 flex flex-col">
+      
+        <div className="w-[95%] lg:w-[34%] bg-white rounded-lg shadow-sm p-4 flex flex-col">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-3 gap-2">
-            <h2 className="text-xl font-bold text-gray-900">BEST SELLER</h2>
-            <div className="flex gap-4 sm:gap-6 text-sm font-medium overflow-x-auto">
-              {/* <button className="text-orange-500 border-b-2 border-orange-500 pb-1 whitespace-nowrap">
-                Accessories
-              </button> */}
-              {/* <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                Fashion
-              </button>
-              <button className="text-gray-500 hover:text-gray-700 whitespace-nowrap">
-                Electronics
-              </button> */}
-            </div>
-          </div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-bold text-gray-900">Deals Of The Week</h3>
 
-          {/* Product Grid */}
-          {/* <div className="mt-4 flex-1 overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              {products.slice(0, 80).map((product, i) => (
-                <div
-                  key={`best-${product.id}`}
-                  onClick={() => router.push(`/product/${product.id}`)}
-                  className="group bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
-                >
-                  <div className="relative aspect-square bg-gray-200">
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0].card || product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No Image</span>
-                      </div>
-                    )}
-                    {i % 5 === 0 && (
-                      <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                        NEW
-                      </span>
-                    )}
-                    {i % 7 === 0 && (
-                      <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                        -7%
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-2 sm:p-3">
-                    <div className="flex text-orange-400 text-[10px] sm:text-xs mb-1">★★★★★</div>
-                    <h3 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-1 group-hover:text-green-700">
-                      {product.name}
-                    </h3>
-                    <div className="mt-1 flex items-center gap-1 sm:gap-2">
-                      <span className="text-red-600 font-bold text-sm">₹{product.price}</span>
-                      <span className="text-gray-400 line-through text-[10px] sm:text-xs">
-                        ₹{Math.round(product.price * 1.1)}
-                      </span>
-                    </div>
-                    <div className="flex gap-1.5 mt-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'cart');
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
-                      >
-                        <ShoppingCart className="h-3 w-3" />
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'wishlist');
-                        }}
-                        className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
-                        title="Add to Wishlist"
-                      >
-                        <Heart className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div> */}
-          <div
-  className="mt-4 flex-1 overflow-x-auto overflow-y-hidden pr-1"
-  style={{ scrollbarWidth: 'none' }}
->
-  <div className="flex gap-3 sm:gap-4 flex-nowrap">
-    {products.slice(0, 80).map((product, i) => (
-      <div
-        key={`best-${product.id}`}
-        onClick={() => router.push(`/product/${product.id}`)}
-        className="group bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer min-w-[160px] sm:min-w-[180px] md:min-w-[200px]"
-      >
-        <div className="relative aspect-square bg-gray-200">
-          {product.images?.[0] ? (
-            <img
-              src={product.images[0].card || product.images[0].url}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-400 text-xs">No Image</span>
-            </div>
-          )}
-
-          {i % 5 === 0 && (
-            <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-              NEW
-            </span>
-          )}
-
-          {i % 7 === 0 && (
-            <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-              -7%
-            </span>
-          )}
-        </div>
-
-        <div className="p-2 sm:p-3">
-          <div className="flex text-orange-400 text-[10px] sm:text-xs mb-1">
-            ★★★★★
-          </div>
-
-          <h3 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-1 group-hover:text-green-700">
-            {product.name}
-          </h3>
-
-          <div className="mt-1 flex items-center gap-1 sm:gap-2">
-            <span className="text-red-600 font-bold text-sm">
-              ₹{product.price}
-            </span>
-            <span className="text-gray-400 line-through text-[10px] sm:text-xs">
-              ₹{Math.round(product.price * 1.1)}
-            </span>
-          </div>
-
-          <div className="flex gap-1.5 mt-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleProductAction(product, 'cart');
-              }}
-              className="flex-1 flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-md text-xs font-medium transition-colors"
-            >
-              <ShoppingCart className="h-3 w-3" />
-              Add to Cart
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleProductAction(product, 'wishlist');
-              }}
-              className="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-md transition-colors"
-              title="Add to Wishlist"
-            >
-              <Heart className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-        
-      </div>
-    ))}
-  </div>
-   
-</div>
-
-        </div>
-
-      </div>
-
-      {/* corousel section */}
-      {/* <div className="w-full sm:w-[80%] md:w-[80%] lg:w-[100%] h-[250px] sm:h-[300px] md:h-[400px] relative bg-gray-100 overflow-hidden">
-            
-          <button
-            onClick={() =>
-              document.getElementById('product-slider')?.scrollBy({ left: -400, behavior: 'smooth' })
-            }
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
-          >
-            ‹
-          </button>
-
-          
-          <button
-            onClick={() =>
-              document.getElementById('product-slider')?.scrollBy({ left: 400, behavior: 'smooth' })
-            }
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow rounded-full w-10 h-10 flex items-center justify-center"
-          >
-            ›
-          </button>
-
-          
-          <div
-            id="product-slider"
-            className="flex gap-4 h-full overflow-x-auto scroll-smooth scrollbar-hide px-6 items-center"
-          >
-            {products.slice(0, 8).map((product) => (
-              <div
-                key={product.id}
-                className="min-w-[85vw] sm:min-w-[300px] md:min-w-[380px] h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-                onClick={() => router.push(`/product/${product.slug}`)}
-              >
-                <div className="w-full h-[75%] bg-gray-200">
-                  {product.images?.[0] ? (
-                    <img
-                      src={product.images[0].card || product.images[0].url}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : null}
-                </div>
-
-                <div className="p-4 h-[25%] flex flex-col justify-center">
-                  <h3 className="text-base font-medium text-gray-900 line-clamp-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-green-700 font-bold mt-1">
-                    ₹{product.price}
-                  </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDealIndex((i) => Math.max(0, i - 1))}
+                    disabled={dealIndex === 0}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+                  >
+                  <ArrowLeft className='text-black'/>
+                  </button>
+                  <button
+                    onClick={() => setDealIndex((i) => Math.min(deals.length - 1, i + 1))}
+                    disabled={dealIndex === deals.length - 1}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+                  >
+                    <ArrowRight className='text-black'/>
+                  </button>
                 </div>
               </div>
-            ))}
+
+                  {deal && 
+                  (
+                    <div className="flex flex-col">
+                      {/* Image */}
+                      <div className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden">
+                        <img
+                          src={deal.images?.[0]?.url || '/placeholder.png'}
+                          alt={deal.name}
+                          className="w-full h-full object-contain"
+                        />
+
+                        {/* Discount Badge */}
+                        <div className="absolute top-3 right-3 bg-red-500 text-white text-sm font-bold w-12 h-12 rounded-full flex items-center justify-center">
+                  -22%
+                </div>
+
+                </div>
+
+                {/* Details */}
+                <div className="mt-4 text-center">
+                  <h4 className="text-xl font-semibold text-gray-900">{deal.name}</h4>
+
+                  <div className="mt-2">
+                    <span className="text-2xl font-bold text-red-500">
+                      ₹{deal.price}
+                    </span>
+                    <span className="ml-2 text-gray-400 line-through">
+                      ₹{Number(deal.price) + 500}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stock Progress */}
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Available: <b>98</b></span>
+                    <span>Sold: <b>32</b></span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-3 rounded-full mt-2">
+                    <div className="bg-green-500 h-3 rounded-full w-[70%]" />
+                  </div>
+                </div>
+
+                {/* Countdown */}
+                <div className="mt-6 text-center">
+                  <h5 className="text-xl font-bold text-black">Hurry Up!</h5>
+                  <p className="text-gray-900">Offer ends in:</p>
+
+                
+                    <div className="flex justify-center gap-3 mt-3 text-black">
+                {[
+                  { label: 'DAY', value: format(timeLeft.day) },
+                  { label: 'HOUR', value: format(timeLeft.hour) },
+                  { label: 'MIN', value: format(timeLeft.min) },
+                  { label: 'SEC', value: format(timeLeft.sec) },
+                ].map((t) => (
+                  <div
+                    key={t.label}
+                    className="bg-gray-200 rounded-full w-16 h-16 flex flex-col items-center justify-center text-sm font-bold"
+                  >
+                    {t.value}
+                    <span className="text-[10px] font-normal">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 mt-5">
+                <button
+                    onClick={() => handleProductAction(deal, 'cart')}
+                    className="
+                      flex-1
+                      flex items-center justify-center gap-2
+                      bg-green-600 text-white
+                      text-lg
+                      py-3
+                      rounded-md
+                      hover:bg-green-500
+                      transition
+                    "
+                  >
+                    <ShoppingCart className="h-6 w-6" />
+                    <span>Add to Cart</span>
+                </button>
+
+                <button
+                  onClick={() => handleProductAction(deal, 'wishlist')}
+                  className="
+                    w-12 h-12
+                    flex items-center justify-center
+                    bg-gray-100 hover:bg-red-50
+                    text-gray-600 hover:text-red-500
+                    rounded-md
+                    transition
+                  "
+                  >
+                  <Heart className="h-6 w-6" />
+                </button>
+
+                </div>
+              </div>
+            )
+            }
+      </div>
+
+ 
+
+            {/* Right - Best Sellers */}
+      
+          <div className="w-[95%] lg:w-[66%] bg-white rounded-xl shadow-md p-5 flex flex-col">
+
+            {/* Header */}
+            <div className="pb-3 border-b">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-wide">
+                Best Sellers
+              </h2>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-8 text-sm font-semibold mt-3 border-b">
+              {[
+                { key: 'furnishing', label: 'Furnishing' },
+                { key: 'books', label: 'Books' },
+                { key: 'cuisine', label: 'Cuisine' },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as any)}
+                  className={`pb-2 relative transition-all duration-200
+                    ${activeTab === tab.key
+                      ? 'text-green-600'
+                      : 'text-black hover:text-gray-800'}
+                  `}
+                >
+                  {tab.label}
+                  {activeTab === tab.key && (
+                    <span className="absolute left-0 -bottom-[1px] w-full h-[3px] bg-green-500 rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Content */}
+            <div className="mt-5 flex-1 overflow-y-auto pr-1">
+
+              {loadingBest ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-7 w-7 animate-spin text-green-500" />
+                </div>
+              ) : currentProducts.length === 0 ? (
+                // <p className="text-center text-gray-500 py-10">No products found</p>
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-7 w-7 animate-spin text-green-500" />
+                </div>
+              ) : (
+
+                <div className="overflow-x-auto overflow-y-hidden scrollbar-hide m-2">
+                  <div
+                    className="
+                      grid
+                      grid-rows-2
+                      grid-flow-col
+                      auto-cols-[230px]
+                      sm:auto-cols-[250px]
+                      gap-6
+                      w-max
+                    "
+                  >
+                    {currentProducts.map(product => (
+                      <div
+                        key={product.id}
+                        onClick={() => router.push(`/product/${product.id}`)}
+                        className="
+                          relative
+                          bg-gray-50
+                          border border-gray-100
+                          rounded-2xl
+                          p-4
+                          cursor-pointer
+                          transition-all duration-300
+                          hover:shadow-xl
+                          hover:-translate-y-1
+                          group
+                        "
+                      >
+                        {/* WISHLIST FLOAT */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductAction(product, 'wishlist');
+                          }}
+                          className="
+                            absolute top-3 right-3
+                            w-9 h-9
+                            flex items-center justify-center
+                            bg-white/90 backdrop-blur
+                            border border-gray-200
+                            rounded-full
+                            shadow-sm
+                            text-gray-500 hover:text-red-500 hover:bg-red-50
+                            transition
+                            z-10
+                          "
+                          title="Add to Wishlist"
+                        >
+                          <Heart className="h-4 w-4" />
+                        </button>
+
+                        {/* IMAGE PANEL */}
+                        <div className="
+                          w-full h-44
+                          bg-white
+                          rounded-xl
+                          flex items-center justify-center
+                          overflow-hidden
+                          shadow-inner
+                        ">
+                          <img
+                            src={
+                              product?.images?.[0]?.card ||
+                              product?.images?.[0]?.url ||
+                              '/placeholder.png'
+                            }
+                            alt={product?.name || 'product'}
+                            className="
+                              max-h-full max-w-full object-contain
+                              transition-transform duration-300
+                              group-hover:scale-110
+                            "
+                          />
+                        </div>
+
+                        {/* NAME */}
+                        <h4 className="
+                          text-sm font-semibold
+                          text-gray-800
+                          mt-3
+                          line-clamp-1
+                          group-hover:text-green-600
+                          transition
+                        ">
+                          {product?.name}
+                        </h4>
+
+                        {/* PRICE */}
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="font-bold text-red-600 text-base">
+                            ₹{product?.price}
+                          </span>
+                          <span className="text-gray-400 line-through text-xs">
+                            ₹{Math.round(Number(product?.price) * 1.15)}
+                          </span>
+                        </div>
+
+                        {/* ADD TO CART */}
+                        <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProductAction(product, 'cart');
+                            }}
+                            className="
+                              mt-3 w-full
+                              flex items-center justify-center gap-2
+                              bg-green-600 hover:bg-green-500
+                              text-white
+                              py-2.5
+                              rounded-lg
+                              text-sm font-semibold
+                              shadow-sm
+                              transition
+                            "
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Add to Cart
+                        </button>
+
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              )}
+            </div>
           </div>
 
-          
           <style jsx>{`
             .scrollbar-hide::-webkit-scrollbar {
               display: none;
             }
           `}</style>
-      </div> */}
-      {/* Carousel Section - Responsive & Centered */}
-      <div className="w-full py-6 md:py-8 bg-gray-50 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Optional title */}
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
-            Featured Products
-          </h2>
 
-          {/* Carousel Container */}
-          <div className="relative">
-            {/* Left Arrow */}
-            <button
-              onClick={() =>
-                document.getElementById('product-slider')?.scrollBy({
-                  left: -340,
-                  behavior: 'smooth',
-                })
-              }
-              className="hidden sm:flex absolute -left-2 lg:-left-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-700 hover:text-black transition-all duration-200"
-            >
-              ‹
-            </button>
 
-            {/* Right Arrow */}
-            <button
-              onClick={() =>
-                document.getElementById('product-slider')?.scrollBy({
-                  left: 340,
-                  behavior: 'smooth',
-                })
-              }
-              className="hidden sm:flex absolute -right-2 lg:-right-5 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-10 h-10 md:w-12 md:h-12 items-center justify-center text-gray-700 hover:text-black transition-all duration-200"
-            >
-              ›
-            </button>
+ 
 
-            {/* Slider */}
-            <div
-              id="product-slider"
-              className="flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory px-1 sm:px-2 pb-4 -mx-1 sm:-mx-2"
-            >
-              {/* Left padding / fake centering helper */}
-              <div className="shrink-0 w-4 sm:w-8 lg:w-16 hidden sm:block" aria-hidden />
 
-              {products.slice(0, 8).map((product) => (
-                <div
-                  key={product.id}
-                  className="flex-shrink-0 snap-start w-[70vw] sm:w-[300px] md:w-[320px] lg:w-[340px] xl:w-[360px] bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 flex flex-col"
-                  onClick={() => router.push(`/product/${product.id}`)}
-                >
-                  {/* Image container */}
-                  <div className="w-full aspect-[4/3] bg-gray-100 relative flex items-center justify-center">
-                    {product.images?.[0] ? (
-                      <img
-                        src={product.images[0].card || product.images[0].url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="text-gray-400">No Image</span>
-                    )}
-                  </div>
 
-                  {/* Info */}
-                  <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
-                    <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-green-700 font-bold mt-1 text-base sm:text-lg">
-                      ₹{product.price.toLocaleString('en-IN')}
-                    </p>
-                    <div className="flex gap-2 mt-auto pt-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'cart');
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleProductAction(product, 'wishlist');
-                        }}
-                        className="flex items-center justify-center w-11 h-11 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-lg transition-colors"
-                        title="Add to Wishlist"
-                      >
-                        <Heart className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* Right padding / fake centering helper */}
-              <div className="shrink-0 w-4 sm:w-8 lg:w-16 hidden sm:block" aria-hidden />
-            </div>
-
-            {/* Scrollbar hiding */}
-            <style jsx>{`
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-              }
-              .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-            `}</style>
-          </div>
-        </div>
       </div>
 
+      
 
-      <section ref={productGridRef} className="bg-white py-12">
+
+      <Testimonials />
+      <ProductShowcaseSection
+  bestProducts={bestProducts}
+  newProducts={newProducts}
+  ratingProducts={ratingProducts}
+  onProductAction={handleProductAction}
+/>
+
+
+
+      {/* <section ref={productGridRef} className="bg-white py-12">
      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -1088,9 +1111,13 @@ const [activeSection, setActiveSection] = useState<SectionType>('products');
           </>
         )}
       </div>
-      </section>
-      <Testimonials />
-        
+      </section> */}
+     
+     {loadingBlogs ? (
+  <div className="flex justify-center py-10">Loading Blogs...</div>
+) : (
+  <LatestBlogs blogs={latestBlogs} />
+)}
         </>
   
 

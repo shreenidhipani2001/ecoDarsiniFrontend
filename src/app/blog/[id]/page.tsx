@@ -10,6 +10,17 @@ import { fetchBlogByIdCached } from '../../../../lib/cachedFetch';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const CMS_IMAGE_BASE = process.env.NEXT_PUBLIC_CMS_IMAGE_URL || `${API_URL}/api/cms/images`;
 
+
+const galleryImages = [
+  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+  'https://images.unsplash.com/photo-1548345233-4557b8809829?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE0fHx8ZW58MHx8fHx8&ixlib=rb-4.1.0&q=60&w=3000',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200',
+ 
+];
+
 type Blog = {
   id: string;
   name: string;
@@ -121,7 +132,8 @@ export default function BlogDetailPage() {
       <div className="relative w-full h-[300px] sm:h-[400px] lg:h-[480px] bg-gray-900 overflow-hidden">
         {heroImage ? (
           <img
-            src={heroImage}
+            src={galleryImages[1]}
+            // src={heroImage}
             alt={blog.name}
             className="w-full h-full object-cover opacity-60"
           />

@@ -67,7 +67,8 @@ interface WishlistModalProps {
 
 
 // Helper to get product image URL by matching product_id
-function getImageForWishlistItem(wishlistItem: WishlistItem, products: Product[]): string {
+function getImageForWishlistItem(wishlistItem: WishlistItem | undefined, products: Product[]): string {
+  if (!wishlistItem?.product_id || !products.length) return '';
   const product = products.find((p) => p.id === wishlistItem.product_id);
   if (product && product.images && product.images.length > 0) {
     return product.images[0].url || product.images[0].card || '';
@@ -254,6 +255,16 @@ const handleAddToCart = async () => {
   }
 
   const item = items[currentIndex];
+  if (!item) {
+    return (
+      <Wrapper>
+        <div className="text-center text-gray-700 py-10">
+          <Heart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <p className="text-lg">Your wishlist is empty.</p>
+        </div>
+      </Wrapper>
+    );
+  }
   const itemImage = getImageForWishlistItem(item, products);
 
   return (
@@ -265,7 +276,7 @@ const handleAddToCart = async () => {
           <div className="w-64 h-64 md:w-80 md:h-80 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0">
             <Image
               src={itemImage}
-              alt={item.name}
+              alt={item?.name || 'No Image'}
               fill
               className="object-cover rounded-xl"
               sizes="(max-width: 768px) 256px, 320px"
@@ -276,9 +287,9 @@ const handleAddToCart = async () => {
           {/* Details + actions */}
           <div className="flex-1 flex flex-col justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{item?.name}</h2>
               <p className="text-green-600 font-bold text-xl mt-4">
-                ₹{item.price.toLocaleString('en-IN')}
+                ₹{item?.price.toLocaleString('en-IN')}
               </p>
             </div>
 
