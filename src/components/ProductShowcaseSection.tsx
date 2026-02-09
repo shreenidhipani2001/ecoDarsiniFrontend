@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function ProductShowcaseSection({
@@ -12,6 +12,9 @@ export default function ProductShowcaseSection({
 }: any) {
   const router = useRouter();
   const [tab, setTab] = useState<'best' | 'new' | 'rating'>('best');
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   const products =
     tab === 'best'
@@ -20,33 +23,113 @@ export default function ProductShowcaseSection({
       ? newProducts
       : ratingProducts;
 
+  // Scroll check function
+  const checkScroll = () => {
+    const container = scrollRef.current;
+    if (container) {
+      setShowLeftArrow(container.scrollLeft > 0);
+      setShowRightArrow(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      );
+    }
+  };
+
+  // Scroll function
+  const scroll = (direction: 'left' | 'right') => {
+    const container = scrollRef.current;
+    if (container) {
+      const scrollAmount = 500;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+      setTimeout(checkScroll, 300);
+    }
+  };
+
+  // Initial check on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkScroll();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Check scroll when products or tab changes
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setTimeout(checkScroll, 150);
+    }
+  }, [products, tab, bestProducts, newProducts, ratingProducts]);
+
+  // Check scroll on window resize
+  useEffect(() => {
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, []);
+
   return (
-    <section className="w-full px-4 py-8 bg-gray-50">
+    <section className="w-full py-8 bg-gray-50">
+      <div className="max-w-[1920px] mx-auto px-4 lg:px-8 xl:px-12">
 
       {/* TABS */}
-      <div className="flex gap-8 border-b text-sm font-semibold">
-        {[
-          { key: 'best', label: 'BEST SELLERS' },
-          { key: 'new', label: 'NEW ARRIVALS' },
-          { key: 'rating', label: 'MOST RATING' },
-        ].map(t => (
+      <div className="flex justify-between items-center border-b">
+        <div className="flex gap-8 text-sm font-semibold">
+          {[
+            { key: 'best', label: 'BEST SELLERS' },
+            { key: 'new', label: 'NEW ARRIVALS' },
+            { key: 'rating', label: 'MOST RATING' },
+          ].map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key as any)}
+              className={`pb-2 relative ${
+                tab === t.key ? 'text-black' : 'text-gray-400'
+              }`}
+            >
+              {t.label}
+              {tab === t.key && (
+                <span className="absolute left-0 -bottom-[1px] w-full h-[3px] bg-green-600 rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Scroll Arrows - Desktop Only */}
+        <div className="hidden lg:flex items-center gap-2 pb-2">
           <button
-            key={t.key}
-            onClick={() => setTab(t.key as any)}
-            className={`pb-2 relative ${
-              tab === t.key ? 'text-black' : 'text-gray-400'
+            onClick={() => scroll('left')}
+            disabled={!showLeftArrow}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              showLeftArrow
+                ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                : 'border-gray-200 text-gray-300 cursor-not-allowed'
             }`}
+            aria-label="Scroll left"
           >
-            {t.label}
-            {tab === t.key && (
-              <span className="absolute left-0 -bottom-[1px] w-full h-[3px] bg-green-600 rounded-full" />
-            )}
+            <ChevronLeft className="h-4 w-4" />
           </button>
-        ))}
+          <button
+            onClick={() => scroll('right')}
+            disabled={!showRightArrow}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+              showRightArrow
+                ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                : 'border-gray-200 text-gray-300 cursor-not-allowed'
+            }`}
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* PRODUCTS */}
-      <div className="mt-6 flex gap-6 overflow-x-auto scrollbar-hide">
+      <div
+        ref={scrollRef}
+        onScroll={checkScroll}
+        className="mt-6 flex gap-6 overflow-x-auto scrollbar-hide"
+      >
         {products?.map((product: any) => (
           <div
             key={product.id}
@@ -111,6 +194,7 @@ export default function ProductShowcaseSection({
           display: none;
         }
       `}</style>
+      </div>
     </section>
   );
 }

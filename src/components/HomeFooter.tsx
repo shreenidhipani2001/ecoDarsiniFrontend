@@ -141,11 +141,11 @@ export default function HomeFooter() {
 
       {/* Newsletter */}
       <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-white">Signup for Newsletter</h3>
-              <p className="text-sm text-gray-400 mt-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6 lg:gap-8">
+            <div className="text-center lg:text-left w-full lg:w-auto">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Signup for Newsletter</h3>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-md mx-auto lg:mx-0">
                 We&apos;ll never share your email address with a third-party.
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function HomeFooter() {
                   setEmail('');
                 }
               }}
-              className="flex w-full md:w-auto"
+              className="flex w-full sm:max-w-md lg:max-w-lg"
             >
               <input
                 type="email"
@@ -164,14 +164,15 @@ export default function HomeFooter() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="flex-1 md:w-80 px-4 py-3 rounded-l-lg bg-gray-800 border border-gray-700 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-l-lg bg-gray-800 border border-gray-700 text-white text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:border-green-500 transition-colors"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm rounded-r-lg transition-colors flex items-center gap-2"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs sm:text-sm rounded-r-lg transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap"
               >
-                <Send className="w-4 h-4" />
-                Subscribe
+                <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Subscribe</span>
+                <span className="sm:hidden">Join</span>
               </button>
             </form>
           </div>
@@ -202,3 +203,4 @@ export default function HomeFooter() {
     </footer>
   );
 }
+

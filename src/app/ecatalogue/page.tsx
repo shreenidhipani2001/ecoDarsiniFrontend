@@ -57,7 +57,7 @@ export default function EcataloguePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      {/* <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <Link
@@ -79,7 +79,7 @@ export default function EcataloguePage() {
             </Link>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Book Flip Component */}
       <EcatalogueBookFlip onAuthRequired={handleAuthRequired} />

@@ -659,7 +659,7 @@ export default function ProductDetailPage() {
                   </div>
 
                   {/* Product Info Box */}
-                  <div className="border-l-4 border-orange-400 bg-gray-50 p-4 mb-4 text-sm">
+                  <div className="w-[92%] border-l-4 border-orange-400 bg-gray-50 px-2 py-4 mb-4 text-sm ">
                     {product.artist_name && (
                       <p className="mb-1"><span className="text-gray-900">Artist:</span> <span className="font-2xl text-gray-900">{product.artist_name}</span></p>
                     )}
@@ -671,7 +671,7 @@ export default function ProductDetailPage() {
                   </div>
 
                   {/* Reviews Section */}
-                  <div className="mb-4 w-full overflow-hidden">
+                  <div className="mb-4 w-[92%] overflow-hidden">
                     <h3 className="text-sm font-semibold text-gray-700 mb-2">Customer Reviews ({reviews.length > 0 ? reviews.length : 7})</h3>
                     <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0" style={{ scrollbarWidth: 'thin' }}>
                       {(reviews.length > 0 ? reviews.slice(0, 7) : [

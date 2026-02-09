@@ -193,7 +193,8 @@ export default function Testimonials() {
   if (loading) return <p className="text-center py-10">Loading...</p>;
 
   return (
-    <section className="w-full py-12 px-2 relative">
+    <section className="w-full py-12 bg-gray-50">
+      <div className="max-w-[1920px] mx-auto px-4 lg:px-8 xl:px-12 relative">
       <h2 className="text-3xl text-black font-bold text-center mb-10">
         What Our Customers Say
       </h2>
@@ -266,6 +267,7 @@ export default function Testimonials() {
             )}
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

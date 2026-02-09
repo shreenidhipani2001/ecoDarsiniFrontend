@@ -98,8 +98,11 @@ export default function HomePage() {
   const contactRef = useRef<HTMLDivElement>(null);
   const ecatalogueRef = useRef<HTMLDivElement>(null);
   const blogsRef = useRef<HTMLDivElement>(null);
+  const bestSellersScrollRef = useRef<HTMLDivElement>(null);
   const [dealIndex, setDealIndex] = useState(0);
   const [latestBlogs, setLatestBlogs] = useState<Blog[]>([]);
+  const [showLeftArrowBest, setShowLeftArrowBest] = useState(false);
+  const [showRightArrowBest, setShowRightArrowBest] = useState(false);
 
 
   
@@ -165,6 +168,30 @@ const [bestSellerData, setBestSellerData] = useState<{
 });
 const [activeTab, setActiveTab] = useState<'furnishing' | 'books' | 'cuisine'>('furnishing');
 const [loadingBest, setLoadingBest] = useState(false);
+
+// Best Sellers scroll functions
+const checkBestSellersScroll = () => {
+  const container = bestSellersScrollRef.current;
+  if (container) {
+    setShowLeftArrowBest(container.scrollLeft > 0);
+    setShowRightArrowBest(
+      container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+    );
+  }
+};
+
+const scrollBestSellers = (direction: 'left' | 'right') => {
+  const container = bestSellersScrollRef.current;
+  if (container) {
+    const scrollAmount = 500; // Increased scroll amount for better visibility
+    container.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+    setTimeout(checkBestSellersScroll, 300);
+  }
+};
+
 const loadCategory = async (key: 'furnishing' | 'books' | 'cuisine', id: string) => {
   setLoadingBest(true);
   const products = await fetchCategoryProducts(id);
@@ -175,6 +202,7 @@ const loadCategory = async (key: 'furnishing' | 'books' | 'cuisine', id: string)
   }));
 
   setLoadingBest(false);
+  setTimeout(checkBestSellersScroll, 100);
 };
 
 const fetchCategoryProducts = async (id: string): Promise<Product[]> => {
@@ -223,6 +251,18 @@ useEffect(() => {
 
   load();
 }, []);
+
+// Check scroll state when products change or tab changes
+useEffect(() => {
+  setTimeout(checkBestSellersScroll, 100);
+}, [bestSellerData, activeTab]);
+
+// Check scroll on window resize
+useEffect(() => {
+  window.addEventListener('resize', checkBestSellersScroll);
+  return () => window.removeEventListener('resize', checkBestSellersScroll);
+}, []);
+
 const currentProducts = bestSellerData[activeTab] || [];
 const bestProducts = bestSellerData.furnishing;
 const newProducts = bestSellerData.books;
@@ -550,24 +590,11 @@ const format = (num: number): string => String(num).padStart(2, '0');
 
       <FeatureBenefits />
 
-   
-      <div
-            className="banners banners1"
-            style={{
-              width: '100vw',
-              height: '120px',
-              marginLeft: 'calc(50% - 50vw)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#f5f5f5',
-              overflow: 'hidden',
-            }}
-      >
 
-     
 
-      <div className="w-full h-full bannerHover3">
+      <div className="w-full flex items-center justify-center bg-gray-100 overflow-hidden min-h-[120px] py-4">
+
+      <div className="w-full max-w-[1920px] h-full min-h-[120px] px-4 lg:px-8 xl:px-12 bannerHover3">
         <div className="bannerInner">
           <span className="bannerText">Welcome To The World Of Nature</span>
         </div>
@@ -575,10 +602,10 @@ const format = (num: number): string => String(num).padStart(2, '0');
         <style jsx>{`
           .bannerHover3 {
             position: relative;
-  width: 95%;
-  height: 100%;
-  min-height: 120px;
-      
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+
             display: flex;
             align-items: center;
             justify-content: center;
@@ -692,10 +719,10 @@ const format = (num: number): string => String(num).padStart(2, '0');
       />
 
       {/* Best Sellers Section */}
-      <div className="w-full flex flex-col lg:flex-row gap-4 px-4 py-4 bg-gray-50">
+      <div className="w-full flex flex-col lg:flex-row gap-4 px-4 lg:px-8 xl:px-12 py-4 bg-gray-50 max-w-[1920px] mx-auto">
 
-      
-        <div className="w-[95%] lg:w-[34%] bg-white rounded-lg shadow-sm p-4 flex flex-col">
+
+        <div className="w-full lg:w-[34%] bg-white rounded-lg shadow-sm p-4 flex flex-col">
           {/* Header */}
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-bold text-gray-900">Deals Of The Week</h3>
@@ -827,14 +854,40 @@ const format = (num: number): string => String(num).padStart(2, '0');
  
 
             {/* Right - Best Sellers */}
-      
-          <div className="w-[95%] lg:w-[66%] bg-white rounded-xl shadow-md p-5 flex flex-col">
+
+          <div className="w-full lg:w-[66%] bg-white rounded-xl shadow-md p-5 flex flex-col">
 
             {/* Header */}
-            <div className="pb-3 border-b">
+            <div className="pb-3 border-b flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900 tracking-wide">
                 Best Sellers
               </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => scrollBestSellers('left')}
+                  disabled={!showLeftArrowBest}
+                  className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                    showLeftArrowBest
+                      ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                      : 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => scrollBestSellers('right')}
+                  disabled={!showRightArrowBest}
+                  className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                    showRightArrowBest
+                      ? 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-600'
+                      : 'border-gray-200 text-gray-300 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Tabs */}
@@ -875,7 +928,11 @@ const format = (num: number): string => String(num).padStart(2, '0');
                 </div>
               ) : (
 
-                <div className="overflow-x-auto overflow-y-hidden scrollbar-hide m-2">
+                <div
+                  ref={bestSellersScrollRef}
+                  onScroll={checkBestSellersScroll}
+                  className="overflow-x-auto overflow-y-hidden scrollbar-hide m-2"
+                >
                   <div
                     className="
                       grid
