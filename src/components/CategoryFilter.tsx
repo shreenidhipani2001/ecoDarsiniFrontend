@@ -99,8 +99,7 @@ export default function CategoryFilter({
   if (loading) {
     return (
       <section className="bg-white py-8">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Shop By Category</h2>
           </div>
@@ -119,8 +118,7 @@ export default function CategoryFilter({
 
   return (
     <section className="bg-white py-8">
-     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
+     <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Shop By Category</h2>

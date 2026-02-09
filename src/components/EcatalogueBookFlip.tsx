@@ -203,6 +203,52 @@ const FrontCover = React.forwardRef<HTMLDivElement>((_, ref) => {
 
 FrontCover.displayName = "FrontCover";
 
+// Left Cover Image - Shows on the left when FrontCover is on the right
+const LeftCoverImage = React.forwardRef<HTMLDivElement>((_, ref) => {
+  return (
+    <div className="page page-cover left-cover-image" ref={ref} data-density="hard">
+      <div className="left-cover-root">
+        <img
+          src="/e-catlog.webp"
+          alt="EcoDarshini Catalogue"
+          className="left-cover-img"
+        />
+      </div>
+
+      <style jsx>{`
+        .left-cover-image {
+          background: linear-gradient(
+            160deg,
+            #f8fafc 0%,
+            #e2e8f0 50%,
+            #cbd5e1 100%
+          );
+          overflow: hidden;
+        }
+
+        .left-cover-root {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        .left-cover-img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+      `}</style>
+    </div>
+  );
+});
+
+LeftCoverImage.displayName = "LeftCoverImage";
+
 
 const BackCover = React.forwardRef<HTMLDivElement>((_, ref) => {
   return (
@@ -382,8 +428,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
     return (
       <div className="page product-page single-page" ref={ref}>
         <div className="page-inner flex flex-col items-center justify-between">
-
-          {/* View Details Button */}
+ 
           <button
             className="view-details-btn text-white bg-green-600 p-2 pr-4 pl-4 rounded-full font-bold"
             onClick={() => onNavigate?.(product.id)}
@@ -391,16 +436,16 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
             View Details
           </button>
 
-          {/* Title */}
+          
           <div className="w-full text-center mt-4">
             <h2 className="text-2xl md:text-3xl font-bold text-black">
               {product.name}
             </h2>
           </div>
 
-          {/* Image */}
+          
           <div className="flex-1 w-full flex items-center justify-center">
-            <div className="w-[360px] h-[360px] border-2 border-green-500 rounded-xl flex items-center justify-center overflow-hidden bg-white">
+            <div className="w-[360px] h-[340px] border-2 border-green-500 rounded-xl flex items-center justify-center overflow-hidden bg-white">
               {!imgError && getProductImageUrl(product) ? (
                 <img
                   src={getProductImageUrl(product)}
@@ -416,7 +461,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
             </div>
           </div>
 
-          {/* Artist */}
+           
           <div className="text-center mb-6">
             <span className="text-xs uppercase tracking-wide text-gray-500">
               Crafted by
@@ -432,6 +477,8 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
           <span className="pg-num text-3xl text-black right">{pageNumber}</span>
         </div>
       </div>
+   
+
     );
   }
 );
@@ -763,6 +810,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
 
   // Generate pages
   const pages: React.ReactNode[] = [];
+  pages.push(<LeftCoverImage key="left-cover-image" />);
   pages.push(<FrontCover key="front-cover" />);
  
   
@@ -950,7 +998,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
                 style={{}}
                 startPage={0}
                 maxShadowOpacity={0.4}
-                showCover={true}
+                showCover={false}
                 mobileScrollSupport={true}
                 onFlip={onFlip}
                 onInit={handleInit}

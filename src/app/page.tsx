@@ -550,24 +550,11 @@ const format = (num: number): string => String(num).padStart(2, '0');
 
       <FeatureBenefits />
 
-   
-      <div
-            className="banners banners1"
-            style={{
-              width: '100vw',
-              height: '120px',
-              marginLeft: 'calc(50% - 50vw)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#f5f5f5',
-              overflow: 'hidden',
-            }}
-      >
 
-     
 
-      <div className="w-full h-full bannerHover3">
+      <div className="w-full flex items-center justify-center bg-gray-100 overflow-hidden min-h-[120px] py-4">
+
+      <div className="w-full max-w-[1920px] h-full min-h-[120px] px-4 lg:px-8 xl:px-12 bannerHover3">
         <div className="bannerInner">
           <span className="bannerText">Welcome To The World Of Nature</span>
         </div>
@@ -575,10 +562,10 @@ const format = (num: number): string => String(num).padStart(2, '0');
         <style jsx>{`
           .bannerHover3 {
             position: relative;
-  width: 95%;
-  height: 100%;
-  min-height: 120px;
-      
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+
             display: flex;
             align-items: center;
             justify-content: center;
@@ -692,10 +679,10 @@ const format = (num: number): string => String(num).padStart(2, '0');
       />
 
       {/* Best Sellers Section */}
-      <div className="w-full flex flex-col lg:flex-row gap-4 px-4 py-4 bg-gray-50">
+      <div className="w-full flex flex-col lg:flex-row gap-4 px-4 lg:px-8 xl:px-12 py-4 bg-gray-50 max-w-[1920px] mx-auto">
 
-      
-        <div className="w-[95%] lg:w-[34%] bg-white rounded-lg shadow-sm p-4 flex flex-col">
+
+        <div className="w-full lg:w-[34%] bg-white rounded-lg shadow-sm p-4 flex flex-col">
           {/* Header */}
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-bold text-gray-900">Deals Of The Week</h3>
@@ -827,8 +814,8 @@ const format = (num: number): string => String(num).padStart(2, '0');
  
 
             {/* Right - Best Sellers */}
-      
-          <div className="w-[95%] lg:w-[66%] bg-white rounded-xl shadow-md p-5 flex flex-col">
+
+          <div className="w-full lg:w-[66%] bg-white rounded-xl shadow-md p-5 flex flex-col">
 
             {/* Header */}
             <div className="pb-3 border-b">

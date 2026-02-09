@@ -21,7 +21,8 @@ export default function ProductShowcaseSection({
       : ratingProducts;
 
   return (
-    <section className="w-full px-4 py-8 bg-gray-50">
+    <section className="w-full py-8 bg-gray-50">
+      <div className="max-w-[1920px] mx-auto px-4 lg:px-8 xl:px-12">
 
       {/* TABS */}
       <div className="flex gap-8 border-b text-sm font-semibold">
@@ -111,6 +112,7 @@ export default function ProductShowcaseSection({
           display: none;
         }
       `}</style>
+      </div>
     </section>
   );
 }
