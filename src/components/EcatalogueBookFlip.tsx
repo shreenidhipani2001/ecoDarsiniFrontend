@@ -427,58 +427,82 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
 
     return (
       <div className="page product-page single-page" ref={ref}>
-        <div className="page-inner flex flex-col items-center justify-between">
- 
-          <button
-            className="view-details-btn text-white bg-green-600 p-2 pr-4 pl-4 rounded-full font-bold"
-            onClick={() => onNavigate?.(product.id)}
-          >
-            View Details
-          </button>
+        <div className="page-inner flex flex-col p-5">
 
-          
-          <div className="w-full text-center mt-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-black">
+          {/* Page Number - Moved to top */}
+          <div className="w-full flex justify-end ">
+            <span className="text-sm font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+              {pageNumber}
+            </span>
+          </div>
+
+          {/* Product Name */}
+          <div className="w-full text-center mb-1">
+            <h2 className="text-lg font-bold text-gray-900 leading-tight line-clamp-2">
               {product.name}
             </h2>
           </div>
 
-          
-          <div className="flex-1 w-full flex items-center justify-center">
-            <div className="w-[360px] h-[340px] border-2 border-green-500 rounded-xl flex items-center justify-center overflow-hidden bg-white">
+          {/* Image - Compact */}
+          <div className="w-full flex items-center justify-center mb-1">
+            <div className="w-[220px] h-[220px] border-2 border-green-200 rounded-lg flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-green-50 shadow-sm">
               {!imgError && getProductImageUrl(product) ? (
                 <img
                   src={getProductImageUrl(product)}
                   alt={product.name}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full object-contain p-2"
                   onError={() => setImgError(true)}
                 />
               ) : (
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-400 text-xs">
                   Loading Image...
                 </span>
               )}
             </div>
           </div>
 
-           
-          <div className="text-center mb-6">
-            <span className="text-xs uppercase tracking-wide text-gray-500">
+          {/* Artist & Category Info - Compact */}
+          <div className="w-full text-center mb-2">
+            <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold block">
               Crafted by
             </span>
-            <div className="text-lg font-semibold text-black">
+            <div className="text-sm font-bold text-green-700 mb-1">
               {product?.artist_name || 'Artisan'}
             </div>
-            <div className="text-sm text-black">
-              {product?.description || 'Artisan'}
+            {product?.category_name && (
+              <span className="inline-block bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                {product.category_name}
+              </span>
+            )}
+          </div>
+
+          {/* Description - Compact */}
+          <div className="w-full mb-2">
+            <div className="bg-gradient-to-br from-gray-50 to-green-50 rounded-md p-2 border border-gray-200">
+              
+              <p className="text-[11px] text-gray-700 leading-snug text-center line-clamp-3">
+                {product?.description || 'A beautiful handcrafted eco-friendly product made with sustainable materials.'}
+              </p>
             </div>
           </div>
 
-          <span className="pg-num text-3xl text-black right">{pageNumber}</span>
+          {/* Price - Compact */}
+          <div className="w-full text-center mb-2">
+            <div className="inline-block bg-gradient-to-r from-green-600 to-green-700 text-white px-3 py-1.5 rounded-md shadow-sm">
+              <span className="text-2xs font-medium">Price: </span>
+              <span className="text-base font-bold">₹{formatPrice(product.price)}</span>
+            </div>
+          </div>
+
+          {/* View Details Button - Compact */}
+          <button
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-sm hover:shadow-md text-sm"
+            onClick={() => onNavigate?.(product.id)}
+          >
+            View Details →
+          </button>
         </div>
       </div>
-   
-
     );
   }
 );

@@ -1,8 +1,8 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import ShopBotIcon from './ShopBotIcon';
 
 interface Message {
   sender: 'bot' | 'user';
@@ -83,10 +83,10 @@ export default function ShopBot() {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-5 right-5 bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg z-50"
+        className="fixed bottom-5 right-5 bg-white hover:bg-gray-50 rounded-full w-14 h-14 flex items-center justify-center shadow-lg z-50"
         title="Chat with ShopBot"
       >
-        <MessageCircle className="h-7 w-7" />
+        <ShopBotIcon className="h-10 w-10" />
       </button>
 
       {/* Chat Window */}

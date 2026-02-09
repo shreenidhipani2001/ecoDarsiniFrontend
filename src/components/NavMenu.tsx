@@ -151,7 +151,6 @@ export default function NavMenu({
   const navItems = [
     { id: 'categories', label: 'Categories', isCategories: true },
     { id: 'about', label: 'About Us', section: 'about' as SectionType },
-    { id: 'products', label: 'Products', section: 'products' as SectionType },
     { id: 'events', label: 'Events', section: 'events' as SectionType },
     { id: 'contact', label: 'Contact Us', section: 'contact' as SectionType },
     { id: 'ecatalogue', label: 'Ecatalogue', section: 'ecatalogue' as SectionType },
@@ -591,9 +590,6 @@ export default function NavMenu({
               )}
             </div>
 
-            <button onClick={disabled ? undefined : () => onSectionChange('products')} disabled={disabled} className={`navBtn ${disabled ? 'cursor-default opacity-70' : ''}`} title="Products">
-              <span>Products</span>
-            </button>
             {/* Events Dropdown */}
             <div className="relative" ref={eventsDropdownRef}>
               <button

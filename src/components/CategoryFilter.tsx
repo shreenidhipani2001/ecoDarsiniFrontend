@@ -157,15 +157,15 @@ export default function CategoryFilter({
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* All Products */}
-            <button
+            {/* <button
               onClick={() => handleCategoryClick(null)}
               className="flex flex-col items-center gap-3 flex-shrink-0 group"
             >
               <div
                 className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center transition-all ${
                   selectedCategory === null
-                    ? 'bg-green-600 ring-2 ring-green-600 ring-offset-2'
-                    : 'bg-gray-100 hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'
+                    ? 'bg-green-600 border-4 border-green-600'
+                    : 'bg-gray-100 hover:bg-green-50 border-2 border-gray-200 group-hover:border-green-200'
                 }`}
               >
                 <Grid3X3
@@ -181,7 +181,7 @@ export default function CategoryFilter({
               >
                 All Products
               </span>
-            </button>
+            </button> */}
 
             {/* Category Items */}
             {categories.map((category) => {
