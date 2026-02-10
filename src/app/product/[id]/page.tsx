@@ -803,15 +803,15 @@ export default function ProductDetailPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => scrollRelated('left')}
-                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-green-200 "
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <ChevronLeft className="w-4 h-4 hover:text-black" />
                     </button>
                     <button
                       onClick={() => scrollRelated('right')}
-                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
+                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-green-200 "
                     >
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4 hover:text-black" />
                     </button>
                   </div>
                 </div>
