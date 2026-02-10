@@ -342,7 +342,7 @@ export default function HomeHeader({
 
                 {/* Account Dropdown Menu */}
                 {mobileProfileOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+                  <div className={`absolute top-full mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50 ${hideSearch ? 'left-0' : 'right-0'}`}>
                     <button
                       onClick={() => {
                         isAuthenticated ? handleDashboardClick() : onLoginClick();

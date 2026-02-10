@@ -192,10 +192,10 @@ export default function CategoryFilter({
                 <button
                   key={category.id}
                   onClick={() => handleCategoryClick(category.id)}
-                  className="flex flex-col items-center gap-3 flex-shrink-0 group"
+                  className="flex flex-col   items-center gap-3 flex-shrink-0 group"
                 >
                   <div
-                    className={`relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden transition-all ${
+                    className={` mt-3 relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden transition-all ${
                       isSelected
                         ? 'ring-2 ring-green-600 ring-offset-2'
                         : 'group-hover:ring-2 group-hover:ring-green-200 group-hover:ring-offset-2'

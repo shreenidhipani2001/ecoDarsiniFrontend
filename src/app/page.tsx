@@ -206,7 +206,6 @@ const loadCategory = async (key: 'furnishing' | 'books' | 'cuisine', id: string)
 };
 
 const fetchCategoryProducts = async (id: string): Promise<Product[]> => {
-  console.log('id:-',id)
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/category-query?id=${id}&limit=20`);
   const data = await res.json();
   return data.products || [];
@@ -551,7 +550,6 @@ const format = (num: number): string => String(num).padStart(2, '0');
   const handleSwitchToLogin = () => setActiveModal('login');
   const deals = useMemo(() => products.slice(0, 10), [products]);
   const deal = deals.length > 0 ? deals[dealIndex] : null;
-  console.log('deals:-',deals);
   const closeAllModals = () => {
     setActiveModal('none');
     setPendingAction(null);
@@ -745,11 +743,14 @@ const format = (num: number): string => String(num).padStart(2, '0');
                 </div>
               </div>
 
-                  {deal && 
+                  {deal &&
                   (
                     <div className="flex flex-col">
                       {/* Image */}
-                      <div className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden">
+                      <div
+                        onClick={() => router.push(`/product/${deal.id}`)}
+                        className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
+                      >
                         <img
                           src={deal.images?.[0]?.url || '/placeholder.png'}
                           alt={deal.name}
@@ -764,8 +765,11 @@ const format = (num: number): string => String(num).padStart(2, '0');
                 </div>
 
                 {/* Details */}
-                <div className="mt-4 text-center">
-                  <h4 className="text-xl font-semibold text-gray-900">{deal.name}</h4>
+                <div
+                  onClick={() => router.push(`/product/${deal.id}`)}
+                  className="mt-4 text-center cursor-pointer"
+                >
+                  <h4 className="text-xl font-semibold text-gray-900 hover:text-green-600 transition-colors">{deal.name}</h4>
 
                   <div className="mt-2">
                     <span className="text-2xl font-bold text-red-500">
