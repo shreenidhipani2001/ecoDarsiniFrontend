@@ -130,7 +130,7 @@ export default function HomeHeader({
   };
 
   return (
-    <header className="sticky top-0 z-500">
+    <header className="sticky top-0 z-60">
       {/* Top Promotional Bar */}
        <div className="bg-green-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
