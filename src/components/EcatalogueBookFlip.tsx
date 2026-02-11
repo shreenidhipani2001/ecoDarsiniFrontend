@@ -212,17 +212,14 @@ const LeftCoverImage = React.forwardRef<HTMLDivElement>((_, ref) => {
           src="/e-catlog.webp"
           alt="EcoDarshini Catalogue"
           className="left-cover-img"
+          onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
         />
       </div>
 
       <style jsx>{`
         .left-cover-image {
-          background: linear-gradient(
-            160deg,
-            #f8fafc 0%,
-            #e2e8f0 50%,
-            #cbd5e1 100%
-          );
+                    background: #ffffff;
+
           overflow: hidden;
         }
 
@@ -451,7 +448,7 @@ const LeftPage = React.forwardRef<HTMLDivElement, LeftPageProps>(
                   src={getProductImageUrl(product)}
                   alt={product.name}
                   className="max-w-full max-h-full object-contain p-2"
-                  onError={() => setImgError(true)}
+                  onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                 />
               ) : (
                 <span className="text-gray-400 text-xs">
@@ -933,6 +930,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
                       src={getProductImageUrl(currentMobileProduct)}
                       alt={currentMobileProduct.name}
                       className="mobile-card-img"
+                      onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                     />
                   ) : (
                     <div className="mobile-card-img-placeholder">
@@ -1066,6 +1064,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
           background-color: #fffef5 !important;
           overflow: hidden !important;
           box-sizing: border-box;
+          border-right: 1.5px solid #f97316;
         }
 
         .page-inner {
@@ -1081,6 +1080,10 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
         /* ========== COVER PAGES ========== */
         .page-cover {
           background: linear-gradient(145deg, #065f46 0%, #047857 40%, #059669 70%, #10b981 100%) !important;
+        }
+
+        .page-cover.left-cover-image {
+          background: #ffffff !important;
         }
 
         .page-cover.back-cover {
