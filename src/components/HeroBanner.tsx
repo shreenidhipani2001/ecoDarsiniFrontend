@@ -231,7 +231,7 @@ export default function HeroBanner({ onShopNowClick }: HeroBannerProps) {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="relative h-[400px] sm:h-[450px] lg:h-[500px] bg-green-600">
+      <div className="relative h-[400px] sm:h-[450px] lg:h-[600px] bg-green-600">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
