@@ -130,20 +130,20 @@ export default function HomeHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-500">
       {/* Top Promotional Bar */}
-      {/* <div className="bg-green-700 text-white">
+       <div className="bg-green-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-10 text-sm">
             <div className="flex items-center gap-6">
-              <span className="font-medium">Get 20% Off On Your First Order!</span>
+              <span className="font-medium">Get upto 70% Off On Your First Order!</span>
               <div className="hidden md:flex items-center gap-4 text-green-100">
                 <a
                   href="mailto:support@ecodarshini.com"
                   className="flex items-center gap-1 hover:text-white transition-colors"
                 >
                   <Mail className="h-3.5 w-3.5" />
-                  <span>support@ecodarshini.com</span>
+                  <span>ecodarshini.odisha@gmail.com</span>
                 </a>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function HomeHeader({
             </div>
           </div>
         </div>
-      </div> */}
+      </div>  
 
       {/* Main Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
