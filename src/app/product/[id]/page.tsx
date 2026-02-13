@@ -445,7 +445,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <HomeHeader hideSearch={true} />
+      <HomeHeader hideSearch={true} onLoginClick={() => setActiveModal('login')} />
       {/* Breadcrumb */}
       <NavMenu
         categories={HARDCODED_CATEGORIES}

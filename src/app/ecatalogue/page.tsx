@@ -82,7 +82,7 @@ export default function EcataloguePage() {
       </nav> */}
 
       {/* Book Flip Component */}
-      <EcatalogueBookFlip onAuthRequired={handleAuthRequired} />
+      <EcatalogueBookFlip onAuthRequired={handleAuthRequired} onLoginClick={() => setActiveModal('login')} />
 
       {/* Auth Prompt Modal */}
       <AuthPromptModal

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Play, Video, X, ExternalLink } from 'lucide-react';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
+import LoginModal from '../../../components/LoginModal';
+import RegisterModal from '../../../components/RegisterModal';
 
 interface EventImage {
   url: string;
@@ -40,6 +42,7 @@ export default function VideosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<'none' | 'login' | 'register'>('none');
 
   // YouTube channel videos
   const [channelVideos, setChannelVideos] = useState<{ id: string; title: string }[]>([]);
@@ -107,7 +110,7 @@ export default function VideosPage() {
 
   return (
     <>
-      <HomeHeader hideSearch={true} />
+      <HomeHeader hideSearch={true} onLoginClick={() => setActiveModal('login')} />
 
       <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black">
         {/* Hero Banner */}
@@ -354,6 +357,17 @@ export default function VideosPage() {
       )}
 
       <HomeFooter />
+
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToRegister={() => setActiveModal('register')}
+      />
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToLogin={() => setActiveModal('login')}
+      />
     </>
   );
 }

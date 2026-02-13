@@ -207,37 +207,106 @@ FrontCover.displayName = "FrontCover";
 const LeftCoverImage = React.forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div className="page page-cover left-cover-image" ref={ref} data-density="hard">
-      <div className="left-cover-root">
-        <img
-          src="/e-catlog.webp"
-          alt="EcoDarshini Catalogue"
-          className="left-cover-img"
-          onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
-        />
+      {/* Bottom banner */}
+      <div className="lc-banner">
+        <div className="lc-banner-inner">
+          <div className="lc-line" />
+          <h1 className="lc-title">Explore Our Catalogue</h1>
+          <p className="lc-subtitle">Discover Sustainable Resources Inside</p>
+          <div className="lc-line" />
+        </div>
       </div>
 
       <style jsx>{`
         .left-cover-image {
-                    background: #ffffff;
-
+          background: url('/coverimage-left-side.png') center center / cover no-repeat;
           overflow: hidden;
+          position: relative;
         }
 
-        .left-cover-root {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
+        .lc-banner {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(
+            to top,
+            rgba(6, 78, 59, 0.93) 0%,
+            rgba(6, 95, 70, 0.78) 55%,
+            rgba(6, 95, 70, 0) 100%
+          );
+          padding: 48px 16px 18px;
+          animation: lcBannerIn 1s ease-out both;
         }
 
-        .left-cover-img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-          border-radius: 8px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        .lc-banner-inner {
+          text-align: center;
+        }
+
+        .lc-line {
+          width: 50px;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+          margin: 0 auto 10px;
+          animation: lcLineGrow 1.2s 0.4s ease-out both;
+        }
+
+        .lc-line:last-child {
+          margin: 10px auto 0;
+          animation-delay: 0.8s;
+        }
+
+        .lc-title {
+          font-size: clamp(1rem, 3.5vw, 1.45rem);
+          font-weight: 700;
+          color: #ffffff;
+          margin: 0 0 4px;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+          animation: lcTextUp 0.8s 0.3s ease-out both;
+        }
+
+        .lc-subtitle {
+          font-size: clamp(0.6rem, 2vw, 0.78rem);
+          color: rgba(255, 255, 255, 0.85);
+          margin: 0;
+          font-weight: 400;
+          letter-spacing: 1.2px;
+          animation: lcTextUp 0.8s 0.5s ease-out both;
+        }
+
+        @keyframes lcBannerIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes lcTextUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes lcLineGrow {
+          from {
+            width: 0;
+            opacity: 0;
+          }
+          to {
+            width: 50px;
+            opacity: 1;
+          }
         }
       `}</style>
     </div>
@@ -520,9 +589,10 @@ interface RightPageProps {
 /* ================= MAIN COMPONENT ================= */
 interface EcatalogueBookFlipProps {
   onAuthRequired?: (actionType: 'cart' | 'wishlist', product: Product) => void;
+  onLoginClick?: () => void;
 }
 
-export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFlipProps) {
+export default function EcatalogueBookFlip({ onAuthRequired, onLoginClick }: EcatalogueBookFlipProps) {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -871,7 +941,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
 
   return (
     <>
-    <HomeHeader />
+    <HomeHeader onLoginClick={onLoginClick} hideSearch />
 
       {/* ===== MOBILE SWIPEABLE CARDS ===== */}
       {isMobile ? (
@@ -1064,7 +1134,9 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
           background-color: #fffef5 !important;
           overflow: hidden !important;
           box-sizing: border-box;
-          border-right: 1.5px solid #f97316;
+          border-right: 2px solid rgba(0, 0, 0, 0.18);
+          box-shadow: inset -6px 0 10px -4px rgba(0, 0, 0, 0.12),
+                      inset -1px 0 2px 0px rgba(0, 0, 0, 0.06);
         }
 
         .page-inner {
@@ -1083,7 +1155,7 @@ export default function EcatalogueBookFlip({ onAuthRequired }: EcatalogueBookFli
         }
 
         .page-cover.left-cover-image {
-          background: #ffffff !important;
+          background: url('/coverimage-left-side.png') center center / cover no-repeat !important;
         }
 
         .page-cover.back-cover {

@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2, ChevronLeft, Clock, User, Calendar, Tag, Eye, Heart } from 'lucide-react';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
+import LoginModal from '../../../components/LoginModal';
+import RegisterModal from '../../../components/RegisterModal';
 import { fetchBlogByIdCached } from '../../../../lib/cachedFetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -63,6 +65,7 @@ export default function BlogDetailPage() {
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<'none' | 'login' | 'register'>('none');
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -92,7 +95,7 @@ export default function BlogDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <HomeHeader />
+        <HomeHeader onLoginClick={() => setActiveModal('login')} />
         <div className="flex justify-center items-center py-40">
           <Loader2 className="h-10 w-10 animate-spin text-green-600" />
           <span className="ml-4 text-gray-600 text-lg">Loading article...</span>
@@ -105,7 +108,7 @@ export default function BlogDetailPage() {
   if (error || !blog) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <HomeHeader />
+        <HomeHeader onLoginClick={() => setActiveModal('login')} />
         <div className="max-w-3xl mx-auto px-4 py-20 text-center">
           <div className="text-6xl mb-6">404</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Blog not found</h2>
@@ -126,7 +129,7 @@ export default function BlogDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HomeHeader />
+      <HomeHeader onLoginClick={() => setActiveModal('login')} />
 
       {/* Hero Section */}
       <div className="relative w-full h-[300px] sm:h-[400px] lg:h-[480px] bg-gray-900 overflow-hidden">
@@ -245,6 +248,17 @@ export default function BlogDetailPage() {
       </article>
 
       <HomeFooter />
+
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToRegister={() => setActiveModal('register')}
+      />
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToLogin={() => setActiveModal('login')}
+      />
     </div>
   );
 }

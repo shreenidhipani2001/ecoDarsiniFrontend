@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { CalendarDays, MapPin, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import HomeHeader from '../../../components/HomeHeader';
 import HomeFooter from '../../../components/HomeFooter';
+import LoginModal from '../../../components/LoginModal';
+import RegisterModal from '../../../components/RegisterModal';
 
 interface EventImage {
   url: string;
@@ -28,6 +30,7 @@ export default function UpcomingEventsPage() {
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<'none' | 'login' | 'register'>('none');
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -78,7 +81,7 @@ export default function UpcomingEventsPage() {
 
   return (
     <>
-      <HomeHeader hideSearch={true} />
+      <HomeHeader hideSearch={true} onLoginClick={() => setActiveModal('login')} />
 
       <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         {/* Hero Banner */}
@@ -277,6 +280,17 @@ export default function UpcomingEventsPage() {
       </main>
 
       <HomeFooter />
+
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToRegister={() => setActiveModal('register')}
+      />
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToLogin={() => setActiveModal('login')}
+      />
     </>
   );
 }

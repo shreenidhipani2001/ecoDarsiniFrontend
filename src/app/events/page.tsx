@@ -226,12 +226,15 @@ import { useState, useEffect } from 'react';
 import { Play, Calendar, Video } from 'lucide-react';
 import HomeHeader from '../../components/HomeHeader';
 import HomeFooter from '../../components/HomeFooter';
+import LoginModal from '../../components/LoginModal';
+import RegisterModal from '../../components/RegisterModal';
 
 export default function EventsPage() {
   const [videos, setVideos] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeModal, setActiveModal] = useState<'none' | 'login' | 'register'>('none');
 
   const galleryImages = [
     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200',
@@ -295,7 +298,7 @@ export default function EventsPage() {
 
   return (
     <>
-      <HomeHeader hideSearch={true} />
+      <HomeHeader hideSearch={true} onLoginClick={() => setActiveModal('login')} />
 
       <main className="min-h-screen py-12 px-4 md:px-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto">
@@ -419,6 +422,17 @@ export default function EventsPage() {
       </main>
 
       <HomeFooter />
+
+      <LoginModal
+        isOpen={activeModal === 'login'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToRegister={() => setActiveModal('register')}
+      />
+      <RegisterModal
+        isOpen={activeModal === 'register'}
+        onClose={() => setActiveModal('none')}
+        onSwitchToLogin={() => setActiveModal('login')}
+      />
     </>
   );
 }
