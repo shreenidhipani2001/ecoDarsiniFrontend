@@ -33,7 +33,7 @@ export default function Contact() {
                     <option>£ GBP</option>
                   </select>
                   <div className="flex items-center gap-2">
-                    <img src="https://flagcdn.com/16x12/gb.png" alt="EN" className="inline" />
+                    <img src="https://flagcdn.com/16x12/gb.png" alt="EN" className="inline" onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }} />
                     <select className="bg-transparent border-none text-white focus:outline-none cursor-pointer">
                       <option>English</option>
                       <option>Arabic</option>
@@ -48,7 +48,7 @@ export default function Contact() {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 
                 <a href="/" className="flex-shrink-0">
-                  <img src="image/catalog/logo.png" alt="eMarket" className="h-10 w-auto" />
+                  <img src="image/catalog/logo.png" alt="eMarket" className="h-10 w-auto" onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }} />
                 </a>
   
                 

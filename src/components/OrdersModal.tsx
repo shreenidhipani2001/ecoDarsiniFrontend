@@ -141,6 +141,7 @@ function OrderDetailView({
               src={imageUrl}
               alt={displayName}
               className="w-full h-full object-contain"
+              onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
             />
           ) : (
             <Package className="w-16 h-16 text-gray-300" />
@@ -368,6 +369,7 @@ export default function OrdersModal({ userId }: OrdersModalProps) {
                       src={imageUrl}
                       alt={displayName}
                       className="w-full h-full object-cover"
+                      onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                     />
                   ) : (
                     <Package className="w-8 h-8 text-gray-300" />

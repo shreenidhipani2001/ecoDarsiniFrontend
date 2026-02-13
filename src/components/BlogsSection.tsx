@@ -145,6 +145,7 @@ export default function BlogsSection() {
                               src={imageUrl}
                               alt={product.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
@@ -181,9 +182,7 @@ export default function BlogsSection() {
                 src="/image/catalog/banners/banner-sidebar.jpg"
                 alt="Sidebar Banner"
                 className="w-full h-auto object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
+                onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
               />
             </div>
           </aside>

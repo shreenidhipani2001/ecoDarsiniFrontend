@@ -204,6 +204,7 @@ export default function EventsSection() {
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
                   index === currentSlide ? "opacity-100" : "opacity-0"
                 }`}
+                onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
               />
             ))}
 
@@ -262,13 +263,7 @@ export default function EventsSection() {
         src={src}
         alt={`Event moment ${idx + 1}`}
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.style.display = "none";
-
-          const fallback = target.nextElementSibling as HTMLElement;
-          if (fallback) fallback.style.display = "flex";
-        }}
+        onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
       />
 
       {/* Hidden fallback — only shows if image fails */}

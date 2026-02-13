@@ -312,9 +312,7 @@ export default function CartModal({
               src={itemImage}
               alt={item?.name}
               className="w-full h-full object-cover rounded-xl"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
             />
           </div>
 

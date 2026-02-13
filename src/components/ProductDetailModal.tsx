@@ -416,6 +416,7 @@ export default function ProductDetailModal({
                     src={imageUrl}
                     alt={product.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-200">

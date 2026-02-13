@@ -530,7 +530,7 @@ export default function ProductDetailPage() {
                     >
                       <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                         {pImageUrl ? (
-                          <img src={pImageUrl} alt={p.name} className="w-full h-full object-cover" />
+                          <img src={pImageUrl} alt={p.name} className="w-full h-full object-cover" onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Leaf className="w-6 h-6 text-gray-300" />
@@ -609,7 +609,7 @@ export default function ProductDetailPage() {
                           }`}
                         >
                           {slot.hasImage && slot.url ? (
-                            <img src={slot.url} alt={`Thumb ${slot.index + 1}`} className="w-full h-full object-cover" />
+                            <img src={slot.url} alt={`Thumb ${slot.index + 1}`} className="w-full h-full object-cover" onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-green-50">
                               <Leaf className="w-6 h-6 text-green-300" />
@@ -837,6 +837,7 @@ export default function ProductDetailPage() {
                               src={rImageUrl}
                               alt={relatedProduct.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">

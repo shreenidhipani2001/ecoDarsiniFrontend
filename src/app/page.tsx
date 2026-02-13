@@ -755,6 +755,7 @@ const format = (num: number): string => String(num).padStart(2, '0');
                           src={deal.images?.[0]?.url || '/placeholder.png'}
                           alt={deal.name}
                           className="w-full h-full object-contain"
+                          onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                         />
 
                         {/* Discount Badge */}
@@ -1009,6 +1010,7 @@ const format = (num: number): string => String(num).padStart(2, '0');
                               transition-transform duration-300
                               group-hover:scale-110
                             "
+                            onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                           />
                         </div>
 

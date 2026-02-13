@@ -284,6 +284,7 @@ export default function LatestBlogs({ blogs,loading }: Props,) {
                     src={getBlogImageUrl(blog)}
                     alt={blog.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                   />
                 </div>
 

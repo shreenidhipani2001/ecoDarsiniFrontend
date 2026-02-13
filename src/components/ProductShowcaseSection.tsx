@@ -156,6 +156,7 @@ export default function ProductShowcaseSection({
                   '/placeholder.png'
                 }
                 className="max-h-full object-contain group-hover:scale-110 transition"
+                onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
               />
             </div>
 

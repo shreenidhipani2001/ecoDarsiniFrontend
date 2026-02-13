@@ -206,7 +206,7 @@ export default function CategoryFilter({
                         src={imageUrl}
                         alt={category.name}
                         className="w-full h-full object-cover rounded-full"
-                        // className="w-full h-full object-cover object-center p-2"
+                        onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = '/tribal-art-statues-stockcake.webp'; }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-green-100">
